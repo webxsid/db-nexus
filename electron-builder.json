@@ -1,0 +1,23 @@
+{
+  "appId": "com.dbclient.app",
+  "productName": "DB Client",
+  "directories": {
+    "output": "release/${version}"
+  },
+  "files": ["dist/**/*", "node_modules/**/*", "dist-electron/**/*"],
+  "win": {
+    "target": "nsis",
+    "oneClick": false,
+    "selectPerMachineByDefault": true,
+    "allowToChangeInstallationDirectory": true
+  },
+  "mac": {
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "target": "dmg",
+    "arch": ["x64", "arm64"],
+    "title": "${productName} ${version}"
+  },
+  "linux": {
+    "target": "deb"
+  }
+}

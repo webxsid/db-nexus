@@ -19,7 +19,17 @@ const removeDatabase = (db: SupportedDatabases) => {
   }
 };
 
+const updateDatabase = (db: SupportedDatabases) => {
+  switch (db) {
+    case SupportedDatabases.MONGO:
+      return mongoActions.updateDatabase;
+    default:
+      throw new Error("Database not supported");
+  }
+};
+
 export default {
   addDatabase,
   removeDatabase,
+  updateDatabase,
 };

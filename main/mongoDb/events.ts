@@ -7,6 +7,9 @@ export enum MongoDbEvent {
   TEST_CONNECTION = "mongo:testConnection",
   GET_DATABASES = "mongo:getDatabases",
   GET_COLLECTIONS = "mongo:getCollections",
+  GET_COLLECTION_STATS = "mongo:getCollectionStats",
   GET_INDEXES = "mongo:getIndexes",
   GET_STATS = "mongo:getStats",
+  DROP_DATABASE = "mongo:dropDatabase",
+  CREATE_COLLECTION = "mongo:createCollection",
 }

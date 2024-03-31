@@ -66,6 +66,35 @@ contextBridge.exposeInMainWorld("mongo", {
     const windowId = await ipcRenderer.invoke("get-window-id");
     return await ipcRenderer.invoke("mongo:getStats", windowId, dbName);
   },
+  createCollection: async (
+    dbName,
+    collectionName,
+    dbOptions,
+    collectionOptions
+  ) => {
+    const windowId = await ipcRenderer.invoke("get-window-id");
+    return await ipcRenderer.invoke(
+      "mongo:createCollection",
+      windowId,
+      dbName,
+      collectionName,
+      dbOptions ? JSON.stringify(dbOptions) : undefined,
+      collectionOptions ? JSON.stringify(collectionOptions) : undefined
+    );
+  },
+  getCollectionStats: async (dbName, collectionName) => {
+    const windowId = await ipcRenderer.invoke("get-window-id");
+    return await ipcRenderer.invoke(
+      "mongo:getCollectionStats",
+      windowId,
+      dbName,
+      collectionName
+    );
+  },
+  dropDatabase: async (dbName) => {
+    const windowId = await ipcRenderer.invoke("get-window-id");
+    return await ipcRenderer.invoke("mongo:dropDatabase", windowId, dbName);
+  },
 });
 
 console.log("preload.js loaded");

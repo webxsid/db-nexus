@@ -45,6 +45,24 @@ const getDatabases = (db: SupportedDatabases) => {
   }
 };
 
+const createCollection = (db: SupportedDatabases) => {
+  switch (db) {
+    case SupportedDatabases.MONGO:
+      return window.mongo.createCollection;
+    default:
+      throw new Error("Database not supported");
+  }
+};
+
+const dropDatabase = (db: SupportedDatabases) => {
+  switch (db) {
+    case SupportedDatabases.MONGO:
+      return window.mongo.dropDatabase;
+    default:
+      throw new Error("Database not supported");
+  }
+};
+
 const getCollections = (db: SupportedDatabases) => {
   switch (db) {
     case SupportedDatabases.MONGO:
@@ -72,6 +90,15 @@ const getStats = (db: SupportedDatabases) => {
   }
 };
 
+const getCollectionStats = (db: SupportedDatabases) => {
+  switch (db) {
+    case SupportedDatabases.MONGO:
+      return window.mongo.getCollectionStats;
+    default:
+      throw new Error("Database not supported");
+  }
+};
+
 export {
   testDBConnection,
   initConnection,
@@ -81,4 +108,7 @@ export {
   getStats,
   getMetaData,
   getCollections,
+  createCollection,
+  dropDatabase,
+  getCollectionStats,
 };

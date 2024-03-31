@@ -25,10 +25,14 @@ import { Databases } from "@/store/types";
 import { useNavigate } from "react-router";
 
 interface Props {
-  provider: SupportedDatabases;
   db: GetArrayReturnType<Databases>;
+  openDeleteDialog: (
+    id: string,
+    name: string,
+    provider: SupportedDatabases
+  ) => void;
 }
-const DBCard: React.FC<Props> = ({ db }) => {
+const DBCard: React.FC<Props> = ({ db, openDeleteDialog }) => {
   const { id, name, color, uri, provider, icon, createdAt, lastConnectionAt } =
     db;
   const [mouseHover, setMouseHover] = React.useState<boolean>(false);
@@ -39,8 +43,9 @@ const DBCard: React.FC<Props> = ({ db }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleDelete = () => {
-    dispatch(databaseActions.removeDatabase(provider)(id));
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    openDeleteDialog(id, name, provider);
   };
   const connect = async () => {
     try {
@@ -55,7 +60,12 @@ const DBCard: React.FC<Props> = ({ db }) => {
         icon: prev?.icon,
       }));
       const isConnected = await connectToDB(provider)();
-      console.log("Connected: ", isConnected);
+      dispatch(
+        databaseActions.updateDatabase(provider)({
+          id,
+          lastConnectionAt: Date.now(),
+        })
+      );
       if (isConnected) {
         setState(null);
         navigate(`/database/${provider}/databases`);
@@ -162,19 +172,17 @@ const DBCard: React.FC<Props> = ({ db }) => {
               </Typography>
             </Box>
           ) : null}
-          {lastConnectionAt ? (
-            <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
-              <AccessTime
-                sx={{
-                  color: "text.secondary",
-                  fontSize: "0.9rem",
-                }}
-              />
-              <Typography variant="caption" color="text.secondary">
-                {timeAgo(lastConnectionAt)}
-              </Typography>
-            </Box>
-          ) : null}
+          <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+            <AccessTime
+              sx={{
+                color: "text.secondary",
+                fontSize: "0.9rem",
+              }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              {timeAgo(lastConnectionAt ?? null)}
+            </Typography>
+          </Box>
         </Box>
       ) : null}
       <Box

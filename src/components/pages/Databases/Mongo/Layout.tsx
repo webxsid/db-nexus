@@ -3,6 +3,7 @@ import { Grid } from "@mui/material";
 import MongoDBSideNav from "./SideNav";
 import { Outlet } from "react-router";
 import {
+  getCollectionStats,
   getCollections,
   getDatabases,
   getMetaData,
@@ -12,6 +13,7 @@ import { SupportedDatabases } from "@/components/common/types";
 import MongoDBContext, {
   MongoDBContextProps,
 } from "@/context/Databases/MongoContext";
+import CreateCollectionDialog from "./CreateDBDialog";
 
 const MongoDBLayout = () => {
   const [dbContext, setDbContext] = React.useState<MongoDBContextProps>({
@@ -19,7 +21,15 @@ const MongoDBLayout = () => {
     totalSize: 0,
     stats: {},
     metaData: undefined,
+    createDialog: false,
   });
+
+  const toggleCreateDialog = () => {
+    setDbContext((prev) => ({
+      ...prev,
+      createDialog: !prev.createDialog,
+    }));
+  };
 
   const getDBMetaData = async () => {
     const metaData = await getMetaData(SupportedDatabases.MONGO)();
@@ -30,6 +40,7 @@ const MongoDBLayout = () => {
   };
   const getDBs = async () => {
     const dbData = await getDatabases(SupportedDatabases.MONGO)();
+    console.log(dbData);
     setDbContext((prev) => ({
       ...prev,
       databases: dbData?.databases || [],
@@ -69,6 +80,26 @@ const MongoDBLayout = () => {
         [db]: collections,
       },
     }));
+    return collections;
+  };
+
+  const getDbCollectionsStats = async (db: string) => {
+    const collections = await getDBCollections(db);
+    const collectionStats = {};
+    for (const collection of collections) {
+      const stats = await getCollectionStats(SupportedDatabases.MONGO)(
+        db,
+        collection.name
+      );
+      collectionStats[`${db}-${collection.name}`] = stats;
+    }
+    setDbContext((prev) => ({
+      ...prev,
+      collectionsStats: {
+        ...prev.collectionsStats,
+        ...collectionStats,
+      },
+    }));
   };
 
   const addFunctionsToContext = () => {
@@ -78,6 +109,8 @@ const MongoDBLayout = () => {
       getStats: getDBStats,
       getMetaData: getDBMetaData,
       getCollections: getDBCollections,
+      toggleCreateDialog,
+      getCollectionsStats: getDbCollectionsStats,
     }));
   };
 
@@ -96,12 +129,13 @@ const MongoDBLayout = () => {
   }, []);
 
   return (
-    <Grid container height="100%" width="100vw">
+    <Grid container height="100vh" width="100vw">
       <MongoDBContext.Provider value={dbContext}>
-        <Grid item xs={4} md={3}>
+        <CreateCollectionDialog />
+        <Grid item xs={4} md={3} lg={2.5}>
           <MongoDBSideNav />
         </Grid>
-        <Grid item xs={8} md={9}>
+        <Grid item xs={8} md={9} lg={9.5} maxHeight={"100vh"}>
           <Outlet />
         </Grid>
       </MongoDBContext.Provider>

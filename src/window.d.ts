@@ -1,4 +1,9 @@
-import { CollectionInfo, ListDatabasesResult } from "mongodb";
+import {
+  CollectionInfo,
+  CreateCollectionOptions,
+  DbOptions,
+  ListDatabasesResult,
+} from "mongodb";
 import { MongoDatabaseState } from "./store/types";
 import { GetMetaDataDto } from "main/mongoDb/dto";
 
@@ -20,9 +25,17 @@ export interface MongoApis {
   ) => Promise<(CollectionInfo | Pick<CollectionInfo, "name" | "type">)[]>;
   getIndexes: (db: string, collection: string) => Promise<string[]>;
   getStats: (db: string) => Promise<{
-    collections: number;
-    indexes: number;
+    collections: number | null;
+    indexes: number | null;
   }>;
+  createCollection: (
+    dbName: string,
+    collectionName: string,
+    dbOptions?: DbOptions,
+    collectionOptions?: CreateCollectionOptions
+  ) => Promise<void>;
+  getCollectionStats: (db: string, collection: string) => Promise<string>;
+  dropDatabase: (dbName: string) => Promise<void>;
 }
 
 declare global {

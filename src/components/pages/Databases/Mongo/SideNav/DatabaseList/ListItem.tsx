@@ -25,6 +25,8 @@ import MongoDBContext, {
 } from "@/context/Databases/MongoContext";
 import { GetObjectReturnType } from "@/helpers/types";
 import { useNavigate, useParams } from "react-router";
+import { SupportedDatabases } from "@/components/common/types";
+import { toast } from "react-toastify";
 
 interface Props {
   db: string;
@@ -39,7 +41,7 @@ const ListItem: React.FC<Props> = ({
   open,
   toggleShowCollections,
 }) => {
-  const { getCollections, collections } =
+  const { getCollections, collections, getCollectionsStats } =
     React.useContext<MongoDBContextProps>(MongoDBContext);
   const [dbCollections, setDbCollections] = React.useState<
     GetObjectReturnType<typeof collections>
@@ -50,6 +52,7 @@ const ListItem: React.FC<Props> = ({
   const [selectedCollection, setSelectedCollection] = React.useState<
     string | null
   >(null);
+  const navigate = useNavigate();
   const params = useParams();
 
   const getSelectedDB = React.useCallback(() => {
@@ -65,6 +68,24 @@ const ListItem: React.FC<Props> = ({
       else console.error("getCollections is not defined");
     }
     toggleShowCollections(db);
+  };
+
+  const navigateToDB = async () => {
+    if (getCollections && getCollectionsStats) {
+      const loadingToast = toast.loading("Fetching collections...");
+      try {
+        await getCollections(db);
+        await getCollectionsStats(db);
+        toast.dismiss(loadingToast);
+        toast.success("Collections fetched successfully");
+      } catch (error) {
+        toast.dismiss(loadingToast);
+        console.error(error);
+      }
+      navigate(`/database/${SupportedDatabases.MONGO}/${db}/collections`);
+    } else {
+      toast.error("Error redirecting to collections");
+    }
   };
 
   React.useEffect(() => {
@@ -108,6 +129,7 @@ const ListItem: React.FC<Props> = ({
         </ListItemIcon>
 
         <ListItemText
+          onClick={navigateToDB}
           primary={
             <Box
               sx={{

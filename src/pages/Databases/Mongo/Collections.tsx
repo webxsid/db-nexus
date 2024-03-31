@@ -17,42 +17,75 @@ import StyledSelect from "@/components/common/StyledSelect";
 import { Add, Cached } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import convertBytes from "@/helpers/text/convertBytes";
-import DatabaseTable from "@/components/pages/Databases/Mongo/DatabaseTable";
+import { useParams } from "react-router";
+import CollectionsTable from "@/components/pages/Databases/Mongo/CollectionTable";
+import { GetObjectReturnType } from "@/helpers/types";
 
-type DBSort = "name" | "size" | "collections" | "indexes";
+type DBSort =
+  | "name"
+  | "size"
+  | "documents"
+  | "avg-doc-size"
+  | "indexes"
+  | "index-size";
 
-const MongoDatabases = () => {
+const MongoCollections = () => {
   const theme = useTheme();
   const {
+    collections,
+    getCollections,
+    getCollectionsStats,
+    collectionsStats,
     databases,
-    getDatabases,
-    stats,
-    getStats,
-    totalSize,
-    toggleCreateDialog,
   } = React.useContext<MongoDBContextProps>(MongoDBContext);
 
-  const [databasesToShow, setDatabasesToShow] =
-    React.useState<typeof databases>(null);
+  const { dbName } = useParams<{ dbName: string }>();
+
+  const [collectionsToShow, setCollectionsToShow] =
+    React.useState<GetObjectReturnType<typeof collections>>(null);
   const [sort, setSort] = React.useState<DBSort>("name");
   const [order, setOrder] = React.useState<"asc" | "desc">("asc");
+  const [totalSize, setTotalSize] = React.useState<number | null>(null);
+  const [dbCollections, setDbCollections] = React.useState<GetObjectReturnType<
+    typeof collections
+  > | null>(null);
 
   const handleRefresh = async () => {
-    const toastId = toast.info("Refreshing databases", {
+    const toastId = toast.info("Refreshing collections", {
       autoClose: false,
     });
-    await getDatabases();
-    await getStats();
+    await getCollections();
+    await getCollectionsStats();
     toast.update(toastId, {
-      render: "Databases refreshed",
+      render: "Collections refreshed",
       type: "success",
       autoClose: 2000,
     });
   };
 
+  const loadCollectionsCallback = React.useCallback(async () => {
+    if (dbCollections?.length) return;
+    if (!collections || !collections[dbName]) {
+      if (getCollections && getCollectionsStats) {
+        await getCollections(dbName);
+        await getCollectionsStats(dbName);
+      }
+    }
+  }, [dbCollections, dbName, collections, getCollections, getCollectionsStats]);
+
   React.useEffect(() => {
-    if (!databases) return;
-    const sorted = [...databases];
+    loadCollectionsCallback();
+  }, [loadCollectionsCallback]);
+
+  React.useEffect(() => {
+    if (collections && collections[dbName]) {
+      setDbCollections(collections[dbName]);
+    }
+  }, [collections, dbName]);
+
+  React.useEffect(() => {
+    if (!dbCollections) return;
+    const sorted = [...dbCollections];
     sorted.sort((a, b) => {
       let first = a;
       let second = b;
@@ -64,17 +97,44 @@ const MongoDatabases = () => {
         return first.name.localeCompare(second.name);
       }
       if (sort === "size") {
-        return first.sizeOnDisk - second.sizeOnDisk;
+        return (
+          collectionsStats[`${dbName}-${first.name}`]?.doc.size -
+          collectionsStats[`${dbName}-${second.name}`]?.doc.size
+        );
       }
-      if (sort === "collections") {
-        return stats[first.name]?.collections - stats[second.name]?.collections;
+      if (sort === "documents") {
+        return (
+          collectionsStats[`${dbName}-${first.name}`]?.doc.total -
+          collectionsStats[`${dbName}-${second.name}`]?.doc.total
+        );
+      }
+      if (sort === "avg-doc-size") {
+        return (
+          collectionsStats[`${dbName}-${first.name}`]?.doc.avgSize -
+          collectionsStats[`${dbName}-${second.name}`]?.doc.avgSize
+        );
       }
       if (sort === "indexes") {
-        return stats[first.name]?.indexes - stats[second.name]?.indexes;
+        return (
+          collectionsStats[`${dbName}-${first.name}`]?.indexes.total -
+          collectionsStats[`${dbName}-${second.name}`]?.indexes.total
+        );
+      }
+      if (sort === "index-size") {
+        return (
+          collectionsStats[`${dbName}-${first.name}`]?.indexes.size -
+          collectionsStats[`${dbName}-${second.name}`]?.indexes.size
+        );
       }
     });
-    setDatabasesToShow(sorted);
-  }, [databases, sort, stats, order]);
+    setCollectionsToShow(sorted);
+  }, [sort, order, collections, collectionsStats, dbName, dbCollections]);
+
+  React.useEffect(() => {
+    const currentDb = databases.find((db) => db.name === dbName);
+    if (!currentDb) return;
+    setTotalSize(currentDb.sizeOnDisk);
+  }, [dbName, databases]);
 
   return (
     <Box
@@ -105,12 +165,12 @@ const MongoDatabases = () => {
               color: theme.palette.primary.main,
             }}
           >
-            Available Databases
+            Available Collections
           </Typography>
           {totalSize && (
             <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               <Typography variant="body2" color="textSecondary">
-                Total Size: {convertBytes(totalSize)}
+                Total Size: {convertBytes(totalSize ?? 0)}
               </Typography>
             </Box>
           )}
@@ -136,8 +196,10 @@ const MongoDatabases = () => {
               >
                 <MenuItem value="name">Name</MenuItem>
                 <MenuItem value="size">Size</MenuItem>
-                <MenuItem value="collections">Collections</MenuItem>
+                <MenuItem value="documents">Documents</MenuItem>
+                <MenuItem value="avg-doc-size">Avg Doc Size</MenuItem>
                 <MenuItem value="indexes">Indexes</MenuItem>
+                <MenuItem value="index-size">Index Size</MenuItem>
               </StyledSelect>
             </FormControl>
             <FormControl
@@ -169,11 +231,11 @@ const MongoDatabases = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={toggleCreateDialog}
+              // onClick={toggleCreateDialog}
               startIcon={<Add />}
               sx={{ borderRadius: 3 }}
             >
-              Create Database
+              Create Collection
             </Button>
             <IconButton onClick={handleRefresh}>
               <Cached />
@@ -186,11 +248,11 @@ const MongoDatabases = () => {
             overflow: "auto",
           }}
         >
-          <DatabaseTable dbToDisplay={databasesToShow} stats={stats} />
+          <CollectionsTable collectionsToDisplay={collectionsToShow} />
         </Box>
       </Box>
     </Box>
   );
 };
 
-export default MongoDatabases;
+export default MongoCollections;

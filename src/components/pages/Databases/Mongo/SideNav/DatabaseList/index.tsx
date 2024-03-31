@@ -11,8 +11,8 @@ import {
   useTheme,
   Button,
 } from "@mui/material";
-import { useNavigate } from "react-router";
-import { Cached, ChevronRight } from "@mui/icons-material";
+import { useNavigate, useParams } from "react-router";
+import { Add, Cached, ChevronRight } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import ListItem from "./ListItem";
 
@@ -22,10 +22,11 @@ interface Props {
 }
 
 const DatabaseList: React.FC<Props> = ({ open, toggleOpen }) => {
-  const { databases, getDatabases } =
+  const { databases, getDatabases, toggleCreateDialog } =
     React.useContext<MongoDBContextProps>(MongoDBContext);
   const theme = useTheme();
   const navigate = useNavigate();
+  const { dbName } = useParams<{ dbName: string }>();
 
   const [openDbs, setOpenDbs] = React.useState<string[]>([]);
 
@@ -45,6 +46,21 @@ const DatabaseList: React.FC<Props> = ({ open, toggleOpen }) => {
       setOpenDbs([...openDbs, db]);
     }
   };
+
+  React.useEffect(() => {
+    if (dbName && databases?.length) {
+      const doesDbExist = databases.find((db) => db.name === dbName);
+      if (doesDbExist) {
+        setOpenDbs((prev) => [...new Set([...prev, dbName])]);
+        if (!open) {
+          toggleOpen("databases");
+        }
+      } else {
+        navigate("/");
+        toast.error("Database not found");
+      }
+    }
+  }, [databases, dbName, navigate, open, toggleOpen]);
   return (
     <Box
       sx={{
@@ -80,13 +96,22 @@ const DatabaseList: React.FC<Props> = ({ open, toggleOpen }) => {
           />
           <Typography variant="body1">Databases</Typography>
         </Button>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <IconButton onClick={toggleCreateDialog}>
+            <Add />
+          </IconButton>
           <IconButton onClick={handleRefresh}>
             <Cached fontSize="small" />
           </IconButton>
         </Box>
       </Box>
-      <Collapse in={open}>
+      <Collapse
+        in={open}
+        sx={{
+          flex: open ? 1 : 0,
+          overflowY: "auto",
+        }}
+      >
         <List>
           {databases.map((db) => (
             <ListItem

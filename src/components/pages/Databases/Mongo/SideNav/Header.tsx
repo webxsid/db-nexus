@@ -8,6 +8,7 @@ import {
   ListItemIcon,
   Typography,
   useTheme,
+  Grid,
 } from "@mui/material";
 import {
   CopyAllOutlined,
@@ -45,7 +46,8 @@ const Header = () => {
     navigate("/");
   };
   return (
-    <Box
+    <Grid
+      container
       sx={{
         backgroundColor: metaData?.color || theme.palette.primary.main,
         borderRadius: 4,
@@ -111,7 +113,11 @@ const Header = () => {
           </ListItemButton>
         </List>
       </StyledMenu>
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
+      <Grid
+        item
+        xs={10}
+        sx={{ display: "flex", flexDirection: "column", flex: 2 }}
+      >
         {metaData?.name ? (
           <>
             <Typography variant="h5" color="inherit">
@@ -126,11 +132,13 @@ const Header = () => {
             {metaData?.uri}
           </Typography>
         )}
-      </Box>
-      <IconButton color="inherit" onClick={openMenu}>
-        <MenuIcon color="inherit" />
-      </IconButton>
-    </Box>
+      </Grid>
+      <Grid item xs={2} sx={{ display: "flex", gap: 2, flex: 1 }}>
+        <IconButton color="inherit" onClick={openMenu}>
+          <MenuIcon color="inherit" />
+        </IconButton>
+      </Grid>
+    </Grid>
   );
 };
 

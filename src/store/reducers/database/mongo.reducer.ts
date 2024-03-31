@@ -19,7 +19,10 @@ const mongoReducer = (
     case MongoActionTypes.UPDATE_DATABASE:
       return state.map((db) => {
         if (db.id === (action.payload as MongoDatabaseState).id) {
-          return action.payload as MongoDatabaseState;
+          return {
+            ...db,
+            ...action.payload,
+          };
         }
         return db;
       });

@@ -1,10 +1,13 @@
 import React from "react";
 import { Box, Button, Grid, IconButton, Typography } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { databaseActions } from "@/store/actions";
 import RootState, { Databases } from "@/store/types";
 import { IFilterState } from "@/local-store/types";
 import { Add, Inbox } from "@mui/icons-material";
 import DBCard from "./DatabaseCard";
+import { SupportedDatabases } from "@/components/common/types";
+import RemoveDialog from "./RemoveDialog";
 
 interface Props {
   filterState: IFilterState;
@@ -13,6 +16,31 @@ interface Props {
 const DatabaseSection: React.FC<Props> = ({ filterState, openAddDBDialog }) => {
   const databases = useSelector((state: RootState) => state.database);
   const [databasesToShow, setDatabasesToShow] = React.useState<Databases>([]);
+  const [deleteDBState, setDeleteDBState] = React.useState<{
+    open: boolean;
+    dbId: string;
+    dbName: string;
+    dbProvider: SupportedDatabases | null;
+  }>({ open: false, dbId: "", dbName: "", dbProvider: null });
+
+  const dispatch = useDispatch();
+
+  const handleOpenDeleteDialog = (
+    dbId: string,
+    dbName: string,
+    dbProvider: SupportedDatabases
+  ) => {
+    console.log("open delete dialog", dbId, dbName, dbProvider);
+    setDeleteDBState({ open: true, dbId, dbName, dbProvider });
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDBState({ open: false, dbId: "", dbName: "", dbProvider: null });
+  };
+
+  const handleRemoveDB = (dbId: string) => {
+    dispatch(databaseActions.removeDatabase(deleteDBState.dbProvider)(dbId));
+  };
 
   React.useEffect(() => {
     const filteredTypes: Databases = [];
@@ -105,9 +133,16 @@ const DatabaseSection: React.FC<Props> = ({ filterState, openAddDBDialog }) => {
 
   return (
     <Grid container spacing={2}>
+      <RemoveDialog
+        open={deleteDBState.open}
+        dbId={deleteDBState.dbId}
+        dbName={deleteDBState.dbName}
+        handleClose={handleCloseDeleteDialog}
+        handleRemove={handleRemoveDB}
+      />
       {databasesToShow.map((db) => (
         <Grid item xs={12} sm={6} md={4} lg={3} key={db.id}>
-          <DBCard db={db} />
+          <DBCard db={db} openDeleteDialog={handleOpenDeleteDialog} />
         </Grid>
       ))}
       <Box

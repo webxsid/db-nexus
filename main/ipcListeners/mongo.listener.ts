@@ -3,6 +3,7 @@ import { initializeDatabase, getDatabase } from "../mongoDb/manager";
 import { MongoDbEvent } from "../mongoDb/events";
 import MongoDatabase from "../mongoDb/db";
 import { MongoDatabaseState } from "@/store/types";
+import { CreateCollectionOptions, DbOptions } from "mongodb";
 
 const registerMongoListeners = () => {
   ipcMain.handle(
@@ -86,6 +87,52 @@ const registerMongoListeners = () => {
     async (event, windowId: number, db: string) => {
       const client = await getDatabase(windowId);
       return await client?.getStats(db);
+    }
+  );
+
+  ipcMain.handle(
+    MongoDbEvent.GET_COLLECTION_STATS,
+    async (event, windowId: number, db: string, collection: string) => {
+      const client = await getDatabase(windowId);
+      return await client?.getCollectionStats(db, collection);
+    }
+  );
+
+  ipcMain.handle(
+    MongoDbEvent.CREATE_COLLECTION,
+    async (
+      event,
+      windowId: number,
+      dbName: string,
+      collectionName: string,
+      stringifiedDBOptions?: string,
+      stringifiedCollectionOptions?: string
+    ) => {
+      const dbOptions: DbOptions | undefined = stringifiedDBOptions
+        ? JSON.parse(stringifiedDBOptions)
+        : undefined;
+      const collectionOptions: CreateCollectionOptions | undefined =
+        stringifiedCollectionOptions
+          ? JSON.parse(stringifiedCollectionOptions)
+          : undefined;
+      const client = await getDatabase(windowId);
+      return (
+        await client?.createCollection(
+          dbName,
+          collectionName,
+          dbOptions,
+          collectionOptions
+        ),
+        collectionOptions
+      );
+    }
+  );
+
+  ipcMain.handle(
+    MongoDbEvent.DROP_DATABASE,
+    async (event, windowId: number, dbName: string) => {
+      const client = await getDatabase(windowId);
+      return await client?.dropDatabase(dbName);
     }
   );
 };

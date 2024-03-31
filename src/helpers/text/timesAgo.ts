@@ -1,4 +1,5 @@
-const timeAgo = (date: Date): string => {
+const timeAgo = (date: Date | null): string => {
+  if (!date) return "Never";
   const currentDate = new Date();
   const pastDate = new Date(date);
   const seconds = Math.floor(
@@ -9,13 +10,22 @@ const timeAgo = (date: Date): string => {
   if (interval > 1) {
     return `${interval} years ago`;
   }
+  if (interval === 1) {
+    return "1 year ago";
+  }
   interval = Math.floor(seconds / 2592000);
   if (interval > 1) {
     return `${interval} months ago`;
   }
+  if (interval === 1) {
+    return "1 month ago";
+  }
   interval = Math.floor(seconds / 86400);
   if (interval > 1) {
     return `${interval} days ago`;
+  }
+  if (interval === 1) {
+    return "1 day ago";
   }
   interval = Math.floor(seconds / 3600);
   if (interval > 1) {

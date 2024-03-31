@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { CreateCollectionOptions, DbOptions, MongoClient } from "mongodb";
 import { MongoDatabaseState } from "@/store/types";
 import { GetMetaDataDto } from "./dto";
 
@@ -86,9 +86,7 @@ class MongoDatabase {
     if (!this._client) {
       throw new Error("Database not initialized");
     }
-    return this._client.db().admin().listDatabases({
-      authorizedDatabases: true,
-    });
+    return this._client.db().admin().listDatabases();
   }
 
   public async getCollections(db: string) {
@@ -96,6 +94,60 @@ class MongoDatabase {
       throw new Error("Database not initialized");
     }
     return await this._client.db(db).listCollections().toArray();
+  }
+
+  public async getCollection(db: string, collection: string) {
+    if (!this._client) {
+      throw new Error("Database not initialized");
+    }
+    return await this._client.db(db).collection(collection);
+  }
+
+  public async getDocumentsAndStats(db: string, collection: string) {
+    if (!this._client) {
+      throw new Error("Database not initialized");
+    }
+    const collectionInstance = await this.getCollection(db, collection);
+    const documents = await collectionInstance.find().toArray();
+    const documentSize = documents.reduce((acc, doc) => {
+      return acc + JSON.stringify(doc).length;
+    }, 0);
+    const avgDocumentSize = documents?.length
+      ? documentSize / documents.length
+      : 0;
+
+    return { documents, documentSize, avgDocumentSize };
+  }
+
+  public async getCollectionIndexesAndStats(db: string, collection: string) {
+    if (!this._client) {
+      throw new Error("Database not initialized");
+    }
+    const collectionInstance = await this.getCollection(db, collection);
+    const indexes = await collectionInstance.listIndexes().toArray();
+    return { indexes, totalIndexes: indexes.length };
+  }
+
+  public async getCollectionStats(db: string, collectionName: string) {
+    if (!this._client) {
+      throw new Error("Database not initialized");
+    }
+    const { documents, avgDocumentSize, documentSize } =
+      await this.getDocumentsAndStats(db, collectionName);
+    const { totalIndexes } = await this.getCollectionIndexesAndStats(
+      db,
+      collectionName
+    );
+    return {
+      doc: {
+        size: documentSize,
+        total: documents.length,
+        avgSize: avgDocumentSize,
+      },
+      index: {
+        total: totalIndexes,
+      },
+    };
   }
 
   public async getIndexes(db: string, collection: string) {
@@ -110,16 +162,45 @@ class MongoDatabase {
   }
 
   public async getStats(db: string) {
-    const collections = await this.getCollections(db);
-    const dbIndexes = await collections.reduce(async (acc, collection) => {
-      const indexes = await this.getIndexes(db, collection.name);
-      return [...(await acc), ...indexes];
-    }, []);
+    try {
+      const collections = await this.getCollections(db);
+      const dbIndexes = await collections.reduce(async (acc, collection) => {
+        const indexes = await this.getIndexes(db, collection.name);
+        return [...(await acc), ...indexes];
+      }, []);
 
-    return {
-      collections: collections.length,
-      indexes: dbIndexes.length,
-    };
+      return {
+        collections: collections.length,
+        indexes: dbIndexes.length,
+      };
+    } catch (e) {
+      console.error(e);
+      return {
+        collections: null,
+        indexes: null,
+      };
+    }
+  }
+
+  public async createCollection(
+    dbName: string,
+    collectionName: string,
+    options?: DbOptions,
+    collectionOptions?: CreateCollectionOptions
+  ) {
+    if (!this._client) {
+      throw new Error("Database not initialized");
+    }
+    return await this._client
+      .db(dbName, options ?? {})
+      .createCollection(collectionName, collectionOptions ?? {});
+  }
+
+  public async dropDatabase(name: string) {
+    if (!this._client) {
+      throw new Error("Database not initialized");
+    }
+    return await this._client.db(name).dropDatabase();
   }
 }
 

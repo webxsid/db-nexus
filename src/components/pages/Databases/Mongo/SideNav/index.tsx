@@ -20,8 +20,6 @@ const MongoDBSideNav = () => {
         height: "100vh",
         py: 3,
         px: 2,
-        borderRight: 1,
-        borderColor: "divider",
       }}
     >
       <Box
@@ -34,12 +32,12 @@ const MongoDBSideNav = () => {
         }}
       >
         <Header />
-        <DashboardList
-          open={openCard === "dashboards"}
-          toggleOpen={handleToggleOpenCard}
-        />
         <DatabaseList
           open={openCard === "databases"}
+          toggleOpen={handleToggleOpenCard}
+        />
+        <DashboardList
+          open={openCard === "dashboards"}
           toggleOpen={handleToggleOpenCard}
         />
       </Box>

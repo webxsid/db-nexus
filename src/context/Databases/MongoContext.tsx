@@ -8,24 +8,40 @@ export interface MongoDBContextProps {
   getDatabases?: () => Promise<void>;
   stats: {
     [db: string]: {
-      collections: number;
-      indexes: number;
+      collections: number | null;
+      indexes: number | null;
     };
   };
   collections?: {
     [db: string]: (CollectionInfo | Pick<CollectionInfo, "name" | "type">)[];
   };
   getCollections?: (db: string) => Promise<void>;
-  getStats?: (db: string) => Promise<void>;
+  collectionsStats?: {
+    [collectionIdentifier: string]: {
+      doc: {
+        size: number;
+        total: number;
+        avgSize: number;
+      };
+      index: {
+        total: number;
+      };
+    };
+  };
+  getCollectionsStats?: (db: string) => Promise<void>;
+  getStats?: () => Promise<void>;
   metaData?: {
     name: MongoDatabaseState["name"];
     color: MongoDatabaseState["color"];
     uri: MongoDatabaseState["uri"];
     icon: MongoDatabaseState["icon"];
+    provider: MongoDatabaseState["provider"];
     createdAt: MongoDatabaseState["createdAt"];
     lastConnectionAt: MongoDatabaseState["lastConnectionAt"];
   };
   getMetaData?: () => Promise<void>;
+  createDialog?: boolean;
+  toggleCreateDialog?: () => void;
 }
 
 const MongoDBContext = React.createContext<MongoDBContextProps>({
@@ -34,6 +50,7 @@ const MongoDBContext = React.createContext<MongoDBContextProps>({
   stats: {},
   metaData: undefined,
   collections: {},
+  createDialog: false,
 });
 
 export default MongoDBContext;

@@ -4,6 +4,7 @@ class GetMetaDataDto {
   public color: MongoDatabaseState["color"];
   public uri: MongoDatabaseState["uri"];
   public icon: MongoDatabaseState["icon"];
+  public provider: MongoDatabaseState["provider"];
   public createdAt: MongoDatabaseState["createdAt"];
   public lastConnectionAt: MongoDatabaseState["lastConnectionAt"];
   constructor(config: MongoDatabaseState) {
@@ -11,6 +12,7 @@ class GetMetaDataDto {
     this.color = config.color;
     this.uri = config.uri;
     this.icon = config.icon;
+    this.provider = config.provider;
     this.createdAt = config.createdAt;
     this.lastConnectionAt = config.lastConnectionAt;
   }
@@ -21,6 +23,7 @@ class GetMetaDataDto {
       color: this.color,
       uri: this.uri,
       icon: this.icon,
+      provider: this.provider,
       createdAt: this.createdAt,
       lastConnectionAt: this.lastConnectionAt,
     };

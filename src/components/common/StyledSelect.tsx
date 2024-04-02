@@ -1,15 +1,16 @@
-import React from "react";
-import { useTheme, Select, Box, Chip } from "@mui/material";
+import React, { ReactElement } from "react";
+import { useTheme, Select, Box, Chip, SelectProps } from "@mui/material";
 
 interface Props {
-  value: string;
+  value: string | string[];
   multiple?: boolean;
-  onChange: (e: React.ChangeEvent<{ value: unknown }>) => void;
+  onChange?: SelectProps["onChange"];
   children: React.ReactNode;
   label?: string;
   labelId?: string;
-  input?: React.ReactNode;
+  input?: ReactElement;
   size?: "small" | "medium";
+  fullWidth?: boolean;
 }
 const StyledSelect: React.FC<Props> = ({
   value,
@@ -20,13 +21,14 @@ const StyledSelect: React.FC<Props> = ({
   labelId,
   input,
   size = "small",
+  fullWidth,
 }) => {
   const theme = useTheme();
   return (
     <Select
       value={value}
-      onChange={onChange}
-      fullWidth
+      {...(onChange && { onChange })}
+      {...(fullWidth && { fullWidth: true })}
       {...(labelId && { labelId })}
       {...(label && { label })}
       {...(input && { input })}

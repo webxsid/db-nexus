@@ -2,12 +2,13 @@ import {
   MongoAction,
   MongoActionPayload,
   MongoActionTypes,
+  MongoDatabaseState,
 } from "@/store/types";
 
 const addDatabase = (payload: MongoActionPayload): MongoAction => ({
   type: MongoActionTypes.ADD_DATABASE,
   payload: {
-    ...payload,
+    ...(payload as MongoDatabaseState),
     createdAt: new Date(),
   },
 });

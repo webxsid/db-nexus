@@ -42,7 +42,7 @@ const MongoCollections = () => {
   const { dbName } = useParams<{ dbName: string }>();
 
   const [collectionsToShow, setCollectionsToShow] =
-    React.useState<GetObjectReturnType<typeof collections>>(null);
+    React.useState<GetObjectReturnType<typeof collections> | null>(null);
   const [sort, setSort] = React.useState<DBSort>("name");
   const [order, setOrder] = React.useState<"asc" | "desc">("asc");
   const [totalSize, setTotalSize] = React.useState<number | null>(null);
@@ -54,8 +54,8 @@ const MongoCollections = () => {
     const toastId = toast.info("Refreshing collections", {
       autoClose: false,
     });
-    await getCollections();
-    await getCollectionsStats();
+    getCollections && (await getCollections(dbName!));
+    getCollectionsStats && (await getCollectionsStats(dbName!));
     toast.update(toastId, {
       render: "Collections refreshed",
       type: "success",
@@ -65,10 +65,10 @@ const MongoCollections = () => {
 
   const loadCollectionsCallback = React.useCallback(async () => {
     if (dbCollections?.length) return;
-    if (!collections || !collections[dbName]) {
+    if (!collections || !collections[dbName as string]) {
       if (getCollections && getCollectionsStats) {
-        await getCollections(dbName);
-        await getCollectionsStats(dbName);
+        await getCollections(dbName!);
+        await getCollectionsStats(dbName!);
       }
     }
   }, [dbCollections, dbName, collections, getCollections, getCollectionsStats]);
@@ -78,8 +78,8 @@ const MongoCollections = () => {
   }, [loadCollectionsCallback]);
 
   React.useEffect(() => {
-    if (collections && collections[dbName]) {
-      setDbCollections(collections[dbName]);
+    if (collections && collections[dbName as string]) {
+      setDbCollections(collections[dbName as string]);
     }
   }, [collections, dbName]);
 
@@ -96,36 +96,36 @@ const MongoCollections = () => {
       if (sort === "name") {
         return first.name.localeCompare(second.name);
       }
+      const sizeA =
+        collectionsStats?.[`${dbName}-${first.name}`]?.doc.size || 0;
+      const sizeB =
+        collectionsStats?.[`${dbName}-${second.name}`]?.doc.size || 0;
       if (sort === "size") {
-        return (
-          collectionsStats[`${dbName}-${first.name}`]?.doc.size -
-          collectionsStats[`${dbName}-${second.name}`]?.doc.size
-        );
+        return sizeA - sizeB;
       }
+      const docsA =
+        collectionsStats?.[`${dbName}-${first.name}`]?.doc.total || 0;
+      const docsB =
+        collectionsStats?.[`${dbName}-${second.name}`]?.doc.total || 0;
       if (sort === "documents") {
-        return (
-          collectionsStats[`${dbName}-${first.name}`]?.doc.total -
-          collectionsStats[`${dbName}-${second.name}`]?.doc.total
-        );
+        return docsA - docsB;
       }
+      const docAvgSizeA =
+        collectionsStats?.[`${dbName}-${first.name}`]?.doc.avgSize || 0;
+      const docAvgSizeB =
+        collectionsStats?.[`${dbName}-${second.name}`]?.doc.avgSize || 0;
       if (sort === "avg-doc-size") {
-        return (
-          collectionsStats[`${dbName}-${first.name}`]?.doc.avgSize -
-          collectionsStats[`${dbName}-${second.name}`]?.doc.avgSize
-        );
+        return docAvgSizeA - docAvgSizeB;
       }
+      const indexSizeA =
+        collectionsStats?.[`${dbName}-${first.name}`]?.index.total || 0;
+      const indexSizeB =
+        collectionsStats?.[`${dbName}-${second.name}`]?.index.total || 0;
       if (sort === "indexes") {
-        return (
-          collectionsStats[`${dbName}-${first.name}`]?.indexes.total -
-          collectionsStats[`${dbName}-${second.name}`]?.indexes.total
-        );
+        return indexSizeA - indexSizeB;
       }
-      if (sort === "index-size") {
-        return (
-          collectionsStats[`${dbName}-${first.name}`]?.indexes.size -
-          collectionsStats[`${dbName}-${second.name}`]?.indexes.size
-        );
-      }
+
+      return first.name.localeCompare(second.name);
     });
     setCollectionsToShow(sorted);
   }, [sort, order, collections, collectionsStats, dbName, dbCollections]);
@@ -133,7 +133,7 @@ const MongoCollections = () => {
   React.useEffect(() => {
     const currentDb = databases.find((db) => db.name === dbName);
     if (!currentDb) return;
-    setTotalSize(currentDb.sizeOnDisk);
+    setTotalSize(currentDb.sizeOnDisk ?? 0);
   }, [dbName, databases]);
 
   return (

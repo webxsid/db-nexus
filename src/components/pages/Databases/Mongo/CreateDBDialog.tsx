@@ -27,8 +27,10 @@ const CreateCollectionDialog = () => {
   const handleClose = () => {
     setNewDbName("");
     setCollectionName("");
-    toggleCreateDialog();
+    toggleCreateDialog && toggleCreateDialog();
   };
+
+  const { dbName } = useParams<{ dbName: string }>();
 
   const handleCreateCollection = async () => {
     if (!newDbName || !collectionName) {
@@ -39,9 +41,9 @@ const CreateCollectionDialog = () => {
       newDB ? "Creating Database..." : "Creating Collection..."
     );
     try {
-      await createCollection(SupportedDatabases.MONGO)(dbName, collectionName);
-      await getDatabases();
-      await getStats();
+      await createCollection(SupportedDatabases.MONGO)(dbName!, collectionName);
+      getDatabases && (await getDatabases());
+      getStats && (await getStats());
       toast.dismiss(loadingToast);
       toast.success(
         newDB
@@ -52,11 +54,9 @@ const CreateCollectionDialog = () => {
     } catch (e) {
       console.error(e);
       toast.dismiss(loadingToast);
-      toast.error(e.message);
+      toast.error("Error creating Database/Collection");
     }
   };
-
-  const { dbName } = useParams<{ dbName?: string }>();
 
   React.useEffect(() => {
     if (dbName) {
@@ -67,7 +67,7 @@ const CreateCollectionDialog = () => {
 
   return (
     <StyledDialog
-      open={createDialog}
+      open={!!createDialog}
       onClose={handleClose}
       title={newDB ? "Create Database" : "Create Collection"}
     >

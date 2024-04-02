@@ -1,7 +1,7 @@
 import React from "react";
 
 interface RenderProps {
-  if: boolean | (() => boolean) | (() => Promise<boolean>);
+  if: boolean | (() => boolean);
   then: React.ReactNode;
   else?: React.ReactNode;
 }
@@ -10,10 +10,13 @@ const Render: React.FC<RenderProps> = ({
   then,
   else: otherwise,
 }) => {
+  let conditionValue: boolean = false;
   if (typeof condition === "function") {
-    condition = condition();
+    conditionValue = condition();
+  } else {
+    conditionValue = condition;
   }
-  if (condition) {
+  if (conditionValue) {
     return <>{then}</>;
   } else if (otherwise) {
     return <>{otherwise}</>;

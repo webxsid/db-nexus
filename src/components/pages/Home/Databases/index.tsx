@@ -8,6 +8,7 @@ import { Add, Inbox } from "@mui/icons-material";
 import DBCard from "./DatabaseCard";
 import { SupportedDatabases } from "@/components/common/types";
 import RemoveDialog from "./RemoveDialog";
+import { AnyAction } from "redux-saga";
 
 interface Props {
   filterState: IFilterState;
@@ -39,7 +40,10 @@ const DatabaseSection: React.FC<Props> = ({ filterState, openAddDBDialog }) => {
   };
 
   const handleRemoveDB = (dbId: string) => {
-    dispatch(databaseActions.removeDatabase(deleteDBState.dbProvider)(dbId));
+    deleteDBState.dbProvider &&
+      dispatch<AnyAction>(
+        databaseActions.removeDatabase(deleteDBState.dbProvider)(dbId)
+      );
   };
 
   React.useEffect(() => {
@@ -59,30 +63,36 @@ const DatabaseSection: React.FC<Props> = ({ filterState, openAddDBDialog }) => {
     console.log("filteredTypes", filteredTypes);
     const filteredDbs = filteredTypes.filter((db) => {
       if (filterState.filter.query.length < 3) return true;
-      return db.name
-        .toLowerCase()
-        .includes(filterState.filter.query.toLowerCase());
+      return (
+        db.name
+          ?.toLowerCase()
+          .includes(filterState.filter.query.toLowerCase()) || false
+      );
     });
 
     const sortedDbs = filteredDbs.sort((a, b) => {
+      let first = a;
+      let second = b;
+      if (filterState.sort.order === "desc") {
+        first = b;
+        second = a;
+      }
       if (filterState.sort.field === "name") {
-        if (filterState.sort.order === "asc") {
-          return a.name.localeCompare(b.name);
-        } else {
-          return b.name.localeCompare(a.name);
-        }
+        const nameA = first.name?.toLowerCase() || "";
+        const nameB = second.name?.toLowerCase() || "";
+        return nameA.localeCompare(nameB);
       } else if (filterState.sort.field === "createdAt") {
-        if (filterState.sort.order === "asc") {
-          return a.createdAt - b.createdAt;
-        } else {
-          return b.createdAt - a.createdAt;
-        }
+        const createdAtA = new Date(first.createdAt || 0).getTime();
+        const createdAtB = new Date(second.createdAt || 0).getTime();
+        return createdAtA - createdAtB;
       } else if (filterState.sort.field === "lastConnectionAt") {
-        if (filterState.sort.order === "asc") {
-          return a.lastConnectionAt - b.lastConnectionAt;
-        } else {
-          return b.lastConnectionAt - a.lastConnectionAt;
-        }
+        const lastConnectionAtA = new Date(
+          first.lastConnectionAt || 0
+        ).getTime();
+        const lastConnectionAtB = new Date(
+          second.lastConnectionAt || 0
+        ).getTime();
+        return lastConnectionAtA - lastConnectionAtB;
       } else {
         return 0;
       }

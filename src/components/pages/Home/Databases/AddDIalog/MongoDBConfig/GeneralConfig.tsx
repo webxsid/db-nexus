@@ -1,5 +1,7 @@
 import React from "react";
-import MongoDbConnectionParams from "@/store/types/database/mongo.types";
+import MongoDbConnectionParams, {
+  MongoScheme,
+} from "@/store/types/database/mongo.types";
 import {
   Box,
   TextField,
@@ -37,7 +39,7 @@ const GeneralConfig: React.FC<Props> = ({
     setGeneralConfig({
       ...generalConfig,
       hosts: ["localhost:27017"],
-      scheme,
+      scheme: scheme as MongoScheme,
     });
     if (scheme === "mongodb+srv") {
       setGeneralConfig({

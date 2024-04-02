@@ -14,10 +14,11 @@ import {
 import { dropDatabase } from "@/utils/database";
 import DropDBDialog from "../../DropDBDialog";
 import { toast } from "react-toastify";
+import Render from "@/components/common/Render";
 
 interface Props {
-  dbToDisplay: MongoDBContextProps["databases"];
-  stats: MongoDBContextProps["stats"];
+  dbToDisplay: MongoDBContextProps["databases"] | null;
+  stats: MongoDBContextProps["stats"] | null;
 }
 
 const DatabaseTable: React.FC<Props> = ({ dbToDisplay, stats }) => {
@@ -40,9 +41,10 @@ const DatabaseTable: React.FC<Props> = ({ dbToDisplay, stats }) => {
   };
 
   const handleDropDB = async (dbName: string) => {
+    if (!metaData?.provider) return;
     await dropDatabase(metaData?.provider)(dbName);
-    getDatabases();
-    getStats();
+    getDatabases && getDatabases();
+    getStats && getStats();
     toast.success("Database dropped successfully");
   };
   return (
@@ -73,22 +75,24 @@ const DatabaseTable: React.FC<Props> = ({ dbToDisplay, stats }) => {
         </TableRow>
       </TableHead>
       <TableBody>
-        {dbToDisplay?.length ? (
-          dbToDisplay.map((db) => (
+        <Render
+          if={!!dbToDisplay && !!dbToDisplay?.length}
+          then={dbToDisplay?.map((db) => (
             <Row
               db={db}
-              stats={stats[db.name]}
+              stats={stats?.[db.name]}
               key={db.name}
               handleShowDeletePrompt={() => handleOpenDropDB(db.name)}
             />
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={5}>
-              <Typography>No databases found</Typography>
-            </TableCell>
-          </TableRow>
-        )}
+          ))}
+          else={
+            <TableRow>
+              <TableCell colSpan={5}>
+                <Typography>No databases found</Typography>
+              </TableCell>
+            </TableRow>
+          }
+        />
       </TableBody>
     </Table>
   );

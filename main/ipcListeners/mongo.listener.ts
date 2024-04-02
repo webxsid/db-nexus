@@ -4,6 +4,7 @@ import { MongoDbEvent } from "../mongoDb/events";
 import MongoDatabase from "../mongoDb/db";
 import { MongoDatabaseState } from "@/store/types";
 import { CreateCollectionOptions, DbOptions } from "mongodb";
+import { SupportedDatabases } from "../../src/components/common/types";
 
 const registerMongoListeners = () => {
   ipcMain.handle(
@@ -26,6 +27,7 @@ const registerMongoListeners = () => {
         id: "Test",
         uri,
         connectionParams,
+        provider: SupportedDatabases.MONGO,
       });
       const result = await client?.testConnection();
       console.log("[mongo.listener.ts] Test result: ", result);

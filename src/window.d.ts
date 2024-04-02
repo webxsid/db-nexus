@@ -6,6 +6,10 @@ import {
 } from "mongodb";
 import { MongoDatabaseState } from "./store/types";
 import { GetMetaDataDto } from "main/mongoDb/dto";
+import {
+  MongoCollectionStats,
+  MongoDBConnectionMetaData,
+} from "./components/common/types/databases/mongo";
 
 export interface FileApis {
   uploadFile: (file: File) => Promise<string>;
@@ -15,7 +19,7 @@ export interface FileApis {
 export interface MongoApis {
   init: (config: MongoDatabaseState) => Promise<void>;
   updateMetadata: (name: string, color: string) => Promise<void>;
-  getMetadata: () => Promise<GetMetaDataDto>;
+  getMetadata: () => Promise<MongoDBConnectionMetaData>;
   testConnection: (dbState: MongoDatabaseState) => Promise<boolean>;
   connect: () => Promise<boolean>;
   disconnect: () => Promise<boolean>;
@@ -34,7 +38,10 @@ export interface MongoApis {
     dbOptions?: DbOptions,
     collectionOptions?: CreateCollectionOptions
   ) => Promise<void>;
-  getCollectionStats: (db: string, collection: string) => Promise<string>;
+  getCollectionStats: (
+    db: string,
+    collection: string
+  ) => Promise<MongoCollectionStats>;
   dropDatabase: (dbName: string) => Promise<void>;
 }
 

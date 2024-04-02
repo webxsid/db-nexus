@@ -26,6 +26,9 @@ class MongoDatabase {
       throw new Error("Database not initialized");
     }
     try {
+      if (!this._config.uri) {
+        throw new Error("URI not provided");
+      }
       this._client = new MongoClient(this._config.uri);
       await this._client.connect();
       this._client.close();
@@ -42,6 +45,9 @@ class MongoDatabase {
     this._state.connecting = true;
     try {
       if (!this._client) {
+        if (!this._config.uri) {
+          throw new Error("URI not provided");
+        }
         this._client = new MongoClient(this._config.uri);
       }
       console.log("Connecting to database");
@@ -49,7 +55,7 @@ class MongoDatabase {
       console.log("Connected to database", this._client);
       return true;
     } catch (e) {
-      this._state.error = e;
+      this._state.error = e as Error;
       this._state.connecting = false;
       return false;
     }
@@ -164,10 +170,10 @@ class MongoDatabase {
   public async getStats(db: string) {
     try {
       const collections = await this.getCollections(db);
-      const dbIndexes = await collections.reduce(async (acc, collection) => {
+      const dbIndexes = await collections.map(async (collection) => {
         const indexes = await this.getIndexes(db, collection.name);
-        return [...(await acc), ...indexes];
-      }, []);
+        return indexes;
+      });
 
       return {
         collections: collections.length,

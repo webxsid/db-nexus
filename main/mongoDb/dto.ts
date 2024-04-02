@@ -1,12 +1,13 @@
+import { MongoDBConnectionMetaData } from "@/components/common/types/databases/mongo";
 import { MongoDatabaseState } from "@/store/types";
 class GetMetaDataDto {
-  public name: MongoDatabaseState["name"];
-  public color: MongoDatabaseState["color"];
-  public uri: MongoDatabaseState["uri"];
-  public icon: MongoDatabaseState["icon"];
-  public provider: MongoDatabaseState["provider"];
-  public createdAt: MongoDatabaseState["createdAt"];
-  public lastConnectionAt: MongoDatabaseState["lastConnectionAt"];
+  private name: MongoDatabaseState["name"];
+  private color: MongoDatabaseState["color"];
+  private uri: MongoDatabaseState["uri"];
+  private icon: MongoDatabaseState["icon"];
+  private provider: MongoDatabaseState["provider"];
+  private createdAt: MongoDatabaseState["createdAt"];
+  private lastConnectionAt: MongoDatabaseState["lastConnectionAt"];
   constructor(config: MongoDatabaseState) {
     this.name = config.name;
     this.color = config.color;
@@ -17,7 +18,7 @@ class GetMetaDataDto {
     this.lastConnectionAt = config.lastConnectionAt;
   }
 
-  public async toObject(): Promise<GetMetaDataDto> {
+  public async toObject(): Promise<MongoDBConnectionMetaData> {
     return {
       name: this.name,
       color: this.color,

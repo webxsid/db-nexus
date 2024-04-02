@@ -25,8 +25,8 @@ import AuthConfig from "./AuthConfig";
 import TLSConfig from "./TLSConfig";
 import ProxyConfig from "./ProxyConfig";
 import { v4 as uuidV4 } from "uuid";
-import { getDBMethods } from "@/utils/database";
 import { SupportedDatabases } from "@/components/common/types";
+import { toast } from "react-toastify";
 
 const TabPanel: React.FC<{
   value: number;
@@ -51,8 +51,8 @@ const TabPanel: React.FC<{
 };
 
 interface Props {
-  handleNext: (dbState: MongoDatabaseState) => void;
-  handlePrevious: () => void;
+  handleNext?: (dbState: MongoDatabaseState) => void;
+  handlePrevious?: () => void;
 }
 
 const MongoDBConfig: React.FC<Props> = ({ handleNext, handlePrevious }) => {
@@ -65,8 +65,8 @@ const MongoDBConfig: React.FC<Props> = ({ handleNext, handlePrevious }) => {
   const handleURIChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setUri(e.target.value);
     const parsedConfig = await mongoConfigParser(e.target.value);
-    console.log(parsedConfig);
-    setConfig(parsedConfig);
+    if (parsedConfig) setConfig(parsedConfig);
+    else toast.error("Invalid URI");
   };
 
   const handleChangeGeneralConfig = (
@@ -218,25 +218,37 @@ const MongoDBConfig: React.FC<Props> = ({ handleNext, handlePrevious }) => {
               <TabPanel value={tab} index={0}>
                 <GeneralConfig
                   generalConfig={config.general}
-                  setGeneralConfig={handleChangeConfig("general")}
+                  setGeneralConfig={
+                    handleChangeConfig(
+                      "general"
+                    ) as typeof handleChangeGeneralConfig
+                  }
                 />
               </TabPanel>
               <TabPanel value={tab} index={1}>
                 <AuthConfig
                   authConfig={config.auth}
-                  setAuthConfig={handleChangeConfig("auth")}
+                  setAuthConfig={
+                    handleChangeConfig("auth") as typeof handleChangeAuthConfig
+                  }
                 />
               </TabPanel>
               <TabPanel value={tab} index={2}>
                 <TLSConfig
                   tlsConfig={config.tls}
-                  setTlsConfig={handleChangeConfig("tls")}
+                  setTlsConfig={
+                    handleChangeConfig("tls") as typeof handleChangeTLSConfig
+                  }
                 />
               </TabPanel>
               <TabPanel value={tab} index={3}>
                 <ProxyConfig
                   proxyConfig={config.proxy}
-                  setProxyConfig={handleChangeConfig("proxy")}
+                  setProxyConfig={
+                    handleChangeConfig(
+                      "proxy"
+                    ) as typeof handleChangeProxyConfig
+                  }
                 />
               </TabPanel>
             </Box>
@@ -268,11 +280,13 @@ const MongoDBConfig: React.FC<Props> = ({ handleNext, handlePrevious }) => {
             disableElevation
             disableRipple
             onClick={() => {
-              handleNext({
-                id: uuidV4(),
-                uri,
-                connectionParams: config,
-              });
+              handleNext &&
+                handleNext({
+                  id: uuidV4(),
+                  uri,
+                  provider: SupportedDatabases.MONGO,
+                  connectionParams: config,
+                });
             }}
             endIcon={<ChevronRight />}
             sx={{ borderRadius: 3 }}

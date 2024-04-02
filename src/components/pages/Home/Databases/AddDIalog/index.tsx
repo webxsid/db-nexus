@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import StyledDialog from "@/components/common/StyledDialog";
 import {
   DialogContent,
@@ -19,6 +19,7 @@ import TestConnection from "./TestConnection";
 import CustomizeDatabase from "./CustomizeDatabase";
 import { useDispatch } from "react-redux";
 import { databaseActions } from "@/store/actions";
+import { AnyAction } from "redux-saga";
 interface Props {
   open: boolean;
   handleClose: () => void;
@@ -32,7 +33,7 @@ const DatabaseAddDialog: React.FC<Props> = ({ open, handleClose }) => {
   const [_dbConfig, setDBConfig] =
     React.useState<GetArrayReturnType<Databases> | null>(null);
   const [dbConfigElement, setDBConfigElement] =
-    React.useState<React.ReactNode>(null);
+    React.useState<ReactElement | null>(null);
 
   const dispatch = useDispatch();
 
@@ -72,18 +73,15 @@ const DatabaseAddDialog: React.FC<Props> = ({ open, handleClose }) => {
   };
 
   const saveDb = async (dbName: string, dbColor: string) => {
+    if (!selectedDB) return;
     const newConfig: GetArrayReturnType<Databases> = {
-      ..._dbConfig,
+      ..._dbConfig!,
       name: dbName,
       color: dbColor,
       provider: selectedDB,
     };
-    console.log(
-      "New Config",
-      databaseActions.addDatabase(selectedDB)(newConfig)
-    );
     setDBConfig(newConfig);
-    dispatch(databaseActions.addDatabase(selectedDB)(newConfig));
+    dispatch<AnyAction>(databaseActions.addDatabase(selectedDB)(newConfig));
     resetComponent();
     handleClose();
   };
@@ -102,7 +100,7 @@ const DatabaseAddDialog: React.FC<Props> = ({ open, handleClose }) => {
                 <StepLabel>Select Database</StepLabel>
                 <StepContent>
                   <DBChoice
-                    selectedDB={selectedDB}
+                    selectedDB={selectedDB!}
                     setSelectedDB={setSelectedDB}
                     handleNext={proceedToDBConfig}
                   />
@@ -124,8 +122,8 @@ const DatabaseAddDialog: React.FC<Props> = ({ open, handleClose }) => {
                 <StepLabel>Test Connection</StepLabel>
                 <StepContent>
                   <TestConnection
-                    dbState={_dbConfig}
-                    selectedDb={selectedDB}
+                    dbState={_dbConfig!}
+                    selectedDb={selectedDB!}
                     handleNext={proceedToCustomize}
                     handlePrevious={_prevStep}
                   />

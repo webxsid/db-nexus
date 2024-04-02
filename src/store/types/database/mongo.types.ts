@@ -22,28 +22,28 @@ interface MongoDbConnectionParams {
   auth: {
     method: MongoAuthMethods;
     passwordParams?: {
-      username: string;
-      password: string;
+      username?: string;
+      password?: string;
       authDb?: string;
-      authMechanism: MongoPasswordAuthMechanism;
+      authMechanism?: MongoPasswordAuthMechanism;
     };
   };
   tls: {
     state: MongoTLSState;
     tlsParams?: {
-      tlsCAFile: string;
+      tlsCAFile?: string;
       tlsCertificateKeyFile?: string;
       tlsCertificateKeyFilePassword?: string;
     };
-    insecure: boolean;
-    invalidHostNameAllowed: boolean;
-    invalidCertificateAllowed: boolean;
+    insecure?: boolean;
+    invalidHostNameAllowed?: boolean;
+    invalidCertificateAllowed?: boolean;
   };
   proxy: {
     method: MongoProxyMethod;
     proxyParams?: {
-      proxyHost: string;
-      proxyPort: number;
+      proxyHost?: string;
+      proxyPort?: number;
       proxyUsername?: string;
       proxyPassword?: string;
       proxyIdentityFile?: string;
@@ -59,7 +59,6 @@ interface MongoDbConnectionParams {
     socketTimeout?: number;
     maxPoolSize?: number;
     minPoolSize?: number;
-    maxIdleTimeMS?: number;
     maxIdleTimeMS?: number;
     waitQueueTimeoutMS?: number;
     heartbeatFrequencyMS?: number;

@@ -4,20 +4,14 @@
   "directories": {
     "output": "release/${version}"
   },
-  "files": ["dist/**/*", "node_modules/**/*", "dist-electron/**/*"],
-  "win": {
-    "target": "nsis",
-    "oneClick": false,
-    "selectPerMachineByDefault": true,
-    "allowToChangeInstallationDirectory": true
-  },
+  "files": [
+    {
+      "from": ".",
+      "to": "."
+    }
+  ],
   "mac": {
-    "artifactName": "${productName}-${version}-${arch}.${ext}",
-    "target": "dmg",
-    "arch": ["x64", "arm64"],
-    "title": "${productName} ${version}"
-  },
-  "linux": {
-    "target": "deb"
+    "appId": "com.dbclient.app",
+    "target": ["dmg"]
   }
 }

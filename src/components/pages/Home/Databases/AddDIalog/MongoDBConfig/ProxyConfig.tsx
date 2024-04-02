@@ -21,7 +21,7 @@ const ProxyConfig: React.FC<Props> = ({ proxyConfig, setProxyConfig }) => {
   const onDropProxyFile = React.useCallback(
     async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
-      const filePath = window.uploadFile(file);
+      const filePath = await window.uploadFile(file);
       setProxyConfig({
         ...proxyConfig,
         proxyParams: {
@@ -41,7 +41,7 @@ const ProxyConfig: React.FC<Props> = ({ proxyConfig, setProxyConfig }) => {
         proxyIdentityFile: undefined,
       },
     });
-    window.removeFile(filePath);
+    filePath && window.removeFile(filePath);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -173,7 +173,7 @@ const ProxyConfig: React.FC<Props> = ({ proxyConfig, setProxyConfig }) => {
                       ...proxyConfig,
                       proxyParams: {
                         ...proxyConfig.proxyParams,
-                        proxyPort: e.target.value,
+                        proxyPort: parseInt(e.target.value),
                       },
                     });
                   }}
@@ -263,7 +263,7 @@ const ProxyConfig: React.FC<Props> = ({ proxyConfig, setProxyConfig }) => {
                         </Typography>
                       </Box>
                       <Render
-                        if={proxyConfig?.proxyParams?.proxyIdentityFile}
+                        if={!!proxyConfig?.proxyParams?.proxyIdentityFile}
                         then={
                           <Chip
                             sx={{
@@ -280,7 +280,7 @@ const ProxyConfig: React.FC<Props> = ({ proxyConfig, setProxyConfig }) => {
                               </Typography>
                             }
                             onDelete={() => {
-                              removeFile("tlsCertificateKeyFile");
+                              removeFile();
                             }}
                           />
                         }
@@ -329,13 +329,16 @@ const ProxyConfig: React.FC<Props> = ({ proxyConfig, setProxyConfig }) => {
                           label="SSH Passphrase"
                           fullWidth
                           type="password"
-                          value={proxyConfig.proxyParams?.proxyPassphrase || ""}
+                          value={
+                            proxyConfig.proxyParams
+                              ?.proxyIdentityFilePassword || ""
+                          }
                           onChange={(e) => {
                             setProxyConfig({
                               ...proxyConfig,
                               proxyParams: {
                                 ...proxyConfig.proxyParams,
-                                proxyPassphrase: e.target.value,
+                                proxyIdentityFilePassword: e.target.value,
                               },
                             });
                           }}

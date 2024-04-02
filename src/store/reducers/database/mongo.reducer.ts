@@ -21,7 +21,7 @@ const mongoReducer = (
         if (db.id === (action.payload as MongoDatabaseState).id) {
           return {
             ...db,
-            ...action.payload,
+            ...(action.payload as MongoDatabaseState),
           };
         }
         return db;

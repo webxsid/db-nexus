@@ -21,8 +21,6 @@ const Row: React.FC<Props> = ({ collection, stats }) => {
         }}
       >
         <Button
-          LinkComponent={Link}
-          to={`/documents?&collection=${collection.name}`}
           variant="text"
           color="primary"
           sx={{ textTransform: "none", py: 1 }}

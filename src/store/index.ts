@@ -5,13 +5,14 @@ import createSagaMiddleware from "redux-saga";
 
 import rootReducer from "./reducers";
 import rootSaga from "./sagas";
+
 const persistConfig = {
   key: "root",
   storage,
   whitelist: ["theme", "database"],
 };
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const persistedReducer = persistReducer<any, any>(persistConfig, rootReducer);
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -26,6 +27,6 @@ const store = configureStore({
 
 sagaMiddleware.run(rootSaga);
 
-export const persistor = persistStore(store);
+export const persistor = persistStore(store as any);
 
 export default store;

@@ -1,3 +1,4 @@
+import { MongoDBConnectionMetaData } from "@/components/common/types/databases/mongo";
 import { MongoDatabaseState } from "@/store/types";
 import { CollectionInfo, ListDatabasesResult } from "mongodb";
 import React from "react";
@@ -15,7 +16,9 @@ export interface MongoDBContextProps {
   collections?: {
     [db: string]: (CollectionInfo | Pick<CollectionInfo, "name" | "type">)[];
   };
-  getCollections?: (db: string) => Promise<void>;
+  getCollections?: (
+    db: string
+  ) => Promise<(CollectionInfo | Pick<CollectionInfo, "name" | "type">)[]>;
   collectionsStats?: {
     [collectionIdentifier: string]: {
       doc: {
@@ -30,15 +33,7 @@ export interface MongoDBContextProps {
   };
   getCollectionsStats?: (db: string) => Promise<void>;
   getStats?: () => Promise<void>;
-  metaData?: {
-    name: MongoDatabaseState["name"];
-    color: MongoDatabaseState["color"];
-    uri: MongoDatabaseState["uri"];
-    icon: MongoDatabaseState["icon"];
-    provider: MongoDatabaseState["provider"];
-    createdAt: MongoDatabaseState["createdAt"];
-    lastConnectionAt: MongoDatabaseState["lastConnectionAt"];
-  };
+  metaData?: MongoDBConnectionMetaData;
   getMetaData?: () => Promise<void>;
   createDialog?: boolean;
   toggleCreateDialog?: () => void;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import timeAgo from "@/helpers/text/timesAgo";
 import {
   ContentCopy,
@@ -21,8 +21,9 @@ import { SupportedDatabases } from "@/components/common/types";
 import invert from "invert-color";
 import { initConnection, connect as connectToDB } from "@/utils/database";
 import { GetArrayReturnType } from "@/helpers/types";
-import { Databases } from "@/store/types";
+import { Databases, MongoDatabaseState } from "@/store/types";
 import { useNavigate } from "react-router";
+import { AnyAction } from "redux-saga";
 
 interface Props {
   db: GetArrayReturnType<Databases>;
@@ -38,14 +39,14 @@ const DBCard: React.FC<Props> = ({ db, openDeleteDialog }) => {
   const [mouseHover, setMouseHover] = React.useState<boolean>(false);
   const [state, setState] = React.useState<{
     text: string;
-    icon: React.ReactNode;
+    icon?: ReactElement;
   } | null>(null);
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    openDeleteDialog(id, name, provider);
+    name && openDeleteDialog(id, name, provider);
   };
   const connect = async () => {
     try {
@@ -56,15 +57,15 @@ const DBCard: React.FC<Props> = ({ db, openDeleteDialog }) => {
       const windowId = await initConnection(provider)(db);
       console.log("Window ID: ", windowId);
       setState((prev) => ({
+        ...prev,
         text: "Connecting...",
-        icon: prev?.icon,
       }));
       const isConnected = await connectToDB(provider)();
-      dispatch(
+      dispatch<AnyAction>(
         databaseActions.updateDatabase(provider)({
           id,
-          lastConnectionAt: Date.now(),
-        })
+          lastConnectionAt: new Date(),
+        } as MongoDatabaseState)
       );
       if (isConnected) {
         setState(null);
@@ -203,17 +204,29 @@ const DBCard: React.FC<Props> = ({ db, openDeleteDialog }) => {
           size="small"
           onClick={() => console.log("Edit")}
         >
-          <Edit fontSize="0.7" />
+          <Edit
+            sx={{
+              fontSize: 0.7,
+            }}
+          />
         </IconButton>
         <IconButton
           color="info"
           size="small"
           onClick={() => console.log("Duplicate")}
         >
-          <ContentCopy fontSize="0.7" />
+          <ContentCopy
+            sx={{
+              fontSize: 0.7,
+            }}
+          />
         </IconButton>
         <IconButton color="error" size="small" onClick={handleDelete}>
-          <Delete fontSize="0.7" />
+          <Delete
+            sx={{
+              fontSize: 0.7,
+            }}
+          />
         </IconButton>
       </Box>
       <Box
@@ -241,11 +254,12 @@ const DBCard: React.FC<Props> = ({ db, openDeleteDialog }) => {
               padding: 0.5,
             }}
           >
-            {React.cloneElement(state.icon, {
-              sx: {
-                color: "inherit",
-              },
-            })}
+            {state.icon &&
+              React.cloneElement(state.icon, {
+                sx: {
+                  color: "inherit",
+                },
+              })}
             <Typography variant="caption">{state.text}</Typography>
           </Box>
         ) : null}

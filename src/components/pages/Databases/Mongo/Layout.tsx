@@ -14,6 +14,7 @@ import MongoDBContext, {
   MongoDBContextProps,
 } from "@/context/Databases/MongoContext";
 import CreateCollectionDialog from "./CreateDBDialog";
+import { MongoCollectionStats } from "@/components/common/types/databases/mongo";
 
 const MongoDBLayout = () => {
   const [dbContext, setDbContext] = React.useState<MongoDBContextProps>({
@@ -85,13 +86,17 @@ const MongoDBLayout = () => {
 
   const getDbCollectionsStats = async (db: string) => {
     const collections = await getDBCollections(db);
-    const collectionStats = {};
+    const collectionStats: {
+      [collectionIdentifier: string]: MongoCollectionStats;
+    } = {};
     for (const collection of collections) {
       const stats = await getCollectionStats(SupportedDatabases.MONGO)(
         db,
         collection.name
       );
-      collectionStats[`${db}-${collection.name}`] = stats;
+      collectionStats[
+        `${db}-${collection.name}` as keyof typeof collectionStats
+      ] = stats;
     }
     setDbContext((prev) => ({
       ...prev,

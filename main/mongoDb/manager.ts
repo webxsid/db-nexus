@@ -2,7 +2,7 @@ import { MongoDatabaseState } from "@/store/types";
 import MongoDatabase from "./db";
 
 const dbInstances: Map<number, MongoDatabase> = new Map<
-  string,
+  number,
   MongoDatabase
 >();
 

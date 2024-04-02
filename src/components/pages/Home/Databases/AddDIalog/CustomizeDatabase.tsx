@@ -12,7 +12,7 @@ import React from "react";
 import { SketchPicker } from "react-color";
 import invert from "invert-color";
 interface Props {
-  handleNext: () => void;
+  handleNext: (dbName: string, dbColor: string) => void;
   handlePrevious: () => void;
 }
 

@@ -1,5 +1,5 @@
-import mongo from "@/assets/logos/mongodb.svg";
-import firestore from "@/assets/logos/firestore.svg";
+import mongo from "../../../../assets/logos/mongodb.svg";
+import firestore from "../../../../assets/logos/firestore.svg";
 
 enum SupportedDatabases {
   MONGO = "mongoDB",

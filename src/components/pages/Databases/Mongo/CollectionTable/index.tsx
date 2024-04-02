@@ -11,18 +11,20 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { dropDatabase } from "@/utils/database";
+import { dropDatabase, getDatabases, getStats } from "@/utils/database";
 import DropDBDialog from "../../DropDBDialog";
 import { toast } from "react-toastify";
 import { useParams } from "react-router";
 import { GetObjectReturnType } from "@/helpers/types";
 
 interface Props {
-  collectionsToDisplay: GetObjectReturnType<MongoDBContextProps["collections"]>;
+  collectionsToDisplay: GetObjectReturnType<
+    MongoDBContextProps["collections"]
+  > | null;
 }
 
 const CollectionsTable: React.FC<Props> = ({ collectionsToDisplay }) => {
-  const { metaData, collectionsStats } =
+  const { metaData, collectionsStats, getDatabases, getStats } =
     React.useContext<MongoDBContextProps>(MongoDBContext);
   const [dropDbState, setDropDbState] = React.useState<{
     open: boolean;
@@ -43,9 +45,10 @@ const CollectionsTable: React.FC<Props> = ({ collectionsToDisplay }) => {
   };
 
   const handleDropDB = async (dbName: string) => {
+    if (!metaData?.provider) return;
     await dropDatabase(metaData?.provider)(dbName);
-    getDatabases();
-    getStats();
+    getDatabases && (await getDatabases());
+    getStats && (await getStats());
     toast.success("Database dropped successfully");
   };
   return (

@@ -7,7 +7,7 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import { IFilterState, ISort } from "@/local-store/types";
+import { FilterAction, ISort, SortField, SortType } from "@/local-store/types";
 import { filterActions } from "@/local-store/actions";
 import StyledSelect from "@/components/common/StyledSelect";
 
@@ -15,7 +15,7 @@ interface Props {
   anchorEl: null | HTMLElement;
   open: boolean;
   sort: ISort;
-  filterDispatch: React.Dispatch<IFilterState>;
+  filterDispatch: React.Dispatch<FilterAction>;
   handleClose: () => void;
 }
 const SortMenu: React.FC<Props> = ({
@@ -72,7 +72,7 @@ const SortMenu: React.FC<Props> = ({
             onChange={(e) =>
               filterDispatch(
                 filterActions.setSort({
-                  field: e.target.value as string,
+                  field: e.target.value as SortField,
                   order: sort.order,
                 })
               )
@@ -99,7 +99,7 @@ const SortMenu: React.FC<Props> = ({
               filterDispatch(
                 filterActions.setSort({
                   field: sort.field,
-                  order: e.target.value as string,
+                  order: e.target.value as SortType,
                 })
               )
             }

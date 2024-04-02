@@ -8,14 +8,17 @@ const initialState: Array<LoadingState> = [];
 const loadingReducer = (
   state = initialState,
   action: LoadingAction
-): boolean => {
+): Array<LoadingState> => {
   switch (action.type) {
     case LoadingActionTypes.START_LOADING:
-      return state.concat({
-        active: true,
-        reason: action.payload.reason,
-        message: action.payload.message,
-      });
+      return [
+        ...state,
+        {
+          active: true,
+          reason: action.payload.reason,
+          message: action.payload.message ?? "",
+        },
+      ];
     case LoadingActionTypes.STOP_LOADING:
       return state.filter(
         (loading) => loading.reason !== action.payload.reason

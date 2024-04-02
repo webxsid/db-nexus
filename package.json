@@ -13,9 +13,11 @@
       "VITE_DEV_SERVER_URL": "http://localhost:3300"
     }
   },
-  "main": "dist-electron/index.js",
+  "homepage": "./",
+  "main": "app/index.js",
   "scripts": {
     "dev": "vite",
+    "build:watch": "tsc -w",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -30,6 +32,7 @@
     "electron-chrome-extensions": "^3.10.1",
     "electron-extension-installer": "^1.2.0",
     "electron-is-dev": "^3.0.1",
+    "electron-serve": "^1.3.0",
     "electron-store": "^8.1.0",
     "firebase-admin": "^12.0.0",
     "invert-color": "^2.0.0",
@@ -68,5 +71,6 @@
     "vite": "^5.1.0",
     "vite-plugin-electron": "^0.28.2",
     "vite-plugin-node-polyfills": "^0.21.0"
-  }
+  },
+  "packageManager": "yarn@4.1.1"
 }

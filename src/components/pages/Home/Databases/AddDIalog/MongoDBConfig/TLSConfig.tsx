@@ -21,7 +21,7 @@ interface Props {
 }
 const TLSConfig: React.FC<Props> = ({ tlsConfig, setTlsConfig }) => {
   const onDropCAFile = React.useCallback(
-    async (acceptedFiles) => {
+    async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       const filePath = await window.uploadFile(file);
       console.log("filePath: ", filePath);
@@ -37,7 +37,7 @@ const TLSConfig: React.FC<Props> = ({ tlsConfig, setTlsConfig }) => {
   );
 
   const onDropKeyFile = React.useCallback(
-    async (acceptedFiles) => {
+    async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       const filePath = await window.uploadFile(file);
       setTlsConfig({
@@ -53,9 +53,9 @@ const TLSConfig: React.FC<Props> = ({ tlsConfig, setTlsConfig }) => {
 
   const removeFile = (key: string) => {
     const filepath =
-      tlsConfig?.tlsParams[
+      tlsConfig?.tlsParams?.[
         key as keyof MongoDbConnectionParams["tls"]["tlsParams"]
-      ];
+      ] || "";
     setTlsConfig({
       ...tlsConfig,
       tlsParams: {

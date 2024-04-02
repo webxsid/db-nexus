@@ -19,7 +19,7 @@ const initialState: IFilterState = {
 const filterReducer = (
   state = initialState,
   action: FilterAction
-): IFilterStat => {
+): IFilterState => {
   switch (action.type) {
     case FilterActionTypes.SET_FILTER:
       return {

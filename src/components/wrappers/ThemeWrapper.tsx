@@ -2,8 +2,9 @@ import React from "react";
 import { useMediaQuery, ThemeProvider, Box } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { themeActions } from "@/store/actions";
-import type { RootState } from "@/store/types";
+import RootState from "@/store/types";
 import theme from "@/theme";
+import { AnyAction } from "redux-saga";
 
 const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -14,7 +15,7 @@ const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({
 
   React.useEffect(() => {
     if (themeState.systemDefault) {
-      dispatch(themeActions.setDarkMode(prefersDarkMode));
+      dispatch<AnyAction>(themeActions.setDarkMode(prefersDarkMode));
     }
   }, [themeState.systemDefault, dispatch, prefersDarkMode]);
 

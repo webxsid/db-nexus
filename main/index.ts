@@ -1,6 +1,7 @@
 import path from "path";
 import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
+import serve from "electron-serve";
 import os from "os";
 import {
   installExtension,
@@ -15,12 +16,25 @@ import {
 } from "./utils/uploader.util";
 import registerMongoListeners from "./ipcListeners/mongo.listener";
 
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+
 let mainWindow: BrowserWindow | null;
+
+if (!isDev) {
+  serve({ directory: "dist" });
+} else {
+  app.setPath("userData", `${app.getPath("userData")} (development)`);
+}
 
 const createWindow = async () => {
   try {
-    const preloadPath = path.join(
-      app.getAppPath(),
+    const preloadPath = path.resolve(
+      __dirname,
+      "..",
       "src",
       "pre-loaders",
       "index.cjs"
@@ -40,11 +54,12 @@ const createWindow = async () => {
     process.env.APPDATA = app.getPath("appData");
 
     if (isDev) {
-      mainWindow.loadURL("http://localhost:3300"); // Development server URL
+      mainWindow.loadURL("http://localhost:3300#/"); // Development server URL
       //open dev tools
       mainWindow.webContents.openDevTools();
     } else {
-      mainWindow.loadFile("../dist/index.html"); // Production build file
+      const url = `file://${path.join(__dirname, "../dist/index.html")}#/`;
+      mainWindow.loadURL(url);
     }
 
     mainWindow.on("closed", () => {

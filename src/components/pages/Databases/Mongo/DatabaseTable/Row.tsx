@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 
 interface Props {
   db: MongoDBContextProps["databases"][0];
-  stats: GetObjectReturnType<MongoDBContextProps["stats"]>;
+  stats?: GetObjectReturnType<MongoDBContextProps["stats"]> | null;
   handleShowDeletePrompt: () => void;
 }
 const Row: React.FC<Props> = ({ db, stats, handleShowDeletePrompt }) => {

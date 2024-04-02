@@ -9,7 +9,7 @@ import {
   Typography,
   Checkbox,
 } from "@mui/material";
-import { IFilter, IFilterState } from "@/local-store/types";
+import { FilterAction, IFilter } from "@/local-store/types";
 import { filterActions } from "@/local-store/actions";
 import { useSelector } from "react-redux";
 import RootState from "@/store/types";
@@ -18,7 +18,7 @@ interface Props {
   anchorEl: null | HTMLElement;
   open: boolean;
   selectedTypes: IFilter["types"];
-  filterDispatch: React.Dispatch<IFilterState>;
+  filterDispatch: React.Dispatch<FilterAction>;
   handleClose: () => void;
 }
 const TypesMenu: React.FC<Props> = ({

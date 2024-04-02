@@ -13,7 +13,7 @@ export default defineConfig(({ command }) => {
   const sourceMap = isServe ? "inline" : false;
 
   if (isBuild) {
-    rmSync("dist-electron", { recursive: true, force: true });
+    rmSync("app", { recursive: true, force: true });
   }
 
   return {
@@ -41,7 +41,7 @@ export default defineConfig(({ command }) => {
             build: {
               sourcemap: sourceMap,
               minify: isBuild,
-              outDir: "dist-electron",
+              outDir: "app",
               emptyOutDir: true,
               rollupOptions: {
                 external: Object.keys(

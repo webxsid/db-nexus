@@ -9,7 +9,7 @@ import {
   ExpandMore,
   ExpandLess,
 } from "@mui/icons-material";
-import { IFilterState } from "@/local-store/types";
+import { FilterAction, IFilterState } from "@/local-store/types";
 import { filterActions } from "@/local-store/actions";
 import SortMenu from "./Menus/SortMenu";
 import TypesMenu from "./Menus/TypesMenu";
@@ -37,7 +37,7 @@ const ChipIcon: React.FC<{ label: React.ReactNode }> = ({ label }) => {
 
 interface Props {
   filterState: IFilterState;
-  filterDispatch: React.Dispatch<IFilterState>;
+  filterDispatch: React.Dispatch<FilterAction>;
 }
 const Header: React.FC<Props> = ({ filterState, filterDispatch }) => {
   const [filterActive, setFilterActive] = React.useState<boolean>(false);

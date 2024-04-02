@@ -84,7 +84,7 @@ const AuthConfig: React.FC<Props> = ({ authConfig, setAuthConfig }) => {
               <TextField
                 fullWidth
                 label="Username"
-                value={authConfig.passwordParams.username}
+                value={authConfig.passwordParams?.username}
                 onChange={(e) =>
                   setAuthConfig({
                     ...authConfig,
@@ -106,7 +106,7 @@ const AuthConfig: React.FC<Props> = ({ authConfig, setAuthConfig }) => {
                 fullWidth
                 label="Password"
                 type="password"
-                value={authConfig.passwordParams.password}
+                value={authConfig.passwordParams?.password}
                 onChange={(e) =>
                   setAuthConfig({
                     ...authConfig,
@@ -127,7 +127,7 @@ const AuthConfig: React.FC<Props> = ({ authConfig, setAuthConfig }) => {
               <TextField
                 fullWidth
                 label="Authentication Database"
-                value={authConfig.passwordParams.authDb}
+                value={authConfig.passwordParams?.authDb}
                 onChange={(e) =>
                   setAuthConfig({
                     ...authConfig,
@@ -171,7 +171,7 @@ const AuthConfig: React.FC<Props> = ({ authConfig, setAuthConfig }) => {
                 <Grid item xs={4}>
                   <StyledChoiceButton
                     active={
-                      authConfig.passwordParams.authMechanism === "DEFAULT"
+                      authConfig.passwordParams?.authMechanism === "DEFAULT"
                     }
                     onClick={() =>
                       setAuthConfig({
@@ -192,7 +192,7 @@ const AuthConfig: React.FC<Props> = ({ authConfig, setAuthConfig }) => {
                 <Grid item xs={4}>
                   <StyledChoiceButton
                     active={
-                      authConfig.passwordParams.authMechanism === "SCRAM-SHA-1"
+                      authConfig.passwordParams?.authMechanism === "SCRAM-SHA-1"
                     }
                     onClick={() =>
                       setAuthConfig({
@@ -213,7 +213,7 @@ const AuthConfig: React.FC<Props> = ({ authConfig, setAuthConfig }) => {
                 <Grid item xs={4}>
                   <StyledChoiceButton
                     active={
-                      authConfig.passwordParams.authMechanism ===
+                      authConfig.passwordParams?.authMechanism ===
                       "SCRAM-SHA-256"
                     }
                     onClick={() =>

@@ -1,5 +1,10 @@
 import React from "react";
-import { IFilterState } from "@/local-store/types";
+import {
+  FilterAction,
+  IFilterState,
+  SortField,
+  SortType,
+} from "@/local-store/types";
 import { filterActions } from "@/local-store/actions";
 import {
   Menu,
@@ -26,7 +31,7 @@ interface Props {
   anchorEl: null | HTMLElement;
   open: boolean;
   filterState: IFilterState;
-  filterDispatch: React.Dispatch<IFilterState>;
+  filterDispatch: React.Dispatch<FilterAction>;
   handleClose: () => void;
 }
 
@@ -161,7 +166,7 @@ const FilterMenu: React.FC<Props> = ({
           <StyledSelect
             labelId="types"
             value={filterState.filter.types}
-            // onChange={handleToggleType}
+            // onChange={handleToggleType}/
             fullWidth
             multiple
             size="medium"
@@ -206,7 +211,7 @@ const FilterMenu: React.FC<Props> = ({
               onChange={(e) =>
                 filterDispatch(
                   filterActions.setSort({
-                    field: e.target.value as string,
+                    field: e.target.value as SortField,
                     order: filterState.sort.order,
                   })
                 )
@@ -233,7 +238,7 @@ const FilterMenu: React.FC<Props> = ({
                 filterDispatch(
                   filterActions.setSort({
                     field: filterState.sort.field,
-                    order: e.target.value as string,
+                    order: e.target.value as SortType,
                   })
                 )
               }

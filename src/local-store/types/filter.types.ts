@@ -31,7 +31,7 @@ type FilterActionPayload = IFilter | ISort | string | undefined | null;
 
 interface FilterAction {
   type: FilterActionTypes;
-  payload: FilterActionPayload;
+  payload?: FilterActionPayload;
 }
 
 export {

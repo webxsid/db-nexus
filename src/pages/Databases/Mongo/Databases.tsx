@@ -32,8 +32,9 @@ const MongoDatabases = () => {
     toggleCreateDialog,
   } = React.useContext<MongoDBContextProps>(MongoDBContext);
 
-  const [databasesToShow, setDatabasesToShow] =
-    React.useState<typeof databases>(null);
+  const [databasesToShow, setDatabasesToShow] = React.useState<
+    typeof databases | null
+  >(null);
   const [sort, setSort] = React.useState<DBSort>("name");
   const [order, setOrder] = React.useState<"asc" | "desc">("asc");
 
@@ -41,8 +42,8 @@ const MongoDatabases = () => {
     const toastId = toast.info("Refreshing databases", {
       autoClose: false,
     });
-    await getDatabases();
-    await getStats();
+    getDatabases && (await getDatabases());
+    getStats && (await getStats());
     toast.update(toastId, {
       render: "Databases refreshed",
       type: "success",
@@ -60,18 +61,25 @@ const MongoDatabases = () => {
         first = b;
         second = a;
       }
+      const sizeA = first.sizeOnDisk || 0;
+      const sizeB = second.sizeOnDisk || 0;
+      const collectionsA = stats[first.name]?.collections || 0;
+      const collectionsB = stats[second.name]?.collections || 0;
+      const indexesA = stats[first.name]?.indexes || 0;
+      const indexesB = stats[second.name]?.indexes || 0;
       if (sort === "name") {
         return first.name.localeCompare(second.name);
       }
       if (sort === "size") {
-        return first.sizeOnDisk - second.sizeOnDisk;
+        return sizeA - sizeB;
       }
       if (sort === "collections") {
-        return stats[first.name]?.collections - stats[second.name]?.collections;
+        return collectionsA - collectionsB;
       }
       if (sort === "indexes") {
-        return stats[first.name]?.indexes - stats[second.name]?.indexes;
+        return indexesA - indexesB;
       }
+      return first.name.localeCompare(second.name);
     });
     setDatabasesToShow(sorted);
   }, [databases, sort, stats, order]);

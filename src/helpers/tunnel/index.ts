@@ -3,6 +3,7 @@ import {
   SshOptions,
   TunnelOptions,
   ServerOptions,
+  ForwardOptions,
 } from "tunnel-ssh";
 
 class Tunnel {
@@ -11,7 +12,11 @@ class Tunnel {
   private tunnelOptions: TunnelOptions = {
     autoClose: false,
   };
-  private serverConfig: ServerOptions | null = null;
+  private forwardOPtions: ForwardOptions = {
+    dstPort: 0,
+  };
+
+  private serverConfig: ServerOptions = {};
 
   constructor(private config: SshOptions) {}
 
@@ -19,7 +24,8 @@ class Tunnel {
     const [server, client] = await createTunnel(
       this.tunnelOptions,
       this.serverConfig,
-      this.config
+      this.config,
+      this.forwardOPtions
     );
     server.on("connection", (socket) => {
       console.log("connection", socket);

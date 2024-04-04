@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# ANSI color codes for colored output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Function to display an error message and exit
+show_error() {
+  echo -e "${RED}Error:${NC} $1"
+  exit 1
+}
+
+# Function to display a success message
+show_success() {
+  echo -e "${GREEN}$1${NC}"
+}
+
+# Function to display a warning message
+show_warning() {
+  echo -e "${YELLOW}$1${NC}"
+}
+
+# Function to display a loading spinner
+spinner() {
+  local pid=$1
+  local delay=0.2
+  local spinstr='|/-\'
+  while ps -p $pid > /dev/null; do
+    local temp=${spinstr#?}
+    printf " [%c]  " "$spinstr"
+    local spinstr=$temp${spinstr%"$temp"}
+    sleep $delay
+    printf "\b\b\b\b\b\b"
+  done
+  printf "    \b\b\b\b"
+}
+
+# Get the current branch name
+branch_name=$(git symbolic-ref --short HEAD)
+
+# Get the commit message
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+# Define the commit message prefix patterns
+feat_prefixes="(Add|Change|Update|Refactor|Remove|Fix|Optimize|Test|Doc|Style|Chore):"
+fix_prefixes="(Fix|Update|Refactor|Remove|Test|Doc|Style|Chore):"
+hotfix_prefixes="(Fix|Update|Refactor|Remove|Test|Doc|Style|Chore):"
+release_prefix="Release:"
+
+# Check if the branch name starts with 'feat'
+if [[ "$branch_name" =~ ^feat/.* ]]; then
+  show_warning "Checking commit message for feature branch..."
+  # Check if the commit message starts with one of the allowed prefixes
+  if [[ ! "$commit_msg" =~ ^($feat_prefixes|$release_prefix) ]]; then
+    show_error "For branches starting with 'feat/', commit message must start with one of the allowed prefixes: $feat_prefixes, or '$release_prefix'."
+  fi
+  show_success "Commit message for feature branch is valid."
+elif [[ "$branch_name" =~ ^fix/.* ]]; then
+  show_warning "Checking commit message for fix branch..."
+  # Check if the commit message starts with one of the allowed prefixes
+  if [[ ! "$commit_msg" =~ ^($fix_prefixes|$release_prefix) ]]; then
+    show_error "For branches starting with 'fix/', commit message must start with one of the allowed prefixes: $fix_prefixes, or '$release_prefix'."
+  fi
+  show_success "Commit message for fix branch is valid."
+elif [[ "$branch_name" =~ ^hotfix/.* ]]; then
+  show_warning "Checking commit message for hotfix branch..."
+  # Check if the commit message starts with one of the allowed prefixes
+  if [[ ! "$commit_msg" =~ ^($hotfix_prefixes|$release_prefix) ]]; then
+    show_error "For branches starting with 'hotfix/', commit message must start with one of the allowed prefixes: $hotfix_prefixes, or '$release_prefix'."
+  fi
+  show_success "Commit message for hotfix branch is valid."
+fi
+
+# All checks passed, allow the commit
+exit 0

@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# ANSI color codes for colored output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Function to display an error message and exit
+show_error() {
+  echo -e "${RED}Error:${NC} $1"
+  exit 1
+}
+
+# Function to display a success message
+show_success() {
+  echo -e "${GREEN}$1${NC}"
+}
+
+# Function to display a warning message
+show_warning() {
+  echo -e "${YELLOW}$1${NC}"
+}
+
+# Function to display a loading spinner
+spinner() {
+  local pid=$1
+  local delay=0.2
+  local spinstr='|/-\'
+  while ps -p $pid > /dev/null; do
+    local temp=${spinstr#?}
+    printf " [%c]  " "$spinstr"
+    local spinstr=$temp${spinstr%"$temp"}
+    sleep $delay
+    printf "\b\b\b\b\b\b"
+  done
+  printf "    \b\b\b\b"
+}
+
+echo -e "${CYAN}Verifying branch and commit message...${NC}"
+
+# Get the current branch name
+branch_name=$(git symbolic-ref --short HEAD)
+
+# Define the branch naming patterns
+feature_pattern="feat/TG-[0-9]+.*"
+fix_pattern="fix/TG-[0-9]+.*"
+hotfix_pattern="hotfix/.*"
+release_pattern="release/[0-9]+\.[0-9]+\.[0-9]+"
+main_branch="main"
+dev_branch="dev"
+
+# Check if the branch is a direct commit branch
+if [ "$branch_name" = "$main_branch" ] || [ "$branch_name" = "$dev_branch" ]; then
+  show_error "Direct commit to branch \"$branch_name\" is not allowed."
+fi
+
+# Check if the branch name matches the naming patterns
+if [[ ! "$branch_name" =~ ^($feature_pattern|$fix_pattern|$hotfix_pattern|$release_pattern)$ ]]; then
+  show_error "Branch name \"$branch_name\" does not match the required naming pattern."
+fi
+
+# All checks passed, allow the commit
+show_success "Branch and commit message verification successful."
+exit 0

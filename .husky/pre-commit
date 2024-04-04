@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# ANSI color codes for colored output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Function to display an error message and exit
+show_error() {
+  echo -e "${RED}Error:${NC} $1"
+  exit 1
+}
+
+# Function to display a success message
+show_success() {
+  echo -e "${GREEN}$1${NC}"
+}
+
+# Function to display a warning message
+show_warning() {
+  echo -e "${YELLOW}$1${NC}"
+}
+
+# Function to display a loading spinner
+spinner() {
+  local pid=$1
+  local delay=0.2
+  local spinstr='|/-\'
+  while ps -p $pid > /dev/null; do
+    local temp=${spinstr#?}
+    printf " [%c]  " "$spinstr"
+    local spinstr=$temp${spinstr%"$temp"}
+    sleep $delay
+    printf "\b\b\b\b\b\b"
+  done
+  printf "    \b\b\b\b"
+}
+
+echo -e "${CYAN}Running linting, build, and formatting checks...${NC}"
+
+# Run linting using yarn lint
+show_warning "Running linting..."
+yarn lint & spinner $!
+
+# Run build using yarn build
+show_warning "Running build..."
+yarn build & spinner $!
+
+# All checks passed, allow the commit
+show_success "Pre-commit checks passed!"
+exit 0

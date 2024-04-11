@@ -11,5 +11,6 @@ export enum MongoDbEvent {
   GET_INDEXES = "mongo:getIndexes",
   GET_STATS = "mongo:getStats",
   DROP_DATABASE = "mongo:dropDatabase",
+  DROP_COLLECTION = "mongo:dropCollection",
   CREATE_COLLECTION = "mongo:createCollection",
 }

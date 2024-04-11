@@ -12,9 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 import { dropDatabase } from "@/utils/database";
-import DropDBDialog from "../../DropDBDialog";
 import { toast } from "react-toastify";
 import Render from "@/components/common/Render";
+import DropDialog from "../../DropDialog";
 
 interface Props {
   dbToDisplay: MongoDBContextProps["databases"] | null;
@@ -49,11 +49,11 @@ const DatabaseTable: React.FC<Props> = ({ dbToDisplay, stats }) => {
   };
   return (
     <Table>
-      <DropDBDialog
+      <DropDialog
         open={dropDbState.open}
         handleClose={handleCloseDropDB}
-        dbName={dropDbState.dbName}
-        handleDropDB={() => handleDropDB(dropDbState.dbName)}
+        name={dropDbState.dbName}
+        handleDrop={() => handleDropDB(dropDbState.dbName)}
       />
       <TableHead>
         <TableRow>

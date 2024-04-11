@@ -12,9 +12,10 @@ dist
 dist-ssr
 *.local
 dist-electron
-app
 .history
 release
+
+app
 
 # Editor directories and files
 .vscode/*

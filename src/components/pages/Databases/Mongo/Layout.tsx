@@ -22,13 +22,22 @@ const MongoDBLayout = () => {
     totalSize: 0,
     stats: {},
     metaData: undefined,
-    createDialog: false,
+    createDialogState: {
+      open: false,
+      title: "",
+      dbName: "",
+    },
   });
 
-  const toggleCreateDialog = () => {
+  const setCreateDialogState = (
+    state: Partial<MongoDBContextProps["createDialogState"]>
+  ) => {
     setDbContext((prev) => ({
       ...prev,
-      createDialog: !prev.createDialog,
+      createDialogState: {
+        ...prev.createDialogState!,
+        ...state,
+      },
     }));
   };
 
@@ -114,7 +123,7 @@ const MongoDBLayout = () => {
       getStats: getDBStats,
       getMetaData: getDBMetaData,
       getCollections: getDBCollections,
-      toggleCreateDialog,
+      setCreateDialogState: setCreateDialogState,
       getCollectionsStats: getDbCollectionsStats,
     }));
   };

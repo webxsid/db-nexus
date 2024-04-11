@@ -3,12 +3,12 @@ import {
   Box,
   Button,
   FormControl,
-  IconButton,
   InputLabel,
   MenuItem,
   useTheme,
   Typography,
   Divider,
+  ButtonGroup,
 } from "@mui/material";
 import MongoDBContext, {
   MongoDBContextProps,
@@ -29,7 +29,7 @@ const MongoDatabases = () => {
     stats,
     getStats,
     totalSize,
-    toggleCreateDialog,
+    setCreateDialogState,
   } = React.useContext<MongoDBContextProps>(MongoDBContext);
 
   const [databasesToShow, setDatabasesToShow] = React.useState<
@@ -49,6 +49,15 @@ const MongoDatabases = () => {
       type: "success",
       autoClose: 2000,
     });
+  };
+
+  const openCreateDialog = () => {
+    setCreateDialogState &&
+      setCreateDialogState({
+        open: true,
+        title: "Create Database",
+        dbName: null,
+      });
   };
 
   React.useEffect(() => {
@@ -174,18 +183,20 @@ const MongoDatabases = () => {
               justifyContent: "flex-end",
             }}
           >
-            <Button
+            <ButtonGroup
               variant="contained"
               color="primary"
-              onClick={toggleCreateDialog}
-              startIcon={<Add />}
-              sx={{ borderRadius: 3 }}
+              size="small"
+              disableElevation
+              sx={{ borderRadius: 3, overflow: "hidden" }}
             >
-              Create Database
-            </Button>
-            <IconButton onClick={handleRefresh}>
-              <Cached />
-            </IconButton>
+              <Button onClick={openCreateDialog} startIcon={<Add />}>
+                Create Database
+              </Button>
+              <Button onClick={handleRefresh}>
+                <Cached />
+              </Button>
+            </ButtonGroup>
           </Box>
         </Box>
         <Box

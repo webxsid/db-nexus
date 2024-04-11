@@ -9,17 +9,19 @@ import {
   useTheme,
   Typography,
   Divider,
+  ButtonGroup,
 } from "@mui/material";
 import MongoDBContext, {
   MongoDBContextProps,
 } from "@/context/Databases/MongoContext";
 import StyledSelect from "@/components/common/StyledSelect";
-import { Add, Cached } from "@mui/icons-material";
+import { Add, Cached, ChevronLeft } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import convertBytes from "@/helpers/text/convertBytes";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import CollectionsTable from "@/components/pages/Databases/Mongo/CollectionTable";
 import { GetObjectReturnType } from "@/helpers/types";
+import { SupportedDatabases } from "@/components/common/types";
 
 type DBSort =
   | "name"
@@ -37,6 +39,7 @@ const MongoCollections = () => {
     getCollectionsStats,
     collectionsStats,
     databases,
+    setCreateDialogState,
   } = React.useContext<MongoDBContextProps>(MongoDBContext);
 
   const { dbName } = useParams<{ dbName: string }>();
@@ -49,6 +52,7 @@ const MongoCollections = () => {
   const [dbCollections, setDbCollections] = React.useState<GetObjectReturnType<
     typeof collections
   > | null>(null);
+  const navigate = useNavigate();
 
   const handleRefresh = async () => {
     const toastId = toast.info("Refreshing collections", {
@@ -63,6 +67,15 @@ const MongoCollections = () => {
     });
   };
 
+  const openCreateDialog = () => {
+    setCreateDialogState &&
+      setCreateDialogState({
+        open: true,
+        title: "Create Collection",
+        dbName: (dbName as string) || null,
+      });
+  };
+
   const loadCollectionsCallback = React.useCallback(async () => {
     if (dbCollections?.length) return;
     if (!collections || !collections[dbName as string]) {
@@ -72,6 +85,10 @@ const MongoCollections = () => {
       }
     }
   }, [dbCollections, dbName, collections, getCollections, getCollectionsStats]);
+
+  const navigateBack = () => {
+    navigate(`/database/${SupportedDatabases.MONGO}/databases`);
+  };
 
   React.useEffect(() => {
     loadCollectionsCallback();
@@ -159,14 +176,24 @@ const MongoCollections = () => {
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography
-            variant="h6"
-            sx={{
-              color: theme.palette.primary.main,
-            }}
-          >
-            Available Collections
-          </Typography>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <IconButton
+              onClick={navigateBack}
+              sx={{
+                color: theme.palette.primary.main,
+              }}
+            >
+              <ChevronLeft />
+            </IconButton>
+            <Typography
+              variant="h6"
+              sx={{
+                color: theme.palette.primary.main,
+              }}
+            >
+              Available Collections
+            </Typography>
+          </Box>
           {totalSize && (
             <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               <Typography variant="body2" color="textSecondary">
@@ -228,18 +255,20 @@ const MongoCollections = () => {
               justifyContent: "flex-end",
             }}
           >
-            <Button
+            <ButtonGroup
               variant="contained"
               color="primary"
-              // onClick={toggleCreateDialog}
-              startIcon={<Add />}
-              sx={{ borderRadius: 3 }}
+              disableElevation
+              sx={{ borderRadius: 3, overflow: "hidden" }}
+              size="small"
             >
-              Create Collection
-            </Button>
-            <IconButton onClick={handleRefresh}>
-              <Cached />
-            </IconButton>
+              <Button onClick={openCreateDialog} startIcon={<Add />}>
+                Create Collection
+              </Button>
+              <Button onClick={handleRefresh}>
+                <Cached />
+              </Button>
+            </ButtonGroup>
           </Box>
         </Box>
         <Box

@@ -11,6 +11,11 @@ interface MongoCollectionStats {
   };
 }
 
+interface MongoDbStats {
+  collections: number | null;
+  indexes: number | null;
+}
+
 interface MongoDBConnectionMetaData {
   name: MongoDatabaseState["name"];
   color: MongoDatabaseState["color"];
@@ -21,4 +26,4 @@ interface MongoDBConnectionMetaData {
   lastConnectionAt: MongoDatabaseState["lastConnectionAt"];
 }
 
-export { MongoCollectionStats, MongoDBConnectionMetaData };
+export { MongoCollectionStats, MongoDBConnectionMetaData, MongoDbStats };

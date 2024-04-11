@@ -13,24 +13,28 @@ import {
   AlertTitle,
 } from "@mui/material";
 import React from "react";
-import { useParams } from "react-router";
 import { toast } from "react-toastify";
 
 const CreateCollectionDialog = () => {
-  const [newDB, setNewDB] = React.useState<boolean>(true);
+  const [newDB, setNewDB] = React.useState<boolean>(false);
   const [newDbName, setNewDbName] = React.useState<string>("");
   const [collectionName, setCollectionName] = React.useState<string>("");
 
-  const { getDatabases, getStats, createDialog, toggleCreateDialog } =
-    React.useContext<MongoDBContextProps>(MongoDBContext);
+  const {
+    getDatabases,
+    getStats,
+    createDialogState,
+    setCreateDialogState,
+    getCollections,
+    getCollectionsStats,
+  } = React.useContext<MongoDBContextProps>(MongoDBContext);
 
   const handleClose = () => {
     setNewDbName("");
     setCollectionName("");
-    toggleCreateDialog && toggleCreateDialog();
+    setCreateDialogState &&
+      setCreateDialogState({ open: false, title: "", dbName: "" });
   };
-
-  const { dbName } = useParams<{ dbName: string }>();
 
   const handleCreateCollection = async () => {
     if (!newDbName || !collectionName) {
@@ -41,9 +45,17 @@ const CreateCollectionDialog = () => {
       newDB ? "Creating Database..." : "Creating Collection..."
     );
     try {
-      await createCollection(SupportedDatabases.MONGO)(dbName!, collectionName);
-      getDatabases && (await getDatabases());
-      getStats && (await getStats());
+      await createCollection(SupportedDatabases.MONGO)(
+        newDbName!,
+        collectionName
+      );
+      if (newDB) {
+        getDatabases && (await getDatabases());
+        getStats && (await getStats());
+      } else {
+        getCollections && (await getCollections(newDbName!));
+        getCollectionsStats && (await getCollectionsStats(newDbName!));
+      }
       toast.dismiss(loadingToast);
       toast.success(
         newDB
@@ -59,17 +71,20 @@ const CreateCollectionDialog = () => {
   };
 
   React.useEffect(() => {
-    if (dbName) {
+    if (!createDialogState?.open) return;
+    if (createDialogState?.dbName) {
       setNewDB(false);
-      setNewDbName(dbName);
+      setNewDbName(createDialogState.dbName);
+    } else {
+      setNewDB(true);
     }
-  }, [dbName]);
+  }, [createDialogState]);
 
   return (
     <StyledDialog
-      open={!!createDialog}
+      open={createDialogState?.open || false}
       onClose={handleClose}
-      title={newDB ? "Create Database" : "Create Collection"}
+      title={createDialogState?.title || "Create Collection"}
     >
       <DialogContent
         sx={{

@@ -57,6 +57,7 @@ const ListItem: React.FC<Props> = ({
 
   const getSelectedDB = React.useCallback(() => {
     if (params?.dbName) setSelectedDB(params.dbName);
+    else setSelectedDB(null);
   }, [params]);
   const getSelectedCollection = React.useCallback(() => {
     if (params?.collectionName) setSelectedCollection(params.collectionName);

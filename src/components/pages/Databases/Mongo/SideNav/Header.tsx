@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Box,
   IconButton,
   List,
   ListItemText,
@@ -25,6 +24,7 @@ import StyledMenu from "@/components/common/StyledMenu";
 import { disconnect } from "@/utils/database";
 import { useNavigate } from "react-router";
 import { SupportedDatabases } from "@/components/common/types";
+import Render from "@/components/common/Render";
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -45,6 +45,7 @@ const Header = () => {
     await disconnect(SupportedDatabases.MONGO)();
     navigate("/");
   };
+
   return (
     <Grid
       container
@@ -118,20 +119,29 @@ const Header = () => {
         xs={10}
         sx={{ display: "flex", flexDirection: "column", flex: 2 }}
       >
-        {metaData?.name ? (
-          <>
-            <Typography variant="h5" color="inherit">
-              {metaData?.name}
-            </Typography>
-            <Typography variant="caption" color="inherit" sx={{ mt: 0 }} noWrap>
+        <Render
+          if={!!metaData?.name}
+          then={
+            <>
+              <Typography variant="h5" color="inherit">
+                {metaData?.name}
+              </Typography>
+              <Typography
+                variant="caption"
+                color="inherit"
+                sx={{ mt: 0 }}
+                noWrap
+              >
+                {metaData?.uri}
+              </Typography>
+            </>
+          }
+          else={
+            <Typography variant="h6" noWrap color="inherit">
               {metaData?.uri}
             </Typography>
-          </>
-        ) : (
-          <Typography variant="h6" noWrap color="inherit">
-            {metaData?.uri}
-          </Typography>
-        )}
+          }
+        />
       </Grid>
       <Grid item xs={2} sx={{ display: "flex", gap: 2, flex: 1 }}>
         <IconButton color="inherit" onClick={openMenu}>

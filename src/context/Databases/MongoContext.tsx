@@ -1,5 +1,8 @@
-import { MongoDBConnectionMetaData } from "@/components/common/types/databases/mongo";
-import { MongoDatabaseState } from "@/store/types";
+import {
+  MongoCollectionStats,
+  MongoDBConnectionMetaData,
+  MongoDbStats,
+} from "@/components/common/types/databases/mongo";
 import { CollectionInfo, ListDatabasesResult } from "mongodb";
 import React from "react";
 
@@ -8,10 +11,7 @@ export interface MongoDBContextProps {
   totalSize?: ListDatabasesResult["totalSize"];
   getDatabases?: () => Promise<void>;
   stats: {
-    [db: string]: {
-      collections: number | null;
-      indexes: number | null;
-    };
+    [db: string]: MongoDbStats;
   };
   collections?: {
     [db: string]: (CollectionInfo | Pick<CollectionInfo, "name" | "type">)[];
@@ -20,23 +20,20 @@ export interface MongoDBContextProps {
     db: string
   ) => Promise<(CollectionInfo | Pick<CollectionInfo, "name" | "type">)[]>;
   collectionsStats?: {
-    [collectionIdentifier: string]: {
-      doc: {
-        size: number;
-        total: number;
-        avgSize: number;
-      };
-      index: {
-        total: number;
-      };
-    };
+    [collectionIdentifier: string]: MongoCollectionStats;
   };
   getCollectionsStats?: (db: string) => Promise<void>;
   getStats?: () => Promise<void>;
   metaData?: MongoDBConnectionMetaData;
   getMetaData?: () => Promise<void>;
-  createDialog?: boolean;
-  toggleCreateDialog?: () => void;
+  createDialogState?: {
+    open: boolean;
+    title: string;
+    dbName: string | null;
+  };
+  setCreateDialogState?: (
+    state: Partial<MongoDBContextProps["createDialogState"]>
+  ) => void;
 }
 
 const MongoDBContext = React.createContext<MongoDBContextProps>({
@@ -45,7 +42,11 @@ const MongoDBContext = React.createContext<MongoDBContextProps>({
   stats: {},
   metaData: undefined,
   collections: {},
-  createDialog: false,
+  createDialogState: {
+    open: false,
+    title: "",
+    dbName: "",
+  },
 });
 
 export default MongoDBContext;

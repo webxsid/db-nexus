@@ -22,7 +22,7 @@ interface Props {
 }
 
 const DatabaseList: React.FC<Props> = ({ open, toggleOpen }) => {
-  const { databases, getDatabases, toggleCreateDialog } =
+  const { databases, getDatabases, setCreateDialogState } =
     React.useContext<MongoDBContextProps>(MongoDBContext);
   const theme = useTheme();
   const navigate = useNavigate();
@@ -45,6 +45,15 @@ const DatabaseList: React.FC<Props> = ({ open, toggleOpen }) => {
     } else {
       setOpenDbs([...openDbs, db]);
     }
+  };
+
+  const openCreateDialog = () => {
+    setCreateDialogState &&
+      setCreateDialogState({
+        open: true,
+        title: "Create Database",
+        dbName: null,
+      });
   };
 
   React.useEffect(() => {
@@ -97,7 +106,7 @@ const DatabaseList: React.FC<Props> = ({ open, toggleOpen }) => {
           <Typography variant="body1">Databases</Typography>
         </Button>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <IconButton onClick={toggleCreateDialog}>
+          <IconButton onClick={openCreateDialog}>
             <Add />
           </IconButton>
           <IconButton onClick={handleRefresh}>

@@ -5,7 +5,6 @@ import {
   ListDatabasesResult,
 } from "mongodb";
 import { MongoDatabaseState } from "./store/types";
-import { GetMetaDataDto } from "main/mongoDb/dto";
 import {
   MongoCollectionStats,
   MongoDBConnectionMetaData,
@@ -43,6 +42,7 @@ export interface MongoApis {
     collection: string
   ) => Promise<MongoCollectionStats>;
   dropDatabase: (dbName: string) => Promise<void>;
+  dropCollection: (db: string, collection: string) => Promise<void>;
 }
 
 declare global {

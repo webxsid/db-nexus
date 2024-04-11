@@ -49,9 +49,7 @@ const registerMongoListeners = () => {
   });
 
   ipcMain.handle(MongoDbEvent.CONNECT, async (event, windowId: number) => {
-    console.log("[mongo.listener.ts] Connect: ", windowId);
     const client = await getDatabase(windowId);
-    console.log("[mongo.listener.ts] Client: ", client);
     return client?.connect();
   });
 
@@ -135,6 +133,14 @@ const registerMongoListeners = () => {
     async (event, windowId: number, dbName: string) => {
       const client = await getDatabase(windowId);
       return await client?.dropDatabase(dbName);
+    }
+  );
+
+  ipcMain.handle(
+    MongoDbEvent.DROP_COLLECTION,
+    async (event, windowId: number, dbName: string, collectionName: string) => {
+      const client = await getDatabase(windowId);
+      return await client?.dropCollection(dbName, collectionName);
     }
   );
 };

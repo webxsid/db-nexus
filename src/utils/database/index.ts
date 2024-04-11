@@ -63,6 +63,15 @@ const dropDatabase = (db: SupportedDatabases) => {
   }
 };
 
+const dropCollection = (db: SupportedDatabases) => {
+  switch (db) {
+    case SupportedDatabases.MONGO:
+      return window.mongo.dropCollection;
+    default:
+      throw new Error("Database not supported");
+  }
+};
+
 const getCollections = (db: SupportedDatabases) => {
   switch (db) {
     case SupportedDatabases.MONGO:
@@ -111,4 +120,5 @@ export {
   createCollection,
   dropDatabase,
   getCollectionStats,
+  dropCollection,
 };

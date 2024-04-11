@@ -95,6 +95,15 @@ contextBridge.exposeInMainWorld("mongo", {
     const windowId = await ipcRenderer.invoke("get-window-id");
     return await ipcRenderer.invoke("mongo:dropDatabase", windowId, dbName);
   },
+  dropCollection: async (dbName, collectionName) => {
+    const windowId = await ipcRenderer.invoke("get-window-id");
+    return await ipcRenderer.invoke(
+      "mongo:dropCollection",
+      windowId,
+      dbName,
+      collectionName
+    );
+  },
 });
 
 console.log("preload.js loaded");

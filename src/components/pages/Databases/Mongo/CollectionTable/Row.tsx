@@ -9,8 +9,13 @@ import convertBytes from "@/helpers/text/convertBytes";
 interface Props {
   collection: GetObjectReturnType<MongoDBContextProps["collections"]>[0];
   stats?: GetObjectReturnType<MongoDBContextProps["collectionsStats"]> | null;
+  handleShowDeletePrompt: () => void;
 }
-const Row: React.FC<Props> = ({ collection, stats }) => {
+const Row: React.FC<Props> = ({
+  collection,
+  stats,
+  handleShowDeletePrompt,
+}) => {
   return (
     <TableRow>
       <TableCell
@@ -36,7 +41,7 @@ const Row: React.FC<Props> = ({ collection, stats }) => {
       </TableCell>
       <TableCell align="center">{stats?.index.total ?? "-"}</TableCell>
       <TableCell align="right">
-        <IconButton>
+        <IconButton onClick={handleShowDeletePrompt}>
           <Delete color="error" />
         </IconButton>
       </TableCell>

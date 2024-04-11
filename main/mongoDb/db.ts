@@ -208,6 +208,13 @@ class MongoDatabase {
     }
     return await this._client.db(name).dropDatabase();
   }
+
+  public async dropCollection(db: string, collection: string) {
+    if (!this._client) {
+      throw new Error("Database not initialized");
+    }
+    return await this._client.db(db).collection(collection).drop();
+  }
 }
 
 export default MongoDatabase;

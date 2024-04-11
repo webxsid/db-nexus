@@ -11,17 +11,19 @@ import {
 import { Cancel, Delete } from "@mui/icons-material";
 
 interface Props {
+  title?: string;
   open: boolean;
   handleClose: () => void;
-  dbName: string;
-  handleDropDB: () => void;
+  name: string;
+  handleDrop: () => void;
 }
 
-const DropDBDialog: React.FC<Props> = ({
+const DropDialog: React.FC<Props> = ({
+  title = "Drop Database",
   open,
   handleClose,
-  handleDropDB,
-  dbName,
+  handleDrop,
+  name,
 }) => {
   const [dropText, setDropText] = React.useState<string>("");
 
@@ -30,17 +32,17 @@ const DropDBDialog: React.FC<Props> = ({
     handleClose();
   };
 
-  const onDropDB = () => {
-    if (dropText === dbName) {
-      handleDropDB();
+  const onDrop = () => {
+    if (dropText === name) {
+      handleDrop();
       onClose();
     } else {
-      toast.error("Database name does not match");
+      toast.error("Names do not match");
     }
   };
 
   return (
-    <StyledDialog open={open} onClose={onClose} title="Drop Database">
+    <StyledDialog open={open} onClose={onClose} title={title}>
       <DialogContent
         sx={{
           display: "flex",
@@ -48,10 +50,10 @@ const DropDBDialog: React.FC<Props> = ({
         }}
       >
         <Typography variant="body1">
-          Are you sure you want to drop <strong>{dbName}</strong>?
+          Are you sure you want to drop <strong>{name}</strong>?
         </Typography>
         <Typography variant="body2" color="error">
-          This action is irreversible. Type the database name to confirm.
+          This action is irreversible. Type "{`${name}`}" to confirm.
         </Typography>
         <TextField
           label="Database Name"
@@ -59,7 +61,7 @@ const DropDBDialog: React.FC<Props> = ({
           onChange={(e) => setDropText(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              onDropDB();
+              onDrop();
             }
           }}
           sx={{
@@ -77,7 +79,7 @@ const DropDBDialog: React.FC<Props> = ({
         }}
       >
         <Button
-          onClick={onDropDB}
+          onClick={onDrop}
           color="error"
           variant="text"
           startIcon={<Delete />}
@@ -100,5 +102,5 @@ const DropDBDialog: React.FC<Props> = ({
   );
 };
 
-export { Props as DropDBDialogProps };
-export default DropDBDialog;
+export { Props as DropDialogProps };
+export default DropDialog;

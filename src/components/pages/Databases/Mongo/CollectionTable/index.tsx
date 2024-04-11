@@ -11,11 +11,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { dropDatabase, getDatabases, getStats } from "@/utils/database";
-import DropDBDialog from "../../DropDBDialog";
+import { dropCollection } from "@/utils/database";
 import { toast } from "react-toastify";
 import { useParams } from "react-router";
 import { GetObjectReturnType } from "@/helpers/types";
+import DropDialog from "../../DropDialog";
 
 interface Props {
   collectionsToDisplay: GetObjectReturnType<
@@ -24,40 +24,41 @@ interface Props {
 }
 
 const CollectionsTable: React.FC<Props> = ({ collectionsToDisplay }) => {
-  const { metaData, collectionsStats, getDatabases, getStats } =
+  const { metaData, collectionsStats, getCollections, getCollectionsStats } =
     React.useContext<MongoDBContextProps>(MongoDBContext);
-  const [dropDbState, setDropDbState] = React.useState<{
+  const [dropCollectionState, setDropCollectionState] = React.useState<{
     open: boolean;
-    dbName: string;
+    name: string;
   }>({
     open: false,
-    dbName: "",
+    name: "",
   });
 
   const { dbName } = useParams<{ dbName: string }>();
 
-  const handleOpenDropDB = (dbName: string) => {
-    setDropDbState({ open: true, dbName });
+  const handleOpenDropCollection = (name: string) => {
+    setDropCollectionState({ open: true, name });
   };
 
-  const handleCloseDropDB = () => {
-    setDropDbState({ open: false, dbName: "" });
+  const handleCloseDropCollection = () => {
+    setDropCollectionState({ open: false, name: "" });
   };
 
-  const handleDropDB = async (dbName: string) => {
-    if (!metaData?.provider) return;
-    await dropDatabase(metaData?.provider)(dbName);
-    getDatabases && (await getDatabases());
-    getStats && (await getStats());
-    toast.success("Database dropped successfully");
+  const handleDrop = async (collectionName: string) => {
+    if (!metaData?.provider || !dbName) return;
+    await dropCollection(metaData?.provider)(dbName, collectionName);
+    getCollections && (await getCollections(dbName));
+    getCollectionsStats && (await getCollectionsStats(dbName));
+    toast.success("Collection dropped successfully");
   };
   return (
     <Table>
-      <DropDBDialog
-        open={dropDbState.open}
-        handleClose={handleCloseDropDB}
-        dbName={dropDbState.dbName}
-        handleDropDB={() => handleDropDB(dropDbState.dbName)}
+      <DropDialog
+        title="Drop Collection"
+        open={dropCollectionState.open}
+        handleClose={handleCloseDropCollection}
+        name={dropCollectionState.name}
+        handleDrop={() => handleDrop(dropCollectionState.name)}
       />
       <TableHead>
         <TableRow>
@@ -91,6 +92,9 @@ const CollectionsTable: React.FC<Props> = ({ collectionsToDisplay }) => {
                 collectionsStats
                   ? collectionsStats[`${dbName}-${collection.name}`]
                   : null
+              }
+              handleShowDeletePrompt={() =>
+                handleOpenDropCollection(collection.name)
               }
             />
           ))

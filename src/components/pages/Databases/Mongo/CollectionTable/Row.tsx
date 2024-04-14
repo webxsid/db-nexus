@@ -1,10 +1,14 @@
-import { MongoDBContextProps } from "@/context/Databases/MongoContext";
+import MongoDBContext, {
+  MongoDBContextProps,
+} from "@/context/Databases/MongoContext";
 import { GetObjectReturnType } from "@/helpers/types";
 import React from "react";
 import { TableRow, TableCell, Button, IconButton } from "@mui/material";
 import { Delete, Storage } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import convertBytes from "@/helpers/text/convertBytes";
+import { toast } from "react-toastify";
+import { SupportedDatabases } from "@/components/common/types";
 
 interface Props {
   collection: GetObjectReturnType<MongoDBContextProps["collections"]>[0];
@@ -16,6 +20,20 @@ const Row: React.FC<Props> = ({
   stats,
   handleShowDeletePrompt,
 }) => {
+  const { openACollection } =
+    React.useContext<MongoDBContextProps>(MongoDBContext);
+  const navigate = useNavigate();
+  const { dbName } = useParams<{ dbName: string }>();
+
+  const handleRedirectToDocuments = async () => {
+    if (openACollection) {
+      await openACollection(dbName!, collection.name);
+      navigate(`/database/${SupportedDatabases.MONGO}/documents`);
+    } else {
+      toast.error("Error redirecting to documents");
+    }
+  };
+
   return (
     <TableRow>
       <TableCell
@@ -30,6 +48,7 @@ const Row: React.FC<Props> = ({
           color="primary"
           sx={{ textTransform: "none", py: 1 }}
           startIcon={<Storage />}
+          onClick={handleRedirectToDocuments}
         >
           {collection.name}
         </Button>

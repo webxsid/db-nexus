@@ -2,6 +2,7 @@ import { createHashRouter } from "react-router-dom";
 import Home from "./pages/Home";
 import MongoDatabases from "./pages/Databases/Mongo/Databases";
 import MongoCollections from "./pages/Databases/Mongo/Collections";
+import MongoDocuments from "./pages/Databases/Mongo/Documents";
 import MongoDBLayout from "./components/pages/Databases/Mongo/Layout";
 import { SupportedDatabases } from "./components/common/types";
 
@@ -26,6 +27,10 @@ const Router = createHashRouter(
             {
               path: ":dbName/collections",
               element: <MongoCollections />,
+            },
+            {
+              path: "documents",
+              element: <MongoDocuments />,
             },
           ],
         },

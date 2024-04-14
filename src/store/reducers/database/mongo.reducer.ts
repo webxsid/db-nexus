@@ -26,6 +26,20 @@ const mongoReducer = (
         }
         return db;
       });
+
+    case MongoActionTypes.UPDATE_REFERENCES:
+      return state.map((db) => {
+        if (db.id === (action.payload as MongoDatabaseState).id) {
+          return {
+            ...db,
+            references: {
+              ...(db.references || {}),
+              ...(action.payload as MongoDatabaseState).references,
+            },
+          };
+        }
+        return db;
+      });
     default:
       return state;
   }

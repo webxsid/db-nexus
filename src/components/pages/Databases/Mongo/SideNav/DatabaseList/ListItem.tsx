@@ -61,6 +61,7 @@ const ListItem: React.FC<Props> = ({
   }, [params]);
   const getSelectedCollection = React.useCallback(() => {
     if (params?.collectionName) setSelectedCollection(params.collectionName);
+    else setSelectedCollection(null);
   }, [params]);
 
   const handleToggle = () => {

@@ -70,6 +70,11 @@ enum MongoActionTypes {
   ADD_DATABASE = "ADD_DATABASE_MONGO",
   REMOVE_DATABASE = "REMOVE_DATABASE_MONGO",
   UPDATE_DATABASE = "UPDATE_DATABASE_MONGO",
+  UPDATE_REFERENCES = "UPDATE_REFERENCES_MONGO",
+}
+
+interface MongoCollectionReference {
+  [key: string]: string;
 }
 
 type MongoActionPayload = MongoDatabaseState | string;
@@ -89,6 +94,7 @@ export {
   MongoActionTypes,
   MongoActionPayload,
   MongoAction,
+  MongoCollectionReference,
 };
 
 export default MongoDbConnectionParams;

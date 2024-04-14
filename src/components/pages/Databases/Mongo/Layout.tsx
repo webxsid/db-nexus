@@ -27,6 +27,8 @@ const MongoDBLayout = () => {
       title: "",
       dbName: "",
     },
+    openCollections: [],
+    activeCollection: null,
   });
 
   const setCreateDialogState = (
@@ -116,6 +118,90 @@ const MongoDBLayout = () => {
     }));
   };
 
+  const openACollection = (
+    dbName: string,
+    collectionName: string,
+    index?: number | null = null,
+    duplicate?: boolean = false
+  ) => {
+    console.log(dbName, collectionName, index, duplicate);
+    let exists = dbContext.openCollections.filter(
+      (c) => c.dbName === dbName && c.collectionName === collectionName
+    );
+    console.log(exists);
+    if (!isNaN(index) && index !== null) {
+      exists = exists.filter((c) => c.index === index);
+      console.log(exists);
+    }
+    if (exists?.length > 0) {
+      if (!duplicate) {
+        setDbContext((prev) => ({
+          ...prev,
+          activeCollection: `${dbName}-${collectionName}-${exists[0].index}`,
+        }));
+      } else {
+        const newIndex = exists.reduce(
+          (acc, curr) => (curr.index > acc ? curr.index : acc),
+          0
+        );
+        setDbContext((prev) => ({
+          ...prev,
+          openCollections: [
+            ...prev.openCollections,
+            { dbName, collectionName, index: newIndex },
+          ],
+          activeCollection: `${dbName}-${collectionName}-${newIndex}`,
+        }));
+      }
+    } else {
+      setDbContext((prev) => ({
+        ...prev,
+        openCollections: [
+          ...prev.openCollections,
+          { dbName, collectionName, index: 0 },
+        ],
+        activeCollection: `${dbName}-${collectionName}-0`,
+      }));
+    }
+  };
+
+  const closeACollection = (
+    dbName: string,
+    collectionName: string,
+    index: number
+  ) => {
+    const currentIndex = dbContext.openCollections.findIndex(
+      (c) =>
+        c.dbName === dbName &&
+        c.collectionName === collectionName &&
+        c.index === index
+    );
+    const newCollections = dbContext.openCollections.filter(
+      (c) =>
+        c.dbName !== dbName ||
+        c.collectionName !== collectionName ||
+        c.index !== index
+    );
+    const newActiveCollection =
+      dbContext.activeCollection === `${dbName}-${collectionName}-${index}`
+        ? newCollections.length > 0
+          ? newCollections[currentIndex]
+          : null
+        : dbContext.activeCollection;
+    setDbContext((prev) => ({
+      ...prev,
+      openCollections: newCollections,
+      activeCollection: newActiveCollection,
+    }));
+  };
+
+  const setActiveCollection = (key: string) => {
+    setDbContext((prev) => ({
+      ...prev,
+      activeCollection: key,
+    }));
+  };
+
   const addFunctionsToContext = () => {
     setDbContext((prev) => ({
       ...prev,
@@ -125,6 +211,9 @@ const MongoDBLayout = () => {
       getCollections: getDBCollections,
       setCreateDialogState: setCreateDialogState,
       getCollectionsStats: getDbCollectionsStats,
+      openACollection,
+      closeACollection,
+      setActiveCollection,
     }));
   };
 

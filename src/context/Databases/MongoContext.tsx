@@ -34,6 +34,24 @@ export interface MongoDBContextProps {
   setCreateDialogState?: (
     state: Partial<MongoDBContextProps["createDialogState"]>
   ) => void;
+  openCollections: Array<{
+    dbName: string;
+    collectionName: string;
+    index: number;
+  }>;
+  activeCollection?: string | null;
+  setActiveCollection?: (key: string) => void;
+  openACollection?: (
+    dbName: string,
+    collectionName: string,
+    index?: number | null,
+    duplicate?: boolean
+  ) => void;
+  closeACollection?: (
+    dbName: string,
+    collectionName: string,
+    index: number
+  ) => void;
 }
 
 const MongoDBContext = React.createContext<MongoDBContextProps>({
@@ -47,6 +65,8 @@ const MongoDBContext = React.createContext<MongoDBContextProps>({
     title: "",
     dbName: "",
   },
+  openCollections: [],
+  activeCollection: null,
 });
 
 export default MongoDBContext;

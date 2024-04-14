@@ -1,7 +1,9 @@
 export * from "./mongo.types";
 
 import React from "react";
-import MongoDbConnectionParams from "./mongo.types";
+import MongoDbConnectionParams, {
+  MongoCollectionReference,
+} from "./mongo.types";
 import { SupportedDatabases } from "@/components/common/types";
 
 interface BaseDatabaseState {
@@ -16,7 +18,11 @@ interface BaseDatabaseState {
   connectionParams: DatabaseConfig;
 }
 
-interface MongoDatabaseState extends BaseDatabaseState {}
+interface MongoDatabaseState extends BaseDatabaseState {
+  references?: {
+    [collection: string]: MongoCollectionReference;
+  };
+}
 
 type DatabaseConfig = MongoDbConnectionParams;
 

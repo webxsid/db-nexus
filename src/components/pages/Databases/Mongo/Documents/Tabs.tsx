@@ -21,7 +21,12 @@ const MongoDocumentTabs = () => {
   const changeTab = async (key: string) => {
     console.log(key);
     const [dbName, collectionName, index] = key.split("-");
-    await openACollection(dbName, collectionName, parseInt(index));
+    await openACollection(
+      openCollections,
+      dbName,
+      collectionName,
+      parseInt(index)
+    );
   };
 
   const handleCloseTab = async (

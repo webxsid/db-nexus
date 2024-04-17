@@ -20,14 +20,14 @@ const Row: React.FC<Props> = ({
   stats,
   handleShowDeletePrompt,
 }) => {
-  const { openACollection } =
+  const { openACollection, openCollections } =
     React.useContext<MongoDBContextProps>(MongoDBContext);
   const navigate = useNavigate();
   const { dbName } = useParams<{ dbName: string }>();
 
   const handleRedirectToDocuments = async () => {
     if (openACollection) {
-      await openACollection(dbName!, collection.name);
+      await openACollection(openCollections, dbName!, collection.name);
       navigate(`/database/${SupportedDatabases.MONGO}/documents`);
     } else {
       toast.error("Error redirecting to documents");

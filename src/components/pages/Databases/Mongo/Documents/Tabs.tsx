@@ -21,7 +21,13 @@ const MongoDocumentTabs = () => {
   const changeTab = async (key: string) => {
     console.log(key);
     const [dbName, collectionName, index] = key.split("-");
-    await openACollection(dbName, collectionName, parseInt(index));
+    openACollection &&
+      (await openACollection(
+        openCollections,
+        dbName,
+        collectionName,
+        parseInt(index)
+      ));
   };
 
   const handleCloseTab = async (
@@ -32,7 +38,8 @@ const MongoDocumentTabs = () => {
     if (openCollections.length === 1) {
       navigate(`/database/${SupportedDatabases.MONGO}/databases`);
     }
-    await closeACollection(dbName, collectionName, index);
+    closeACollection &&
+      (await closeACollection(openCollections, dbName, collectionName, index));
   };
 
   return (

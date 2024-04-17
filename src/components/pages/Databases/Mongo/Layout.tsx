@@ -119,17 +119,18 @@ const MongoDBLayout = () => {
   };
 
   const openACollection = (
+    openCollections: MongoDBContextProps["openCollections"],
     dbName: string,
     collectionName: string,
-    index?: number | null = null,
-    duplicate?: boolean = false
+    index: number | null = null,
+    duplicate: boolean = false
   ) => {
     console.log(dbName, collectionName, index, duplicate);
-    let exists = dbContext.openCollections.filter(
+    let exists = openCollections.filter(
       (c) => c.dbName === dbName && c.collectionName === collectionName
     );
     console.log(exists);
-    if (!isNaN(index) && index !== null) {
+    if (index !== null && !isNaN(index)) {
       exists = exists.filter((c) => c.index === index);
       console.log(exists);
     }
@@ -147,7 +148,7 @@ const MongoDBLayout = () => {
         setDbContext((prev) => ({
           ...prev,
           openCollections: [
-            ...prev.openCollections,
+            ...openCollections,
             { dbName, collectionName, index: newIndex },
           ],
           activeCollection: `${dbName}-${collectionName}-${newIndex}`,
@@ -157,7 +158,7 @@ const MongoDBLayout = () => {
       setDbContext((prev) => ({
         ...prev,
         openCollections: [
-          ...prev.openCollections,
+          ...openCollections,
           { dbName, collectionName, index: 0 },
         ],
         activeCollection: `${dbName}-${collectionName}-0`,
@@ -166,17 +167,18 @@ const MongoDBLayout = () => {
   };
 
   const closeACollection = (
+    openCollections: MongoDBContextProps["openCollections"],
     dbName: string,
     collectionName: string,
     index: number
   ) => {
-    const currentIndex = dbContext.openCollections.findIndex(
+    const currentIndex = openCollections.findIndex(
       (c) =>
         c.dbName === dbName &&
         c.collectionName === collectionName &&
         c.index === index
     );
-    const newCollections = dbContext.openCollections.filter(
+    const newCollections = openCollections.filter(
       (c) =>
         c.dbName !== dbName ||
         c.collectionName !== collectionName ||
@@ -185,7 +187,7 @@ const MongoDBLayout = () => {
     const newActiveCollection =
       dbContext.activeCollection === `${dbName}-${collectionName}-${index}`
         ? newCollections.length > 0
-          ? newCollections[currentIndex]
+          ? `${newCollections[currentIndex]?.dbName}-${newCollections[currentIndex]?.collectionName}-${newCollections[currentIndex]?.index}`
           : null
         : dbContext.activeCollection;
     setDbContext((prev) => ({

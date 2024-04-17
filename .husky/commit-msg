@@ -46,7 +46,7 @@ commit_msg_file="$1"
 commit_msg=$(cat "$commit_msg_file")
 
 # Define the commit message prefix patterns
-feat_prefixes="(Add|Change|Update|Refactor|Remove|Fix|Optimize|Test|Doc|Style|Chore):"
+feat_prefixes="(Add|Change|Update|Refactor|Remove|Fix|Optimize|Test|Doc|Style|Chore|Branching):"
 fix_prefixes="(Fix|Update|Refactor|Remove|Test|Doc|Style|Chore):"
 hotfix_prefixes="(Fix|Update|Refactor|Remove|Test|Doc|Style|Chore):"
 release_prefix="Release:"

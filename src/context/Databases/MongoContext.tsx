@@ -42,12 +42,14 @@ export interface MongoDBContextProps {
   activeCollection?: string | null;
   setActiveCollection?: (key: string) => void;
   openACollection?: (
+    openCollections: MongoDBContextProps["openCollections"],
     dbName: string,
     collectionName: string,
     index?: number | null,
     duplicate?: boolean
   ) => void;
   closeACollection?: (
+    openCollections: MongoDBContextProps["openCollections"],
     dbName: string,
     collectionName: string,
     index: number

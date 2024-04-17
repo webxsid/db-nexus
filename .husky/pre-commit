@@ -38,17 +38,6 @@ spinner() {
   printf "    \b\b\b\b"
 }
 
-# Get the current commit message
-commit_msg_file="$1"
-commit_msg=$(cat "$commit_msg_file")
-
-# check if the commit message contains the word 'WIP' | 'wip' | 'Debug' | 'debug' | Debugging' | 'debugging' | 'Branching' | 'branching'
-pattern="(WIP|wip|Debug|debug|Debugging|debugging|Branching|branching)"
-if [[ "$commit_msg" =~ $pattern ]]; then
-  show_warning "Skipping pre-commit checks for commit message containing 'WIP', 'Debug', or 'Branching'."
-  exit 0
-fi
-
 echo -e "${CYAN}Running linting, build, and formatting checks...${NC}"
 
 # Run linting using yarn lint

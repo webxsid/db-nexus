@@ -122,15 +122,15 @@ const MongoDBLayout = () => {
     openCollections: MongoDBContextProps["openCollections"],
     dbName: string,
     collectionName: string,
-    index?: number | null = null,
-    duplicate?: boolean = false
+    index: number | null = null,
+    duplicate: boolean = false
   ) => {
     console.log(dbName, collectionName, index, duplicate);
     let exists = openCollections.filter(
       (c) => c.dbName === dbName && c.collectionName === collectionName
     );
     console.log(exists);
-    if (!isNaN(index) && index !== null) {
+    if (index !== null && !isNaN(index)) {
       exists = exists.filter((c) => c.index === index);
       console.log(exists);
     }

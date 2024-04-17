@@ -187,7 +187,7 @@ const MongoDBLayout = () => {
     const newActiveCollection =
       dbContext.activeCollection === `${dbName}-${collectionName}-${index}`
         ? newCollections.length > 0
-          ? newCollections[currentIndex]
+          ? `${newCollections[currentIndex]?.dbName}-${newCollections[currentIndex]?.collectionName}-${newCollections[currentIndex]?.index}`
           : null
         : dbContext.activeCollection;
     setDbContext((prev) => ({

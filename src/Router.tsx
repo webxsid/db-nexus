@@ -1,10 +1,11 @@
+/* eslint-disable react/react-in-jsx-scope */
 import { createHashRouter } from "react-router-dom";
-import Home from "./pages/Home";
-import MongoDatabases from "./pages/Databases/Mongo/Databases";
-import MongoCollections from "./pages/Databases/Mongo/Collections";
-import MongoDocuments from "./pages/Databases/Mongo/Documents";
-import MongoDBLayout from "./components/pages/Databases/Mongo/Layout";
 import { SupportedDatabases } from "./components/common/types";
+import MongoDBLayout from "./components/pages/Databases/Mongo/Layout";
+import MongoCollections from "./pages/Databases/Mongo/Collections";
+import MongoDatabases from "./pages/Databases/Mongo/Databases";
+import MongoDocuments from "./pages/Databases/Mongo/Documents";
+import Home from "./pages/Home";
 
 const Router = createHashRouter(
   [
@@ -13,33 +14,28 @@ const Router = createHashRouter(
       element: <Home />,
     },
     {
-      path: "/database",
+      path: SupportedDatabases.MONGO,
+      element: <MongoDBLayout />,
       children: [
         {
-          path: SupportedDatabases.MONGO,
-          element: <MongoDBLayout />,
-          children: [
-            {
-              path: "databases",
-              index: true,
-              element: <MongoDatabases />,
-            },
-            {
-              path: ":dbName/collections",
-              element: <MongoCollections />,
-            },
-            {
-              path: "documents",
-              element: <MongoDocuments />,
-            },
-          ],
+          path: "",
+          index: true,
+          element: <MongoDatabases />,
+        },
+        {
+          path: ":dbName/collections",
+          element: <MongoCollections />,
+        },
+        {
+          path: "documents",
+          element: <MongoDocuments />,
         },
       ],
     },
   ],
   {
     basename: "/",
-  }
+  },
 );
 
 export default Router;

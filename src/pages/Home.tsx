@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Box, Typography, Button } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import { filterReducer, filterInitialState } from "@/local-store/reducers";
 import Header from "@/components/pages/Home/Header";
 import DatabaseSection from "@/components/pages/Home/Databases";

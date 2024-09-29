@@ -1,11 +1,11 @@
 import React from "react";
 
-interface RenderProps {
+interface IRenderProps {
   if: boolean | (() => boolean);
   then: React.ReactNode;
   else?: React.ReactNode;
 }
-const Render: React.FC<RenderProps> = ({
+const Render: React.FC<IRenderProps> = ({
   if: condition,
   then,
   else: otherwise,

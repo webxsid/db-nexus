@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router";
-import { Box } from "@mui/material";
+import { Box, Divider } from "@mui/material";
 import MongoDBContext, {
   MongoDBContextProps,
 } from "@/context/Databases/MongoContext";
@@ -23,15 +23,14 @@ const MongoDocuments = () => {
         gap: 2,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          gap: 2,
-          justifyContent: "flex-start",
-          alignItems: "center",
-        }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         <MongoDocumentTabs />
+        <Divider
+          sx={{
+            borderWidth: 2,
+            transform: "translateY(-3px)",
+          }}
+        />
       </Box>
     </Box>
   );

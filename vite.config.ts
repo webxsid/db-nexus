@@ -1,9 +1,11 @@
+import react from "@vitejs/plugin-react";
 import { rmSync } from "node:fs";
 import path from "node:path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import electron from "vite-plugin-electron/simple";
+import json5 from "vite-plugin-json5";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import tsconfigPaths from "vite-tsconfig-paths";
 import pkg from "./package.json";
 
 // https://vitejs.dev/config/
@@ -20,6 +22,8 @@ export default defineConfig(({ command }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
+        "@main": path.resolve(__dirname, "main"),
+        "@shared": path.resolve(__dirname, "shared"),
       },
     },
     optimizeDeps: {
@@ -27,14 +31,21 @@ export default defineConfig(({ command }) => {
     },
     plugins: [
       react(),
+      json5(),
+      tsconfigPaths(),
       electron({
         main: {
           entry: "main/index.ts",
           onstart(args) {
+            console.log(
+              "tsconfig paths:",
+              require("./tsconfig.json").compilerOptions.paths,
+            );
             console.log("Electron started with args:", args);
             args.startup();
           },
           vite: {
+            plugins: [tsconfigPaths(), json5()],
             define: {
               "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
             },
@@ -44,9 +55,9 @@ export default defineConfig(({ command }) => {
               outDir: "app",
               emptyOutDir: true,
               rollupOptions: {
-                external: Object.keys(
-                  "dependencies" in pkg ? pkg.dependencies : {}
-                ),
+                external: [
+                  ...Object.keys("dependencies" in pkg ? pkg.dependencies : {}),
+                ],
               },
             },
           },

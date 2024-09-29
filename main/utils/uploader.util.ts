@@ -1,8 +1,8 @@
 import { app } from "electron";
-import path from "path";
 import fs from "fs";
+import path from "path";
 
-const getOSAppDataPath = () => {
+const getOSAppDataPath = (): string => {
   const appDirPath = path.join(app.getPath("appData"), app.name);
 
   if (!fs.existsSync(appDirPath)) {
@@ -12,7 +12,7 @@ const getOSAppDataPath = () => {
   return appDirPath;
 };
 
-const uploadFile = async (filePath: string) => {
+const uploadFile = async (filePath: string): string => {
   const appDataPath = getOSAppDataPath();
   const targetDir = path.join(appDataPath, "uploads");
   if (!fs.existsSync(targetDir)) {
@@ -23,8 +23,8 @@ const uploadFile = async (filePath: string) => {
   return targetPath;
 };
 
-const removeFile = (filePath: string) => {
+const removeFile = (filePath: string): void => {
   fs.unlinkSync(filePath);
 };
 
-export { uploadFile, getOSAppDataPath, removeFile };
+export { getOSAppDataPath, removeFile, uploadFile };

@@ -1,14 +1,14 @@
-import ThemeState from "./theme.types";
-import DatabaseState from "./database";
+import IDatabaseState from "./database";
 import LoadingState from "./loading.types";
-export * from "./theme.types";
+import ThemeState from "./theme.types";
 export * from "./database";
 export * from "./loading.types";
+export * from "./theme.types";
 
-interface RootState {
+interface IRootState {
   theme: ThemeState;
-  database: DatabaseState;
+  database: IDatabaseState;
   loading: LoadingState;
 }
 
-export default RootState;
+export default IRootState;

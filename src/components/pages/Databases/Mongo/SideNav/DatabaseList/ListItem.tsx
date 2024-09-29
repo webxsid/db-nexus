@@ -24,7 +24,7 @@ import MongoDBContext, {
   MongoDBContextProps,
 } from "@/context/Databases/MongoContext";
 import { GetObjectReturnType } from "@/helpers/types";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { SupportedDatabases } from "@/components/common/types";
 import { toast } from "react-toastify";
 
@@ -41,8 +41,14 @@ const ListItem: React.FC<Props> = ({
   open,
   toggleShowCollections,
 }) => {
-  const { getCollections, collections, getCollectionsStats } =
-    React.useContext<MongoDBContextProps>(MongoDBContext);
+  const {
+    getCollections,
+    collections,
+    getCollectionsStats,
+    openCollections,
+    openACollection,
+    activeCollection,
+  } = React.useContext<MongoDBContextProps>(MongoDBContext);
   const [dbCollections, setDbCollections] = React.useState<
     GetObjectReturnType<typeof collections>
   >([]);
@@ -53,16 +59,17 @@ const ListItem: React.FC<Props> = ({
     string | null
   >(null);
   const navigate = useNavigate();
-  const params = useParams();
 
-  const getSelectedDB = React.useCallback(() => {
-    if (params?.dbName) setSelectedDB(params.dbName);
-    else setSelectedDB(null);
-  }, [params]);
-  const getSelectedCollection = React.useCallback(() => {
-    if (params?.collectionName) setSelectedCollection(params.collectionName);
-    else setSelectedCollection(null);
-  }, [params]);
+  const getSelectedDbAndCollection = React.useCallback(() => {
+    if (!activeCollection || !activeCollection?.length) {
+      setSelectedDB(null);
+      setSelectedCollection(null);
+      return;
+    }
+    const [dbName, collectionName] = activeCollection.split("-");
+    setSelectedDB(dbName);
+    setSelectedCollection(collectionName);
+  }, [activeCollection]);
 
   const handleToggle = () => {
     if (!open) {
@@ -90,22 +97,29 @@ const ListItem: React.FC<Props> = ({
     }
   };
 
+  const navigateToCollection = async (collectionName: string) => {
+    openACollection && openACollection(openCollections, db, collectionName);
+    navigate(`/database/${SupportedDatabases.MONGO}/documents`);
+  };
+
   React.useEffect(() => {
     if (collections) {
-      let dbCollections = collections[db];
+      console.log(collections);
+      let dbCollections = collections[db]?.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
       if (collectionSearchText?.length > 3) {
-        dbCollections = dbCollections.filter((collection) =>
+        dbCollections = dbCollections?.filter((collection) =>
           collection.name.includes(collectionSearchText)
         );
       }
       setDbCollections(dbCollections);
     }
-  }, [collections, db, collectionSearchText]);
+  }, [collections, db, collectionSearchText, selectedCollection]);
 
   React.useEffect(() => {
-    getSelectedDB();
-    getSelectedCollection();
-  }, [getSelectedDB, getSelectedCollection]);
+    getSelectedDbAndCollection();
+  }, [getSelectedDbAndCollection]);
 
   return (
     <React.Fragment key={db}>
@@ -197,6 +211,7 @@ const ListItem: React.FC<Props> = ({
                   pl: 5,
                 }}
                 selected={selectedCollection === collection.name}
+                onClick={() => navigateToCollection(collection.name)}
               >
                 <ListItemIcon
                   sx={{

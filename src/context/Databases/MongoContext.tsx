@@ -38,6 +38,7 @@ export interface MongoDBContextProps {
     dbName: string;
     collectionName: string;
     index: number;
+    id: string;
   }>;
   activeCollection?: string | null;
   setActiveCollection?: (key: string) => void;
@@ -46,13 +47,16 @@ export interface MongoDBContextProps {
     dbName: string,
     collectionName: string,
     index?: number | null,
+    id?: string | null,
     duplicate?: boolean
   ) => void;
   closeACollection?: (
     openCollections: MongoDBContextProps["openCollections"],
-    dbName: string,
-    collectionName: string,
-    index: number
+    id: string
+  ) => void;
+  duplicateOpenCollection?: (
+    openCollections: MongoDBContextProps["openCollections"],
+    id: string
   ) => void;
 }
 

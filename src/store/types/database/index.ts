@@ -1,12 +1,12 @@
 export * from "./mongo.types";
 
+import { SupportedDatabases } from "@/components/common/types";
 import React from "react";
 import MongoDbConnectionParams, {
   MongoCollectionReference,
 } from "./mongo.types";
-import { SupportedDatabases } from "@/components/common/types";
 
-interface BaseDatabaseState {
+interface IBaseDatabaseState {
   id: string;
   name?: string;
   icon?: React.ReactNode;
@@ -15,23 +15,31 @@ interface BaseDatabaseState {
   provider: SupportedDatabases;
   createdAt?: Date;
   lastConnectionAt?: Date;
-  connectionParams: DatabaseConfig;
+  connectionParams: TDatabaseConfig;
 }
 
-interface MongoDatabaseState extends BaseDatabaseState {
+interface IMongoDatabaseState extends IBaseDatabaseState {
   references?: {
     [collection: string]: MongoCollectionReference;
   };
 }
 
-type DatabaseConfig = MongoDbConnectionParams;
+type TDatabaseConfig = MongoDbConnectionParams;
 
-type Databases = Array<MongoDatabaseState>;
+type TDatabase = IMongoDatabaseState;
 
-interface DatabaseState {
-  mongo: Array<MongoDatabaseState>;
+type TDatabases = TDatabase[];
+
+interface IDatabaseState {
+  mongo: IMongoDatabaseState[];
 }
 
-export { MongoDatabaseState, BaseDatabaseState, Databases, DatabaseConfig };
+export {
+  IBaseDatabaseState as BaseDatabaseState,
+  TDatabaseConfig as DatabaseConfig,
+  TDatabases as Databases,
+  IMongoDatabaseState as MongoDatabaseState,
+  TDatabase,
+};
 
-export default DatabaseState;
+export default IDatabaseState;

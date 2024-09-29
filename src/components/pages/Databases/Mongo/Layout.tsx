@@ -118,16 +118,42 @@ const MongoDBLayout = () => {
     }));
   };
 
+  const duplicateOpenCollection = (
+    openCollections: MongoDBContextProps["openCollections"],
+    id: string
+  ) => {
+    const currentIndex = openCollections.findIndex((c) => c.id === id);
+    if (currentIndex === -1) return;
+    const currentCollection = openCollections[currentIndex];
+    const newId = new Date().getTime().toString();
+    setDbContext((prev) => ({
+      ...prev,
+      openCollections: [
+        ...openCollections,
+        {
+          dbName: currentCollection.dbName,
+          collectionName: currentCollection.collectionName,
+          index: currentCollection.index + 1,
+          id: newId,
+        },
+      ],
+      activeCollection: newId,
+    }));
+  };
+
   const openACollection = (
     openCollections: MongoDBContextProps["openCollections"],
     dbName: string,
     collectionName: string,
     index: number | null = null,
+    id: string | null = null,
     duplicate: boolean = false
   ) => {
     console.log(dbName, collectionName, index, duplicate);
     let exists = openCollections.filter(
-      (c) => c.dbName === dbName && c.collectionName === collectionName
+      (c) =>
+        c.id === id ||
+        (c.dbName === dbName && c.collectionName === collectionName)
     );
     console.log(exists);
     if (index !== null && !isNaN(index)) {
@@ -136,60 +162,36 @@ const MongoDBLayout = () => {
     }
     if (exists?.length > 0) {
       if (!duplicate) {
-        setDbContext((prev) => ({
-          ...prev,
-          activeCollection: `${dbName}-${collectionName}-${exists[0].index}`,
-        }));
+        setActiveCollection(exists[0].id);
       } else {
-        const newIndex = exists.reduce(
-          (acc, curr) => (curr.index > acc ? curr.index : acc),
-          0
-        );
-        setDbContext((prev) => ({
-          ...prev,
-          openCollections: [
-            ...openCollections,
-            { dbName, collectionName, index: newIndex },
-          ],
-          activeCollection: `${dbName}-${collectionName}-${newIndex}`,
-        }));
+        duplicateOpenCollection(openCollections, exists[0].id);
       }
     } else {
+      const id = new Date().getTime().toString();
       setDbContext((prev) => ({
         ...prev,
         openCollections: [
           ...openCollections,
-          { dbName, collectionName, index: 0 },
+          { dbName, collectionName, index: 0, id },
         ],
-        activeCollection: `${dbName}-${collectionName}-0`,
+        activeCollection: id,
       }));
     }
   };
 
   const closeACollection = (
     openCollections: MongoDBContextProps["openCollections"],
-    dbName: string,
-    collectionName: string,
-    index: number
+    id: string
   ) => {
-    const currentIndex = openCollections.findIndex(
-      (c) =>
-        c.dbName === dbName &&
-        c.collectionName === collectionName &&
-        c.index === index
-    );
-    const newCollections = openCollections.filter(
-      (c) =>
-        c.dbName !== dbName ||
-        c.collectionName !== collectionName ||
-        c.index !== index
-    );
+    const currentIndex = openCollections.findIndex((c) => c.id === id);
+    if (currentIndex === -1) return;
+    const newCollections = openCollections.filter((c) => c.id !== id);
     const newActiveCollection =
-      dbContext.activeCollection === `${dbName}-${collectionName}-${index}`
-        ? newCollections.length > 0
-          ? `${newCollections[currentIndex]?.dbName}-${newCollections[currentIndex]?.collectionName}-${newCollections[currentIndex]?.index}`
-          : null
-        : dbContext.activeCollection;
+      newCollections.length > 0
+        ? newCollections[currentIndex]
+          ? newCollections[currentIndex].id
+          : newCollections[newCollections.length - 1].id
+        : null;
     setDbContext((prev) => ({
       ...prev,
       openCollections: newCollections,
@@ -216,6 +218,7 @@ const MongoDBLayout = () => {
       openACollection,
       closeACollection,
       setActiveCollection,
+      duplicateOpenCollection,
     }));
   };
 

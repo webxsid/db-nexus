@@ -1,13 +1,14 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, nativeImage } from "electron";
 import { kDefaultWindowHeight, kDefaultWindowWidth } from "../constants";
 import { CoreIPCListeners, MongoIPCListeners } from "../ipc-listeners";
-import { PathManager } from "../managers";
+import { FileManager, PathManager } from "../managers";
 
 export class MainWindow {
   private _window: BrowserWindow;
 
   constructor(
     private readonly _pathManager: PathManager = new PathManager(),
+    private readonly _fileManager: FileManager = new FileManager(),
     private readonly _mongoIpcListener: MongoIPCListeners = new MongoIPCListeners(),
     private readonly _coreIpcListener: CoreIPCListeners = new CoreIPCListeners(),
   ) {}
@@ -34,10 +35,14 @@ export class MainWindow {
   }
 
   private _createWindow(): void {
+    const icon = nativeImage.createFromPath(this._fileManager.IconFile);
+    // const tray = new Tray(icon);
+    console.log("Icon", icon);
     try {
       this._window = new BrowserWindow({
         width: kDefaultWindowWidth,
         height: kDefaultWindowHeight,
+        icon,
         webPreferences: {
           nodeIntegration: true,
           preload: this._pathManager.MainWindowPreloadPath,

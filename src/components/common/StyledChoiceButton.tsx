@@ -1,14 +1,14 @@
-import React from "react";
 import { Button, SxProps, Theme, useTheme } from "@mui/material";
+import React from "react";
 
-interface Props {
+export interface IStyledChoiceButtonProps {
   active: boolean;
   sx?: SxProps<Theme>;
   children: React.ReactNode;
   onClick?: () => void;
 }
 
-const StyledChoiceButton: React.FC<Props> = ({
+const StyledChoiceButton: React.FC<IStyledChoiceButtonProps> = ({
   active,
   sx,
   children,
@@ -25,9 +25,10 @@ const StyledChoiceButton: React.FC<Props> = ({
         gap: 1,
         cursor: "pointer",
         backgroundColor: active ? "primary.main" : "background.paper",
-        color: active ? "white" : "primary.main",
+        color: active ? "primary.contrastText" : "primary.main",
         py: 1,
-        borderRadius: 5,
+        borderRadius: 3,
+        px: 3,
         border: 1,
         height: "100%",
         borderColor: "background.paper",

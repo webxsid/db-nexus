@@ -9,8 +9,11 @@
     "baseUrl": "./",
     "paths": {
       "@": ["src/index.ts"],
+      "@/*": ["src/*"],
       "@main": ["main/index.ts"],
-      "@shared": ["shared/index.ts"]
+      "@shared": ["shared/index.ts"],
+      "@shared/*": ["shared/*"],
+      "@assets/*": ["shared/assets/*"]
     },
     "moduleResolution": "node",
     "allowImportingTsExtensions": true,

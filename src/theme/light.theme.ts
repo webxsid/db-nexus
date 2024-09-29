@@ -1,28 +1,41 @@
 import { createTheme } from "@mui/material";
 
-const theme = createTheme({
+const lightTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#FFC107",
+      main: "#546E7A", // A darker pastel gray for the primary accent in light mode
     },
     secondary: {
-      main: "#03A9F4",
+      main: "#121212", // Black or very dark gray for secondary elements
     },
     error: {
-      main: "#D32F2F",
+      main: "#D32F2F", // A slightly less intense error color for light backgrounds
     },
     warning: {
-      main: "#FF5722",
+      main: "#FBC02D", // A softer yellow for visibility in light mode
     },
     success: {
-      main: "#8BC34A",
+      main: "#388E3C", // Slightly darker green for success
     },
     background: {
-      default: "#F0F0F0",
-      paper: "#444444",
+      default: "#F5F5F5", // Light background for default
+      paper: "#FFFFFF", // Pure white for paper (slightly lighter than default background)
+    },
+    text: {
+      primary: "#121212", // Dark text for light backgrounds
+      secondary: "#757575", // Lighter gray for secondary text
+    },
+  },
+
+  components: {
+    MuiTypography: {
+      defaultProps: {
+        color: "textPrimary", // Ensure the text color adapts to the mode
+        fontFamily: "'Fira Code', 'Courier New', monospace", // Keep the same font
+      },
     },
   },
 });
 
-export default theme;
+export default lightTheme;

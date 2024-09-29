@@ -152,4 +152,16 @@ export class FileManager {
     const meta = JSON.parse(metaFileData);
     return meta;
   }
+
+  public get IconFile(): string {
+    const appIconPath = `${this._pathManager.AssetPath}/app-icons`;
+    switch (process.platform) {
+      case "win32":
+        return `${appIconPath}/icon.ico`;
+      case "darwin":
+        return `${appIconPath}/icon.icns`;
+      default:
+        return `${appIconPath}/icon.png`;
+    }
+  }
 }

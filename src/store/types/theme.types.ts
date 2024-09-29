@@ -1,17 +1,22 @@
-interface ThemeState {
+interface IThemeState {
   systemDefault: boolean;
   darkMode: boolean;
 }
 
-enum ThemeActionTypes {
+enum EThemeActionTypes {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   SET_SYSTEM_DEFAULT = "SET_SYSTEM_DEFAULT",
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   SET_DARK_MODE = "SET_DARK_MODE",
 }
 
-interface ThemeAction {
-  type: ThemeActionTypes;
+interface IThemeAction {
+  type: EThemeActionTypes;
   payload: boolean;
 }
 
-export { ThemeActionTypes, ThemeAction };
-export default ThemeState;
+export {
+  IThemeState,
+  IThemeAction as ThemeAction,
+  EThemeActionTypes as ThemeActionTypes,
+};

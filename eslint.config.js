@@ -54,7 +54,6 @@ export default [
     rules: {
       "react/jsx-uses-react": "off",
       "react/jsx-uses-vars": "error",
-      "react/react-in-jsx-scope": "error",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
       "@typescript-eslint/no-unused-vars": [
@@ -94,17 +93,13 @@ export default [
           format: ["PascalCase"],
         },
         {
-          selector: "property",
-          format: ["camelCase", "PascalCase"],
-          leadingUnderscore: "allow",
-        },
-        {
           selector: "method",
           format: ["camelCase", "PascalCase"],
         },
         {
           selector: "parameter",
           format: ["camelCase", "PascalCase"],
+          leadingUnderscore: "allow",
         },
         {
           selector: "interface",

@@ -1,20 +1,23 @@
-import "./App.css";
+import { ReactNode } from "react";
 import { RouterProvider } from "react-router-dom";
-import ThemeWrapper from "./components/wrappers/ThemeWrapper";
-import Router from "./Router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-function App() {
+import "./App.css";
+import { DevToolsWrapper, ThemeWrapper } from "./components/wrappers";
+import Router from "./Router";
+function App(): ReactNode {
   return (
-    <ThemeWrapper>
-      <ToastContainer
-        theme="dark"
-        position="bottom-center"
-        pauseOnFocusLoss={false}
-        hideProgressBar
-      />
-      <RouterProvider router={Router} />
-    </ThemeWrapper>
+    <DevToolsWrapper>
+      <ThemeWrapper>
+        <ToastContainer
+          theme="dark"
+          position="bottom-center"
+          pauseOnFocusLoss={false}
+          hideProgressBar
+        />
+        <RouterProvider router={Router} />
+      </ThemeWrapper>
+    </DevToolsWrapper>
   );
 }
 

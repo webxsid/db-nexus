@@ -1,39 +1,40 @@
-type LoadingStatus = "success" | "error" | "warning" | "info";
-enum LoadingActionTypes {
+/* eslint-disable @typescript-eslint/naming-convention */
+type TLoadingStatus = "success" | "error" | "warning" | "info";
+enum ELoadingActionTypes {
   START_LOADING = "START_LOADING",
   STOP_LOADING = "STOP_LOADING",
 }
 
-interface StartLoadingPayload {
-  reason: string;
+interface IStartLoadingPayload {
+  r;
   message: string;
 }
 
-interface StopLoadingPayload {
+interface IStopLoadingPayload {
   reason: string;
   message?: string;
-  status: LoadingStatus;
+  status: TLoadingStatus;
 }
 
-type LoadingPayload = StartLoadingPayload | StopLoadingPayload;
+type TLoadingPayload = IStartLoadingPayload | IStopLoadingPayload;
 
-interface LoadingAction {
-  type: LoadingActionTypes;
-  payload: LoadingPayload;
+interface ILoadingAction {
+  type: ELoadingActionTypes;
+  payload: TLoadingPayload;
 }
 
-interface LoadingState {
+interface ILoadingState {
   active: boolean;
   reason: string;
   message: string;
 }
 
 export {
-  LoadingActionTypes,
-  LoadingAction,
-  StartLoadingPayload,
-  StopLoadingPayload,
-  LoadingPayload,
-  LoadingStatus,
+  ELoadingActionTypes,
+  ILoadingAction,
+  ILoadingState,
+  IStartLoadingPayload,
+  IStopLoadingPayload,
+  TLoadingPayload,
+  TLoadingStatus,
 };
-export default LoadingState;

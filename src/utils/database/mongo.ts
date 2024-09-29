@@ -1,14 +1,15 @@
-import MongoDbConnectionParams, {
-  MongoPasswordAuthMechanism,
-  MongoProxyMethod,
-  MongoReadPreference,
-  MongoScheme,
-} from "@/store/types/database/mongo.types";
+import {
+  IMongoConnectionParams,
+  TMongoPasswordAuthMechanism,
+  TMongoProxyMethod,
+  TMongoReadPreference,
+  TMongoScheme,
+} from "@shared";
 import qs from "query-string";
 import { toast } from "react-toastify";
-import { object, string, number, array, boolean } from "yup";
+import { array, boolean, number, object, string } from "yup";
 
-const mongoConnectionInit: MongoDbConnectionParams = {
+const mongoConnectionInit: IMongoConnectionParams = {
   general: {
     scheme: "mongodb",
     hosts: ["localhost:27017"],
@@ -31,7 +32,9 @@ const mongoConnectionInit: MongoDbConnectionParams = {
   },
 };
 
-const mongoParamsValidator = (config: MongoDbConnectionParams) => {
+const mongoParamsValidator = (
+  config: IMongoConnectionParams,
+): IMongoConnectionParams => {
   const schema = object({
     general: object({
       scheme: string()
@@ -111,7 +114,7 @@ const mongoParamsValidator = (config: MongoDbConnectionParams) => {
     advanced: object({
       readPreference: string()
         .matches(
-          /Default|Primary|PrimaryPreferred|Secondary|SecondaryPreferred|Nearest/
+          /Default|Primary|PrimaryPreferred|Secondary|SecondaryPreferred|Nearest/,
         )
         .required(),
       replicaSet: string(),
@@ -131,7 +134,7 @@ const mongoParamsValidator = (config: MongoDbConnectionParams) => {
   return schema.validate(config);
 };
 
-const mongoURIGenerator = async (config: MongoDbConnectionParams) => {
+const mongoURIGenerator = async (config: IMongoConnectionParams): string => {
   const { general, auth, tls, proxy, advanced } = config;
   const { scheme, hosts, directConnection } = general;
   const { method, passwordParams } = auth;
@@ -219,22 +222,22 @@ const mongoURIGenerator = async (config: MongoDbConnectionParams) => {
   return finalURI;
 };
 
-const mongoConfigParser = async (uri: string) => {
+const mongoConfigParser = async (uri: string): IMongoConnectionParams => {
   const parsed = qs.parse(uri);
   const scheme = uri.split("://")[0];
   const hosts = uri.split("://")[1].split("/")[0].split(",");
   const { directConnection } = parsed;
-  const auth: MongoDbConnectionParams["auth"] = {
+  const auth: IMongoConnectionParams["auth"] = {
     method: parsed.authMechanism ? "password" : "none",
     passwordParams: {
       username: uri.split("://")[1]?.split("@")[1]?.split(":")[0] || "",
       password:
         uri.split("://")[1]?.split("@")[1]?.split(":")[1]?.split("@")[0] || "",
       authDb: parsed.authSource as string,
-      authMechanism: parsed.authMechanism as MongoPasswordAuthMechanism,
+      authMechanism: parsed.authMechanism as TMongoPasswordAuthMechanism,
     },
   };
-  const tls: MongoDbConnectionParams["tls"] = {
+  const tls: IMongoConnectionParams["tls"] = {
     state: parsed.tls ? "Enabled" : "Default",
     tlsParams: {
       tlsCAFile: parsed.tlsCAFile as string,
@@ -246,8 +249,8 @@ const mongoConfigParser = async (uri: string) => {
     invalidHostNameAllowed: parsed.tlsAllowInvalidHostnames === "true",
     invalidCertificateAllowed: parsed.tlsAllowInvalidCertificates === "true",
   };
-  const proxy: MongoDbConnectionParams["proxy"] = {
-    method: (parsed.proxyHost as MongoProxyMethod) ? "Socks5" : "None",
+  const proxy: IMongoConnectionParams["proxy"] = {
+    method: (parsed.proxyHost as TMongoProxyMethod) ? "Socks5" : "None",
     proxyParams: {
       proxyHost: parsed.proxyHost as string,
       proxyPort: parsed.proxyPort ? parseInt(parsed.proxyPort as string) : 0,
@@ -255,8 +258,9 @@ const mongoConfigParser = async (uri: string) => {
       proxyPassword: parsed.proxyPassword as string,
     },
   };
-  const advanced: MongoDbConnectionParams["advanced"] = {
-    readPreference: (parsed.readPreference as MongoReadPreference) || "Default",
+  const advanced: IMongoConnectionParams["advanced"] = {
+    readPreference:
+      (parsed.readPreference as TMongoReadPreference) || "Default",
     replicaSet: parsed.replicaSet as string,
     authSource: parsed.authSource as string,
     serverSelectionTimeout: parsed.serverSelectionTimeout
@@ -289,7 +293,7 @@ const mongoConfigParser = async (uri: string) => {
   try {
     await mongoParamsValidator({
       general: {
-        scheme: scheme as MongoScheme,
+        scheme: scheme as TMongoScheme,
         hosts,
         directConnection: directConnection === "true" ? true : false,
       },
@@ -300,7 +304,7 @@ const mongoConfigParser = async (uri: string) => {
     });
     return {
       general: {
-        scheme: scheme as MongoScheme,
+        scheme: scheme as TMongoScheme,
         hosts,
         directConnection: directConnection === "true" ? true : false,
       },
@@ -316,8 +320,8 @@ const mongoConfigParser = async (uri: string) => {
 };
 
 export {
+  mongoConfigParser,
   mongoConnectionInit,
   mongoParamsValidator,
   mongoURIGenerator,
-  mongoConfigParser,
 };

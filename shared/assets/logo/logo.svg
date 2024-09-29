@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <!-- White background filling the entire square -->
+    <rect x="5" y="5" width="90" height="90" rx="15" ry="15" fill="white"/>
+    
+    <!-- Main square with rounded corners -->
+    <rect x="5" y="5" width="90" height="90" rx="15" ry="15" fill="none" stroke="black" stroke-width="3"/>
+    
+    <!-- Database icon group -->
+    <g transform="translate(25, 25)">
+      <!-- Bottom cylinder of database -->
+      <path d="M0 12.5C0 5.596 11.193 0 25 0s25 5.596 25 12.5v25C50 44.404 38.807 50 25 50S0 44.404 0 37.5v-25z" fill="white" stroke="black" stroke-width="3"/>
+      
+      <!-- Top ellipse of database -->
+      <ellipse cx="25" cy="12.5" rx="25" ry="12.5" fill="white" stroke="black" stroke-width="3"/>
+      
+      <!-- Middle section line -->
+      <path d="M0 25C0 31.904 11.193 37.5 25 37.5s25-5.596 25-12.5" fill="none" stroke="black" stroke-width="3"/>
+      
+      <!-- Subtle shading -->
+      <path d="M5 12.5C5 17.5 13.954 21.5 25 21.5s20-4 20-9" fill="none" stroke="#d0d0d0" stroke-width="2"/>
+    </g>
+    
+    <!-- Sparkle in top-right corner -->
+    <path d="M85 15 L87 17 L89 15 L87 13 Z M83 15 L85 17 L87 15 L85 13 Z M87 13 L89 15 L87 17 L85 15 Z" fill="black"/>
+  </svg>

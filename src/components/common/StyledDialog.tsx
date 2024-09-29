@@ -1,17 +1,17 @@
-import React from "react";
 import {
   Dialog,
   DialogProps,
-  useTheme,
   DialogTitle,
   Divider,
+  useTheme,
 } from "@mui/material";
+import React from "react";
 
-interface Props extends DialogProps {
+interface IProps extends DialogProps {
   children: React.ReactNode;
   title?: string;
 }
-const StyledDialog: React.FC<Props> = ({ children, title, ...rest }) => {
+const StyledDialog: React.FC<IProps> = ({ children, title, ...rest }) => {
   const theme = useTheme();
   return (
     <Dialog

@@ -1,17 +1,19 @@
-import React from "react";
-import { Grid, Box } from "@mui/material";
-import { filterReducer, filterInitialState } from "@/local-store/reducers";
+import { HomeCommandCentre } from "@/components/common/CommandCentre";
+import {
+  AddMongoDbConnectionDialog,
+  SelectConnectionProviderDialog,
+} from "@/components/pages/Home";
 import Header from "@/components/pages/Home/Header";
-import DatabaseSection from "@/components/pages/Home/Databases";
-import DatabaseAddDialog from "@/components/pages/Home/Databases/AddDIalog";
+import { filterInitialState, filterReducer } from "@/local-store/reducers";
+import { Box, Grid } from "@mui/material";
+import React, { ReactNode } from "react";
+import { Helmet } from "react-helmet-async";
 
-const Home = () => {
+const Home = (): ReactNode => {
   const [filterState, filterDispatch] = React.useReducer(
     filterReducer,
-    filterInitialState
+    filterInitialState,
   );
-  const [openAddDatabaseDialog, setOpenAddDatabaseDialog] =
-    React.useState<boolean>(false);
 
   return (
     <Grid
@@ -21,6 +23,12 @@ const Home = () => {
       height="100%"
       width="100vw"
     >
+      <Helmet>
+        <title>DB Nexus - Home</title>
+      </Helmet>
+      <HomeCommandCentre />
+      <SelectConnectionProviderDialog />
+      <AddMongoDbConnectionDialog />
       <Grid
         xs={12}
         item
@@ -30,8 +38,6 @@ const Home = () => {
           zIndex: 100,
           top: 0,
           left: 0,
-          py: 2,
-          px: 2.5,
         }}
       >
         <Header filterState={filterState} filterDispatch={filterDispatch} />
@@ -57,16 +63,7 @@ const Home = () => {
             borderRadius: 5,
             padding: 4,
           }}
-        >
-          <DatabaseAddDialog
-            open={openAddDatabaseDialog}
-            handleClose={() => setOpenAddDatabaseDialog(false)}
-          />
-          <DatabaseSection
-            filterState={filterState}
-            openAddDBDialog={() => setOpenAddDatabaseDialog(true)}
-          />
-        </Box>
+        ></Box>
       </Grid>
     </Grid>
   );

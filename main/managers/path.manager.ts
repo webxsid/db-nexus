@@ -10,13 +10,14 @@ export class PathManager {
   private _basePreloadPath: string = path.resolve(
     global.__dirname,
     "..",
-    "src",
     "pre-loaders",
   );
 
   private _baseUrl = isDev
     ? "http://localhost:3300#/"
     : `file://${path.join(global.__dirname, "../dist/index.html")}#/`;
+
+  private _assetPath = path.resolve(global.__dirname, "..", "shared", "assets");
 
   constructor() {
     this._appDataPath = getOSAppDataPath();
@@ -44,5 +45,9 @@ export class PathManager {
 
   public get AppDataPath(): string {
     return this._appDataPath;
+  }
+
+  public get AssetPath(): string {
+    return this._assetPath;
   }
 }

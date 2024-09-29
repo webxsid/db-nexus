@@ -24,6 +24,7 @@ export default defineConfig(({ command }) => {
         "@": path.resolve(__dirname, "src"),
         "@main": path.resolve(__dirname, "main"),
         "@shared": path.resolve(__dirname, "shared"),
+        "@assets": path.resolve(__dirname, "shared/assets"),
       },
     },
     optimizeDeps: {

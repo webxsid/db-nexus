@@ -1,14 +1,12 @@
-import IDatabaseState from "./database";
-import LoadingState from "./loading.types";
-import ThemeState from "./theme.types";
-export * from "./database";
+import { ILoadingState } from "./loading.types";
+import { IThemeState } from "./theme.types";
+export * from "./dialogs.types";
 export * from "./loading.types";
 export * from "./theme.types";
 
 interface IRootState {
-  theme: ThemeState;
-  database: IDatabaseState;
-  loading: LoadingState;
+  theme: IThemeState;
+  loading: ILoadingState;
 }
 
 export default IRootState;

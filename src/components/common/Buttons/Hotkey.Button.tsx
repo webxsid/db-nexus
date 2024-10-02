@@ -1,4 +1,4 @@
-import { useKeybindingManager } from "@/managers";
+import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
 import { Button, ButtonProps, Tooltip } from "@mui/material";
 import React, { useEffect } from "react";
 
@@ -16,19 +16,17 @@ export const HotkeyButton: React.FC<IHotkeyButtonProps> = ({
   children,
   ...props
 }) => {
-  const { registerKeybinding, unregisterKeybinding, getKeyComboIcons } =
-    useKeybindingManager();
   useEffect(() => {
     if (!keyBindings) return;
 
     // Register keybindings using the keybinding manager
-    registerKeybinding(keyBindings, onClick);
+    KeybindingManager.registerKeybinding(keyBindings, onClick);
 
     // Cleanup keybindings on component unmount
     return () => {
-      unregisterKeybinding(keyBindings, onClick);
+      KeybindingManager.unregisterKeybinding(keyBindings, onClick);
     };
-  }, [keyBindings, onClick, registerKeybinding, unregisterKeybinding]);
+  }, [keyBindings, onClick]);
 
   return (
     <Tooltip title={`${props.tooltip} (${keyBindings[0]})`} arrow>
@@ -36,7 +34,7 @@ export const HotkeyButton: React.FC<IHotkeyButtonProps> = ({
         {...props}
         onClick={onClick}
         endIcon={
-          props.showhotkey ? getKeyComboIcons(keyBindings[0], "small") : null
+          props.showhotkey ? <KeyCombo keyCombo={keyBindings[0]} /> : null
         }
       >
         {children}

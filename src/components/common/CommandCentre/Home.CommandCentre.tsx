@@ -1,4 +1,5 @@
-import { useDialogManager, useKeybindingManager } from "@/managers";
+import { KeybindingManager } from "@/helpers/keybindings";
+import { useDialogManager } from "@/managers";
 import { Add, Person, Search, Settings } from "@mui/icons-material";
 import {
   Box,
@@ -31,7 +32,6 @@ export const HomeCommandCentre: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [currentActions, setCurrentActions] = useState<IHomeCCAction[]>([]);
   const [selectedItem, setSelectedItem] = useState<number>(0);
-  const { registerKeybinding, unregisterKeybinding } = useKeybindingManager();
   const { openDialog, isDialogOpen } = useDialogManager();
 
   const theme = useTheme();
@@ -97,27 +97,20 @@ export const HomeCommandCentre: FC = () => {
 
   useEffect(() => {
     if (open) {
-      registerKeybinding(["ArrowDown"], handleArrowDown);
-      registerKeybinding(["ArrowUp"], handleArrowUp);
-      registerKeybinding(["Enter"], handleEnter);
+      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.registerKeybinding(["Enter"], handleEnter);
     } else {
-      unregisterKeybinding(["ArrowDown"], handleArrowDown);
-      unregisterKeybinding(["ArrowUp"], handleArrowUp);
-      unregisterKeybinding(["Enter"], handleEnter);
+      KeybindingManager.unregisterKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.unregisterKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.unregisterKeybinding(["Enter"], handleEnter);
     }
     return () => {
-      unregisterKeybinding(["ArrowDown"], handleArrowDown);
-      unregisterKeybinding(["ArrowUp"], handleArrowUp);
-      unregisterKeybinding(["Enter"], handleEnter);
+      KeybindingManager.unregisterKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.unregisterKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.unregisterKeybinding(["Enter"], handleEnter);
     };
-  }, [
-    open,
-    handleArrowDown,
-    handleArrowUp,
-    handleEnter,
-    registerKeybinding,
-    unregisterKeybinding,
-  ]);
+  }, [open, handleArrowDown, handleArrowUp, handleEnter]);
 
   return (
     <CommandCentre
@@ -142,10 +135,7 @@ export const HomeCommandCentre: FC = () => {
                 index === selectedItem
                   ? `${theme.palette.primary.main}22`
                   : "transparent",
-              color:
-                index === selectedItem
-                  ? "primary.contrastText"
-                  : "text.primary",
+              color: index === selectedItem ? "tex.secondary" : "text.primary",
               "&:hover": {
                 backgroundColor: "primary.main",
                 color: "primary.contrastText",
@@ -155,7 +145,7 @@ export const HomeCommandCentre: FC = () => {
             <ListItemIcon>
               <Box
                 sx={{
-                  backgroundColor: "secondary.main",
+                  backgroundColor: "secondary.light",
                   color: "secondary.contrastText",
                   aspectRatio: 1,
                   borderRadius: 2,

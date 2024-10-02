@@ -1,4 +1,5 @@
-import { useDialogManager, useKeybindingManager } from "@/managers";
+import { KeybindingManager } from "@/helpers/keybindings";
+import { useDialogManager } from "@/managers";
 import { TDialogIds } from "@/store";
 import { Box, Dialog, Divider } from "@mui/material";
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from "react";
@@ -25,7 +26,6 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
   endAdornment,
 }) => {
   const { openDialog, closeDialog, isDialogOpen } = useDialogManager();
-  const { registerKeybinding, unregisterKeybinding } = useKeybindingManager();
 
   const [open, setOpen] = useState<boolean>(false);
 
@@ -56,13 +56,13 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
 
   useEffect(() => {
     if (keybindings && keybindings.length > 0) {
-      registerKeybinding(keybindings, handleToggle);
+      KeybindingManager.registerKeybinding(keybindings, handleToggle);
 
       return () => {
-        unregisterKeybinding(keybindings, handleToggle);
+        KeybindingManager.unregisterKeybinding(keybindings, handleToggle);
       };
     }
-  }, [handleToggle, registerKeybinding, unregisterKeybinding, keybindings]);
+  }, [handleToggle, keybindings]);
   return (
     <Dialog
       open={open}
@@ -71,7 +71,7 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
       maxWidth="md"
       PaperProps={{
         sx: {
-          backgroundColor: "background.paper",
+          backgroundColor: "secondary.dark",
           backgroundImage: "unset",
           borderRadius: 2,
           border: "1px solid",
@@ -89,19 +89,21 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
           minHeight: 30,
         }}
       >
-        <TransparentTextField
-          InputProps={{
-            id: `${dialogType}-search`,
-            ...(startAdornment && { startAdornment }),
-            ...(endAdornment && { endAdornment }),
-          }}
-          inputRef={inputRef}
-          placeholder={textPlaceholder}
-          variant="outlined"
-          fullWidth
-          value={text}
-          onChange={(e) => onTextChange(e.target.value)}
-        />
+        <Box sx={{ width: "100%", backgroundColor: "background.default" }}>
+          <TransparentTextField
+            InputProps={{
+              id: `${dialogType}-search`,
+              ...(startAdornment && { startAdornment }),
+              ...(endAdornment && { endAdornment }),
+            }}
+            inputRef={inputRef}
+            placeholder={textPlaceholder}
+            variant="outlined"
+            fullWidth
+            value={text}
+            onChange={(e) => onTextChange(e.target.value)}
+          />
+        </Box>
         <Divider flexItem />
         {children}
       </Box>

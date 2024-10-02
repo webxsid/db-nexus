@@ -1,4 +1,4 @@
-import { useKeybindingManager } from "@/managers";
+import { KeyCombo } from "@/helpers/keybindings";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { FC, ReactNode } from "react";
 
@@ -10,8 +10,6 @@ export const ConnectionConfigTabs: FC<IConnectionConfigTabsProps> = ({
   selectedTab,
   setSelectedTab,
 }): ReactNode => {
-  const { getKeyComboIcons } = useKeybindingManager();
-
   return (
     <Tabs
       value={selectedTab}
@@ -63,7 +61,7 @@ export const ConnectionConfigTabs: FC<IConnectionConfigTabsProps> = ({
               gap: 1,
             }}
           >
-            General {getKeyComboIcons("Meta+1", "smaller")}
+            General <KeyCombo keyCombo="Meta+1" size="smaller" />
           </Typography>
         }
       />
@@ -73,7 +71,7 @@ export const ConnectionConfigTabs: FC<IConnectionConfigTabsProps> = ({
             variant="body1"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            Auth {getKeyComboIcons("Meta+2", "smaller")}
+            Auth <KeyCombo keyCombo="Meta+2" size="smaller" />
           </Typography>
         }
       />
@@ -83,7 +81,7 @@ export const ConnectionConfigTabs: FC<IConnectionConfigTabsProps> = ({
             variant="body1"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            TLS {getKeyComboIcons("Meta+3", "smaller")}
+            TLS <KeyCombo keyCombo="Meta+3" size="smaller" />
           </Typography>
         }
       />
@@ -93,7 +91,7 @@ export const ConnectionConfigTabs: FC<IConnectionConfigTabsProps> = ({
             variant="body1"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            Proxy {getKeyComboIcons("Meta+4", "smaller")}
+            Proxy <KeyCombo keyCombo="Meta+4" size="smaller" />
           </Typography>
         }
       />
@@ -103,7 +101,7 @@ export const ConnectionConfigTabs: FC<IConnectionConfigTabsProps> = ({
             variant="body1"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            Advanced {getKeyComboIcons("Meta+5", "smaller")}
+            Advanced <KeyCombo keyCombo="Meta+5" size="smaller" />
           </Typography>
         }
       />

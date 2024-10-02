@@ -1,30 +1,75 @@
-# React + TypeScript + Vite
+# DB Nexus
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+DB Nexus is a versatile database management tool compatible with MongoDB, Firestore, and various other databases. It offers a unified interface for multiple databases, enabling standard operations, data aggregation, and visualization. The application features keyboard shortcuts, search filters, and an intuitive design. It is designed for developers and data analysts who require efficient workflows across diverse database systems.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Unified Interface**: Access multiple databases from a single application.
+- **Standard Operations**: Perform CRUD operations, data aggregation, and visualization.
+- **Keyboard Shortcuts**: Use shortcuts for quick navigation and data manipulation.
+- **Search Filters**: Filter data based on specific criteria.
+- **Intuitive Design**: Navigate through databases with ease.
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### Windows
 
-- Configure the top-level `parserOptions` property like this:
+1. Download the `.exe` installer from the [releases page](https://www.dbnexus.com/releases).
+2. Run the installer and follow the on-screen instructions.
+3. Once installed, launch DB Nexus from the Start Menu or desktop shortcut.
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+### Linux
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+#### .deb Package
+
+1. Download the `.deb` package from the [releases page](https://www.dbnexus.com/releases).
+2. Open a terminal and navigate to the download directory.
+3. Install the package using:
+
+   ```sh
+   sudo dpkg -i db-nexus.deb
+   ```
+
+4. Resolve any dependencies with:
+
+   ```sh
+   sudo apt-get install -f
+   ```
+
+#### .AppImage
+
+1. Download the `.AppImage` file from the [releases page](https://www.dbnexus.com/releases).
+2. Make the file executable:
+
+   ```sh
+   chmod +x db-nexus.AppImage
+   ```
+
+3. Run the application:
+
+   ```sh
+   ./db-nexus.AppImage
+   ```
+
+### Mac
+
+#### .dmg File
+
+1. Download the `.dmg` file from the [releases page](https://www.dbnexus.com/releases).
+2. Open the `.dmg` file and drag the DB Nexus app to the Applications folder.
+3. Launch DB Nexus from the Applications folder.
+
+#### .pkg File
+
+1. Download the `.pkg` installer from the [releases page](https://www.dbnexus.com/releases).
+2. Run the installer and follow the on-screen instructions.
+3. Once installed, launch DB Nexus from the Applications folder.
+
+## Use Cases
+
+- A full-stack developer can seamlessly transition between MongoDB and Firestore for various projects using a single interface.
+- A data analyst can execute intricate queries on multiple databases and visualize the outcomes with integrated graphing tools.
+- A database administrator can handle routine CRUD tasks across different databases without needing separate management tools.
+- A product manager can effortlessly access and visualize key metrics from various databases without complex query writing.
+- A startup CTO can oversee both document-based and relational databases as the company's data requirements grow.
+- A database migration specialist can move data between different database systems using DB Nexus as a bridge.

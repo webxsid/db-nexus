@@ -1,7 +1,9 @@
 import mongoDBImg from "@/assets/logos/mongodb.svg";
-import { CommandCentre } from "@/components/common";
-import { useDialogManager, useKeybindingManager } from "@/managers";
+import { CommandCentre, HotkeyButton } from "@/components/common";
+import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
+import { useDialogManager } from "@/managers";
 import { EDialogIds } from "@/store";
+import { mongoConnectionInit, mongoURIGenerator } from "@/utils/database/mongo";
 import { ArrowBack } from "@mui/icons-material";
 import {
   Box,
@@ -9,6 +11,7 @@ import {
   IconButton,
   InputAdornment,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { IMongoConnectionParams } from "@shared";
 import { ReactNode, useCallback, useEffect, useState } from "react";
@@ -17,21 +20,32 @@ import { GeneralConfig } from "./GeneralConfig.MongoDB";
 
 export const AddMongoDbConnectionDialog = (): ReactNode => {
   const [open, setOpen] = useState<boolean>(false);
-  const [connectionUrl, setConnectionUrl] = useState<string>("");
+  const [connectionUrl, setConnectionUrl] = useState<string>(
+    "mongodb://localhost:27017",
+  );
   const [showBack, setShowBack] = useState<boolean>(false);
   const [showAdvancedConfig, setShowAdvancedConfig] = useState<boolean>(false);
   const { hasHistory, closeDialog, isDialogOpen, clearAllDialogs } =
     useDialogManager();
-  const { registerKeybinding, unregisterKeybinding, getKeyComboIcons } =
-    useKeybindingManager();
+  const theme = useTheme();
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const [generalConfig, setGeneralConfig] = useState<
     IMongoConnectionParams["general"]
-  >({
-    hosts: ["localhost:27017"],
-    scheme: "mongodb",
-    directConnection: true,
-  });
+  >(mongoConnectionInit.general);
+  const [authConfig, setAuthConfig] = useState<IMongoConnectionParams["auth"]>(
+    mongoConnectionInit.auth,
+  );
+  const [tlsConfig, setTlsConfig] = useState<IMongoConnectionParams["tls"]>(
+    mongoConnectionInit.tls,
+  );
+  const [proxyConfig, setProxyConfig] = useState<
+    IMongoConnectionParams["proxy"]
+  >(mongoConnectionInit.proxy);
+  const [advancedConfig, setAdvancedConfig] = useState<
+    IMongoConnectionParams["advanced"]
+  >(mongoConnectionInit.advanced);
+  const [config, setConfig] =
+    useState<IMongoConnectionParams>(mongoConnectionInit);
 
   const handleClose = useCallback(() => {
     setConnectionUrl("");
@@ -63,13 +77,16 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
   }, []);
 
   const toggleAdvancedConfig = useCallback(() => {
+    console.log("Toggle Advanced Config");
     setShowAdvancedConfig((prev) => {
-      if (prev) {
+      console.log("Toggle Advanced Config");
+      if (!prev) {
         setSelectedTab(0);
         // blur the input field
         const inputField = document.getElementById(
-          `connection-${EDialogIds.AddMongoConnection}}`,
+          `${EDialogIds.AddMongoConnection}-search`,
         );
+        console.log(inputField);
         if (inputField) {
           inputField.blur();
         }
@@ -79,44 +96,57 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
   }, []);
 
   useEffect(() => {
+    setConfig({
+      general: generalConfig,
+      auth: authConfig,
+      tls: tlsConfig,
+      proxy: proxyConfig,
+      advanced: advancedConfig,
+    });
+  }, [generalConfig, authConfig, tlsConfig, proxyConfig, advancedConfig]);
+
+  const generateAndSetUri = useCallback(async () => {
+    const url = await mongoURIGenerator(config);
+    setConnectionUrl(url);
+  }, [config]);
+
+  useEffect(() => {
+    generateAndSetUri();
+  }, [generateAndSetUri]);
+
+  useEffect(() => {
     if (open) {
-      registerKeybinding(["Meta+Shift+c"], handleClose);
-      registerKeybinding(["Meta+1"], openGeneralTab);
-      registerKeybinding(["Meta+2"], openAuthTab);
-      registerKeybinding(["Meta+3"], openTlsTab);
-      registerKeybinding(["Meta+4"], openProxyTab);
-      registerKeybinding(["Meta+5"], openAdvancedTab);
-      registerKeybinding(["Shift+Tab"], toggleAdvancedConfig);
+      KeybindingManager.registerKeybinding(["Meta+Shift+c"], handleClose);
+      KeybindingManager.registerKeybinding(["Meta+1"], openGeneralTab);
+      KeybindingManager.registerKeybinding(["Meta+2"], openAuthTab);
+      KeybindingManager.registerKeybinding(["Meta+3"], openTlsTab);
+      KeybindingManager.registerKeybinding(["Meta+4"], openProxyTab);
+      KeybindingManager.registerKeybinding(["Meta+5"], openAdvancedTab);
     } else {
-      unregisterKeybinding(["Meta+Shift+c"], handleClose);
-      unregisterKeybinding(["Meta+1"], openGeneralTab);
-      unregisterKeybinding(["Meta+2"], openAuthTab);
-      unregisterKeybinding(["Meta+3"], openTlsTab);
-      unregisterKeybinding(["Meta+4"], openProxyTab);
-      unregisterKeybinding(["Meta+5"], openAdvancedTab);
-      unregisterKeybinding(["Shift+Tab"], toggleAdvancedConfig);
+      KeybindingManager.unregisterKeybinding(["Meta+Shift+c"], handleClose);
+      KeybindingManager.unregisterKeybinding(["Meta+1"], openGeneralTab);
+      KeybindingManager.unregisterKeybinding(["Meta+2"], openAuthTab);
+      KeybindingManager.unregisterKeybinding(["Meta+3"], openTlsTab);
+      KeybindingManager.unregisterKeybinding(["Meta+4"], openProxyTab);
+      KeybindingManager.unregisterKeybinding(["Meta+5"], openAdvancedTab);
     }
 
     return () => {
-      unregisterKeybinding(["Ctrl+c"], handleClose);
-      unregisterKeybinding(["Meta+1"], openGeneralTab);
-      unregisterKeybinding(["Meta+2"], openAuthTab);
-      unregisterKeybinding(["Meta+3"], openTlsTab);
-      unregisterKeybinding(["Meta+4"], openProxyTab);
-      unregisterKeybinding(["Meta+5"], openAdvancedTab);
-      unregisterKeybinding(["Shift+Tab"], toggleAdvancedConfig);
+      KeybindingManager.unregisterKeybinding(["Ctrl+c"], handleClose);
+      KeybindingManager.unregisterKeybinding(["Meta+1"], openGeneralTab);
+      KeybindingManager.unregisterKeybinding(["Meta+2"], openAuthTab);
+      KeybindingManager.unregisterKeybinding(["Meta+3"], openTlsTab);
+      KeybindingManager.unregisterKeybinding(["Meta+4"], openProxyTab);
+      KeybindingManager.unregisterKeybinding(["Meta+5"], openAdvancedTab);
     };
   }, [
     open,
     handleClose,
-    registerKeybinding,
-    unregisterKeybinding,
     openGeneralTab,
     openAuthTab,
     openTlsTab,
     openProxyTab,
     openAdvancedTab,
-    toggleAdvancedConfig,
   ]);
 
   return (
@@ -140,16 +170,24 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       }
       endAdornment={
         <InputAdornment position="end">
-          <Typography
-            variant="caption"
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          <HotkeyButton
+            onClick={toggleAdvancedConfig}
+            keyBindings={["Meta+Shift+a"]}
+            showhotkey={"true"}
+            tooltip="Toggle Advanced Config"
+            sx={{ textTransform: "none" }}
           >
-            {getKeyComboIcons("Shift+Tab", "small")} to Advanced Config
-          </Typography>
+            Advanced config
+          </HotkeyButton>
         </InputAdornment>
       }
     >
-      <Collapse in={showAdvancedConfig}>
+      <Collapse
+        in={showAdvancedConfig}
+        sx={{
+          width: "100%",
+        }}
+      >
         <ConnectionConfigTabs
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -161,6 +199,31 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
             setGeneralConfig={setGeneralConfig}
           />
         </TabPanel>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            px: 2,
+            py: 1,
+            backgroundColor: "secondary.main",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{ flexGrow: 1, display: "flex", gap: 1 }}
+          >
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: "bold", color: "info.main" }}
+            >
+              Pro Tip
+            </Typography>
+            : Use the <KeyCombo keyCombo="Tab" size="smaller" /> &{" "}
+            <KeyCombo keyCombo="Shift+Tab" size="smaller" /> keys to navigate
+            between fields
+          </Typography>
+        </Box>
       </Collapse>
     </CommandCentre>
   );

@@ -135,6 +135,7 @@ const mongoParamsValidator = (
 };
 
 const mongoURIGenerator = async (config: IMongoConnectionParams): string => {
+  console.log(config);
   const { general, auth, tls, proxy, advanced } = config;
   const { scheme, hosts, directConnection } = general;
   const { method, passwordParams } = auth;

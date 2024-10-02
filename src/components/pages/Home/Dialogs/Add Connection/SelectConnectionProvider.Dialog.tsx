@@ -1,5 +1,6 @@
 import { CommandCentre } from "@/components/common";
-import { useDialogManager, useKeybindingManager } from "@/managers";
+import { KeybindingManager } from "@/helpers/keybindings";
+import { useDialogManager } from "@/managers";
 import { ArrowBack } from "@mui/icons-material";
 import {
   Box,
@@ -33,7 +34,6 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
   const [providers, setProviders] = useState(availableProviders);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [showBack, setShowBack] = useState<boolean>(false);
-  const { registerKeybinding, unregisterKeybinding } = useKeybindingManager();
 
   const handleTextChange = (text: string): void => {
     setText(text);
@@ -89,28 +89,21 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
 
   useEffect(() => {
     if (open) {
-      registerKeybinding(["ArrowDown"], handleArrowDown);
-      registerKeybinding(["ArrowUp"], handleArrowUp);
-      registerKeybinding(["Enter"], handleEnter);
+      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.registerKeybinding(["Enter"], handleEnter);
     } else {
-      unregisterKeybinding(["ArrowDown"], handleArrowDown);
-      unregisterKeybinding(["ArrowUp"], handleArrowUp);
-      unregisterKeybinding(["Enter"], handleEnter);
+      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.registerKeybinding(["Enter"], handleEnter);
     }
 
     return () => {
-      unregisterKeybinding(["ArrowDown"], handleArrowDown);
-      unregisterKeybinding(["ArrowUp"], handleArrowUp);
-      unregisterKeybinding(["Enter"], handleEnter);
+      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.registerKeybinding(["Enter"], handleEnter);
     };
-  }, [
-    open,
-    handleArrowDown,
-    handleArrowUp,
-    handleEnter,
-    registerKeybinding,
-    unregisterKeybinding,
-  ]);
+  }, [open, handleArrowDown, handleArrowUp, handleEnter]);
 
   return (
     <CommandCentre

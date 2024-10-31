@@ -18,6 +18,20 @@ html {
 }
 .MuiTooltip-popper,
 .MuiTooltip-popperArrow,
-.MuiTooltip-arrow {
+.MuiTooltip-arrow,
+.base-Popper-root {
   transition: unset;
+}
+
+.base-Popper-root {
+  z-index: 9999;
+}
+
+.draggable {
+  -webkit-app-region: drag;
+}
+
+button,
+.no-drag {
+  -webkit-app-region: no-drag;
 }

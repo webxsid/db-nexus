@@ -138,7 +138,6 @@ export const HomeCommandCentre: FC = () => {
               color: index === selectedItem ? "tex.secondary" : "text.primary",
               "&:hover": {
                 backgroundColor: "primary.main",
-                color: "primary.contrastText",
               },
             }}
           >

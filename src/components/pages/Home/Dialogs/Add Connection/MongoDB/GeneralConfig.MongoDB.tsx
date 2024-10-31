@@ -15,7 +15,7 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import { IMongoConnectionParams, TMongoScheme } from "@shared";
+import { IMongoConnectionParams } from "@shared";
 import React, {
   FC,
   ReactNode,
@@ -67,25 +67,6 @@ export const GeneralConfig: FC<IProps> = ({
     const input = hostRef.current?.querySelector("input");
     input?.focus();
   }, []);
-
-  const selectMongoScheme = useCallback(
-    (scheme: string): void => {
-      setGeneralConfig({
-        ...generalConfig,
-        hosts: ["localhost:27017"],
-        scheme: scheme as TMongoScheme,
-      });
-      if (scheme === "mongodb+srv") {
-        setGeneralConfig({
-          ...generalConfig,
-          scheme,
-          hosts: ["localhost"],
-          directConnection: false,
-        });
-      }
-    },
-    [generalConfig, setGeneralConfig],
-  );
 
   const toggleMongoScheme = useCallback(() => {
     console.log("Toggle Mongo Scheme");
@@ -147,7 +128,7 @@ export const GeneralConfig: FC<IProps> = ({
     }
   }, [selectedIndex, skipDirectConnection]);
 
-  const handleTab = useCallback(
+  const handleArrowDown = useCallback(
     function tabHandler(event: SyntheticEvent): void {
       event.preventDefault();
       handleNext();
@@ -155,7 +136,7 @@ export const GeneralConfig: FC<IProps> = ({
     [handleNext],
   );
 
-  const handleShiftTab = useCallback(
+  const handleArrowUp = useCallback(
     function shiftTabHandler(event: SyntheticEvent): void {
       event.preventDefault();
       handlePrev();
@@ -165,13 +146,13 @@ export const GeneralConfig: FC<IProps> = ({
 
   useEffect(() => {
     if (isActive) {
-      KeybindingManager.registerKeybinding(["Tab"], handleTab);
-      KeybindingManager.registerKeybinding(["Shift+Tab"], handleShiftTab);
+      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
     } else {
-      KeybindingManager.unregisterKeybinding(["Tab"], handleTab);
-      KeybindingManager.unregisterKeybinding(["Shift+Tab"], handleShiftTab);
+      KeybindingManager.unregisterKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.unregisterKeybinding(["ArrowUp"], handleArrowUp);
     }
-  }, [isActive, handleTab, handleShiftTab]);
+  }, [isActive, handleArrowDown, handleArrowUp]);
 
   useEffect(() => {
     const currentRef =

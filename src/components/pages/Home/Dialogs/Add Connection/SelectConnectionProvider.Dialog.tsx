@@ -46,15 +46,21 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
 
   const theme = useTheme();
 
-  const handleArrowDown = useCallback(() => {
-    setSelectedIndex((prev) => (prev + 1) % providers.length);
-  }, [providers.length]);
+  const handleArrowDown = useCallback(
+    function arrowDownHandler() {
+      setSelectedIndex((prev) => (prev + 1) % providers.length);
+    },
+    [providers.length],
+  );
 
-  const handleArrowUp = useCallback(() => {
-    setSelectedIndex(
-      (prev) => (prev - 1 + providers.length) % providers.length,
-    );
-  }, [providers.length]);
+  const handleArrowUp = useCallback(
+    function arrowUpHandler() {
+      setSelectedIndex(
+        (prev) => (prev - 1 + providers.length) % providers.length,
+      );
+    },
+    [providers.length],
+  );
 
   const handleSelect = useCallback(
     (index: number) => {
@@ -73,13 +79,17 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
     [providers, openDialog],
   );
 
-  const handleEnter = useCallback(() => {
-    if (selectedIndex >= 0 && selectedIndex < providers.length) {
-      handleSelect(selectedIndex);
-    }
-  }, [selectedIndex, providers, handleSelect]);
+  const handleEnter = useCallback(
+    function enterHandler() {
+      if (open && selectedIndex >= 0 && selectedIndex < providers.length) {
+        handleSelect(selectedIndex);
+      }
+    },
+    [open, selectedIndex, providers, handleSelect],
+  );
 
   useEffect(() => {
+    console.log("Is Dialog Open", isDialogOpen("selectDbProvider"));
     setOpen(isDialogOpen("selectDbProvider"));
   }, [isDialogOpen]);
 
@@ -93,15 +103,15 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
       KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
       KeybindingManager.registerKeybinding(["Enter"], handleEnter);
     } else {
-      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
-      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
-      KeybindingManager.registerKeybinding(["Enter"], handleEnter);
+      KeybindingManager.unregisterKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.unregisterKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.unregisterKeybinding(["Enter"], handleEnter);
     }
 
     return () => {
-      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
-      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
-      KeybindingManager.registerKeybinding(["Enter"], handleEnter);
+      KeybindingManager.unregisterKeybinding(["ArrowDown"], handleArrowDown);
+      KeybindingManager.unregisterKeybinding(["ArrowUp"], handleArrowUp);
+      KeybindingManager.unregisterKeybinding(["Enter"], handleEnter);
     };
   }, [open, handleArrowDown, handleArrowUp, handleEnter]);
 
@@ -152,7 +162,6 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
               my: 0.5,
               "&:hover": {
                 backgroundColor: `${theme.palette.primary.main}22`,
-                color: "primary.contrastText",
               },
             }}
             onClick={() => handleSelect(index)}

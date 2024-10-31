@@ -23,7 +23,7 @@ const manager = new WindowManager();
 app
   .whenReady()
   .then(async () => {
-    manager.MainWindow.init();
+    await manager.MainWindow.init();
     app.on("window-all-closed", () => {
       manager.destroyAllWindows();
       if (process.platform !== "darwin") {

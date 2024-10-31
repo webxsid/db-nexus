@@ -1,19 +1,37 @@
 import { HomeCommandCentre } from "@/components/common/CommandCentre";
 import {
   AddMongoDbConnectionDialog,
+  ConnectionsTable,
   SelectConnectionProviderDialog,
 } from "@/components/pages/Home";
 import Header from "@/components/pages/Home/Header";
-import { filterInitialState, filterReducer } from "@/local-store/reducers";
-import { Box, Grid } from "@mui/material";
-import React, { ReactNode } from "react";
+import { CoreIpcEvents, WindowIPCEvents } from "@/ipc-events";
+import { refreshConnectionsAtom } from "@/store";
+import { Container, Grid } from "@mui/material";
+import { useAtom } from "jotai";
+import { ReactNode, useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 
 const Home = (): ReactNode => {
-  const [filterState, filterDispatch] = React.useReducer(
-    filterReducer,
-    filterInitialState,
+  const [_, refreshConnections] = useAtom(refreshConnectionsAtom);
+
+  const fetchConnections = useCallback(
+    async function () {
+      const result = await CoreIpcEvents.listConnections();
+      if (result.ok === 1) {
+        refreshConnections(result.connections);
+      }
+    },
+    [refreshConnections],
   );
+
+  const handleHeaderDoubleClick = useCallback(async () => {
+    await WindowIPCEvents.maximize();
+  }, []);
+
+  useEffect(() => {
+    fetchConnections();
+  }, [fetchConnections]);
 
   return (
     <Grid
@@ -30,40 +48,47 @@ const Home = (): ReactNode => {
       <SelectConnectionProviderDialog />
       <AddMongoDbConnectionDialog />
       <Grid
+        onDoubleClick={handleHeaderDoubleClick}
         xs={12}
         item
+        className="draggable"
         sx={{
-          position: "fixed",
           width: "100%",
           zIndex: 100,
           top: 0,
           left: 0,
+          height: "70px",
         }}
       >
-        <Header filterState={filterState} filterDispatch={filterDispatch} />
+        <Header />
       </Grid>
       <Grid
         item
         xs={12}
         sx={{
-          height: "100%",
+          height: "calc(100vh - 70px)",
           width: "100vw",
-          overflowY: "auto",
-          pt: 12,
+          overflowY: "hidden",
+          // pt: 10,
           pb: 2,
           px: 4,
         }}
       >
-        <Box
+        <Container
+          maxWidth="xl"
           sx={{
-            width: "100%",
             height: "100%",
-            border: 1,
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            border: "2px solid",
             borderColor: "background.paper",
-            borderRadius: 5,
-            padding: 4,
+            pt: 2,
+            borderRadius: 4,
           }}
-        ></Box>
+        >
+          <ConnectionsTable />
+        </Container>
       </Grid>
     </Grid>
   );

@@ -3,6 +3,7 @@ import {
   IMongoIpcEventsPayload,
   IMongoIpcEventsResponse,
 } from "@shared";
+import { logger } from "main/utils";
 import { Controller, Event } from "../../decorators";
 import { MongoConnectionService } from "../../services";
 
@@ -38,7 +39,8 @@ export class MongoConnectionController {
   public async testConnection(
     payload: IMongoIpcEventsPayload[EMongoIpcEvents.TestConnection],
   ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.TestConnection]> {
-    const ok = this._connectionService.testConnection(payload.meta);
+    const ok = await this._connectionService.testConnection(payload.meta);
+    logger.info("Testing connection", ok);
     return {
       ok,
     };

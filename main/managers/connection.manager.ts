@@ -3,30 +3,35 @@ import {
   IDatabaseConnection,
   IMongoConnection,
 } from "@shared";
+import { logger } from "main/utils";
 import { v4 } from "uuid";
 import { Singleton } from "../decorators";
-import { MongoConnectionService } from "../services";
 import { FileManager } from "./file.manager";
 
 @Singleton
 export class ConnectionManager {
   private _mongoConnections: Map<string, IMongoConnection> = new Map();
 
-  constructor(
-    private readonly _fileManager: FileManager = new FileManager(),
-    private readonly _mongoService: MongoConnectionService = new MongoConnectionService(),
-  ) {}
+  constructor(private readonly _fileManager: FileManager = new FileManager()) {}
 
-  public listConnections(): Array<IDatabaseConnection<unknown>> {
+  public async initConnections(): Promise<void> {
+    try {
+      await this._loadConnectionsFromFile();
+    } catch (error) {
+      logger.error(error);
+    }
+  }
+
+  public async listConnections(): Promise<Array<IDatabaseConnection<unknown>>> {
     const mongoConnections = Array.from(this._mongoConnections.values());
     const connections = [...mongoConnections];
     return connections;
   }
 
-  public getConnection(
+  public async getConnection(
     provider: ESupportedDatabases,
     id: string,
-  ): IDatabaseConnection<unknown> | null {
+  ): Promise<IDatabaseConnection<unknown> | null> {
     switch (provider) {
       case ESupportedDatabases.Mongo:
         return this._mongoConnections.get(id) || null;
@@ -40,6 +45,7 @@ export class ConnectionManager {
     switch (provider) {
       case ESupportedDatabases.Mongo:
         return this._connectToMongo;
+        break;
       default:
         throw new Error("Unsupported provider.");
     }
@@ -55,11 +61,11 @@ export class ConnectionManager {
     }
   }
 
-  public queryConnections(
+  public async queryConnections(
     searchTerm: string,
     sortField: "name" | "createdAt" | "lastConnectedAt" = "name",
     sorDirection: "asc" | "desc" = "asc",
-  ): Array<IDatabaseConnection<unknown>> {
+  ): Promise<Array<IDatabaseConnection<unknown>>> {
     const mongoConnections = Array.from(this._mongoConnections.values());
     const connections = [...mongoConnections];
     return connections
@@ -72,23 +78,23 @@ export class ConnectionManager {
       });
   }
 
-  public loadConnectionsFromFile(): void {
+  private async _loadConnectionsFromFile(): Promise<void> {
     // mongo connections
-    const mongoConnections = this._fileManager.getConnectionData(
+    const mongoConnections = await this._fileManager.getConnectionData(
       ESupportedDatabases.Mongo,
     );
     if (mongoConnections) {
-      this._mongoConnections = new Map(mongoConnections);
+      this._mongoConnections = new Map(Object.entries(mongoConnections));
     }
   }
 
-  public addConnection(
+  public async addConnection(
     provider: ESupportedDatabases,
     connection: IDatabaseConnection<unknown>,
-  ): string {
+  ): Promise<string> {
     switch (provider) {
       case ESupportedDatabases.Mongo:
-        return this._addMongoConnection(
+        return await this._addMongoConnection(
           connection as Omit<IMongoConnection, "id">,
         );
       default:
@@ -96,33 +102,66 @@ export class ConnectionManager {
     }
   }
 
-  public duplicateConnection(provider: ESupportedDatabases, id: string): void {
+  public async updateConnection(
+    provider: ESupportedDatabases,
+    id: string,
+    connection: IDatabaseConnection<unknown>,
+  ): Promise<void> {
     switch (provider) {
       case ESupportedDatabases.Mongo:
-        this._duplicateMongoConnection(id);
+        await this._updateMongoConnection(
+          id,
+          connection as Omit<IMongoConnection, "id">,
+        );
         break;
       default:
         throw new Error("Unsupported provider.");
     }
   }
 
-  public removeConnection(provider: ESupportedDatabases, id: string): void {
+  public async duplicateConnection(
+    provider: ESupportedDatabases,
+    id: string,
+  ): Promise<void> {
     switch (provider) {
       case ESupportedDatabases.Mongo:
-        this._removeMongoConnection(id);
+        await this._duplicateMongoConnection(id);
         break;
       default:
         throw new Error("Unsupported provider.");
     }
   }
 
-  private _addMongoConnection(
+  public async removeConnection(
+    provider: ESupportedDatabases,
+    id: string,
+  ): Promise<void> {
+    switch (provider) {
+      case ESupportedDatabases.Mongo:
+        await this._removeMongoConnection(id);
+        break;
+      default:
+        throw new Error("Unsupported provider.");
+    }
+  }
+
+  private async _addMongoConnection(
     connection: Omit<IMongoConnection, "id">,
-  ): string {
+  ): Promise<string> {
     const id = v4();
     this._validateMongoConnection({ ...connection, id });
-    this._mongoConnections.set(id, { ...connection, id });
-    this._saveMongoConnectionToFile({ ...connection, id });
+    const data = {
+      ...connection,
+      id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this._mongoConnections.set(id, data);
+    const ok = await this._fileManager.addConnectionToFile(
+      ESupportedDatabases.Mongo,
+      data,
+    );
+    if (!ok) throw new Error("Failed to add connection to file.");
     return id;
   }
 
@@ -135,22 +174,54 @@ export class ConnectionManager {
     // @TODO: Add more validation
   }
 
-  private _duplicateMongoConnection(connectionId: string): boolean {
+  private async _updateMongoConnection(
+    id: string,
+    connection: Omit<IMongoConnection, "id">,
+  ): Promise<void> {
+    this._validateMongoConnection({ ...connection, id });
+    const data = {
+      ...connection,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    this._mongoConnections.set(id, data);
+    await this._fileManager.updateConnectionToFile(
+      ESupportedDatabases.Mongo,
+      id,
+      data,
+    );
+  }
+
+  private async _duplicateMongoConnection(
+    connectionId: string,
+  ): Promise<boolean> {
     const existingConnection = this._mongoConnections.get(connectionId);
     if (!existingConnection) {
       return false;
     }
     const newId = v4();
-    this._mongoConnections.set(newId, { ...existingConnection, id: newId });
-    this._fileManager.duplicateConnectionToFile(
+    const name = `${existingConnection.name} (Copy)`;
+    const newConnection = {
+      ...existingConnection,
+      id: newId,
+      name,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this._mongoConnections.set(newId, newConnection);
+    this._fileManager.addConnectionToFile(
       ESupportedDatabases.Mongo,
-      connectionId,
-      newId,
+      newConnection,
     );
+    return true;
   }
 
-  private _removeMongoConnection(id: string): void {
+  private async _removeMongoConnection(id: string): Promise<void> {
     this._mongoConnections.delete(id);
-    this._fileManager.removeConnectionFromFile(ESupportedDatabases.Mongo, id);
+    logger.info(`Removed connection with id: ${id}`);
+    await this._fileManager.removeConnectionFromFile(
+      ESupportedDatabases.Mongo,
+      id,
+    );
   }
 }

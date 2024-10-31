@@ -35,6 +35,11 @@ export interface IDatabaseConnection<T> {
   createdAt?: Date;
 
   /**
+   * Optional timestamp indicating when the database connection was last updated.
+   */
+  updatedAt?: Date;
+
+  /**
    * Optional timestamp for the last time the database was connected to.
    */
   lastConnectionAt?: Date;

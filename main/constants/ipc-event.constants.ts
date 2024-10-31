@@ -2,4 +2,5 @@ export type TIpcListenersType =
   | "connection"
   | "database"
   | "collection"
-  | "document";
+  | "document"
+  | "process";

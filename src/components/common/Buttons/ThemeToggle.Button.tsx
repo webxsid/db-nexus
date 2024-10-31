@@ -13,52 +13,45 @@ export const ThemeToggleButton: FC = () => {
 
   return (
     <HotkeyButton
-      variant="outlined"
+      variant="text"
       tooltip="Toggle Theme"
       keyBindings={["Shift+T", "Shift+t"]}
       onClick={handleToggle}
-      showhotkey={"true"}
       sx={{
         backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderColor: "currentColor",
+        // borderColor: "currentColor",
         overflow: "hidden",
         borderRadius: 2,
-        "& .MuiButton-startIcon": {
+      }}
+    >
+      <Box
+        sx={{
+          width: 24,
+          height: 24,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-        },
-      }}
-      startIcon={
-        <Box
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <Brightness7
           sx={{
-            width: 24,
-            height: 24,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            overflow: "hidden",
+            position: "absolute",
+            transition: "transform 0.3s, opacity 0.3s",
+            transform: darkMode ? "translateY(-100%)" : "translateY(0)",
+            opacity: darkMode ? 0 : 1,
           }}
-        >
-          <Brightness7
-            sx={{
-              position: "absolute",
-              transition: "transform 0.3s, opacity 0.3s",
-              transform: darkMode ? "translateY(-100%)" : "translateY(0)",
-              opacity: darkMode ? 0 : 1,
-            }}
-          />
-          <Brightness4
-            sx={{
-              position: "absolute",
-              transition: "transform 0.3s, opacity 0.3s",
-              transform: darkMode ? "translateY(0)" : "translateY(100%)",
-              opacity: darkMode ? 1 : 0,
-            }}
-          />
-        </Box>
-      }
-    ></HotkeyButton>
+        />
+        <Brightness4
+          sx={{
+            position: "absolute",
+            transition: "transform 0.3s, opacity 0.3s",
+            transform: darkMode ? "translateY(0)" : "translateY(100%)",
+            opacity: darkMode ? 1 : 0,
+          }}
+        />
+      </Box>
+    </HotkeyButton>
   );
 };

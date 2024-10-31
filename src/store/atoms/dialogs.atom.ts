@@ -8,3 +8,7 @@ activeDialogAtom.debugLabel = "Active Dialog Atom";
 export const dialogHistoryAtom = atom<TDialogIds[]>([]);
 
 dialogHistoryAtom.debugLabel = "Dialog History Atom";
+
+export const isEditConnectionAtom = atom<boolean>(false);
+
+isEditConnectionAtom.debugLabel = "Is Edit Connection Atom";

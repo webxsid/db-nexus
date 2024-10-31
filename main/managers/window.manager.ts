@@ -1,3 +1,4 @@
+import { BrowserWindow } from "electron";
 import { Singleton } from "../decorators";
 import { MainWindow, MongoDbWindow } from "../window";
 
@@ -46,5 +47,9 @@ export class WindowManager {
     });
 
     this._mongoWindows.clear();
+  }
+
+  public get ActiveWindow(): BrowserWindow | null {
+    return BrowserWindow.getFocusedWindow();
   }
 }

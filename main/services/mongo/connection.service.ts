@@ -1,4 +1,5 @@
 import { ESupportedDatabases, IMongoConnection } from "@shared";
+import { logger } from "main/utils";
 import { MongoClient } from "mongodb";
 import { Singleton } from "../../decorators";
 import {
@@ -56,12 +57,14 @@ export class MongoConnectionService {
   }
 
   public async testConnection(meta: IMongoConnection): Promise<0 | 1> {
+    logger.info("Testing connection", meta);
     const client = new MongoClient(meta.uri);
     try {
       await client.connect();
       await client.close();
       return 1;
     } catch (error) {
+      logger.error("Error while testing connection", error);
       return 0;
     }
   }

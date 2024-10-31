@@ -5,24 +5,26 @@ import {
   Divider,
   useTheme,
 } from "@mui/material";
-import React from "react";
+import React, { FC } from "react";
 
 interface IProps extends DialogProps {
   children: React.ReactNode;
   title?: string;
 }
-const StyledDialog: React.FC<IProps> = ({ children, title, ...rest }) => {
+const StyledDialog: FC<IProps> = ({ children, title, maxWidth, ...rest }) => {
   const theme = useTheme();
   return (
     <Dialog
       fullWidth
-      maxWidth="md"
+      maxWidth={maxWidth || "md"}
       PaperProps={{
         sx: {
-          backgroundColor: `${theme.palette.background.default}aa`,
-          backdropFilter: "blur(30px)",
+          bgcolor: `${theme.palette.primary.main}20`,
+          backdropFilter: "blur(15px)",
           borderRadius: 4,
-          boxShadow: 24,
+          border: 1,
+          borderColor: "divider",
+          color: "text.primary",
         },
       }}
       {...rest}

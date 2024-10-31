@@ -1,12 +1,11 @@
-import React from "react";
 import { Menu, MenuProps, useTheme } from "@mui/material";
+import { FC } from "react";
 
-interface Props extends MenuProps {}
-
-const StyledMenu: React.FC<Props> = ({
+const StyledMenu: FC<MenuProps> = ({
   children,
   transformOrigin,
   anchorOrigin,
+  slotProps,
   ...rest
 }) => {
   const theme = useTheme();
@@ -15,11 +14,22 @@ const StyledMenu: React.FC<Props> = ({
       slotProps={{
         paper: {
           sx: {
-            backgroundColor: `${theme.palette.background.paper}cc`,
+            border: 1,
+            borderColor: "divider",
+            bgcolor: `${theme.palette.primary.main}20`,
             backdropFilter: "blur(10px)",
-            py: 0,
-            borderRadius: 3,
+            borderRadius: 2,
+            color: "text.primary",
+            mt: 1,
+            opacity: 0.5,
+            ...slotProps?.paper?.sx,
           },
+        },
+        ...slotProps,
+      }}
+      MenuListProps={{
+        sx: {
+          py: 0,
         },
       }}
       anchorOrigin={

@@ -51,6 +51,13 @@ const theme = createTheme({
         root: {
           fontFamily: "'Fira Code', 'Courier New', monospace",
         },
+        contained: {
+          fontWeight: 800, // or your desired weight
+        },
+        outlined: ({ theme }) => ({
+          borderRadius: 6,
+          backgroundColor: `${theme.palette.primary.main}20`,
+        }),
       },
     },
     MuiTabs: {
@@ -101,7 +108,7 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 2,
+          borderRadius: 3,
           fontWeight: "bold",
         },
       },

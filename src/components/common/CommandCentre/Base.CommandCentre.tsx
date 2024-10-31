@@ -102,6 +102,8 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
             fullWidth
             value={text}
             onChange={(e) => onTextChange(e.target.value)}
+            multiline
+            maxRows={2}
           />
         </Box>
         <Divider flexItem />

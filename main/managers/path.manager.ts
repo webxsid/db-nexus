@@ -1,5 +1,6 @@
 import { ESupportedDatabases } from "@shared";
 import isDev from "electron-is-dev";
+import { existsSync, promises } from "fs";
 import path from "path";
 import { Singleton } from "../decorators";
 import { getOSAppDataPath } from "../utils";
@@ -23,8 +24,28 @@ export class PathManager {
     this._appDataPath = getOSAppDataPath();
   }
 
-  public ConnectionDataDir(provider: ESupportedDatabases): string {
-    return path.join(this._appDataPath, "connections", provider, "meta.json");
+  public async ConnectionDataFile(
+    provider: ESupportedDatabases,
+  ): Promise<string> {
+    const filePath = path.join(
+      this._appDataPath,
+      "connections",
+      provider,
+      "meta.json",
+    );
+    if (!existsSync(filePath)) {
+      // create the file directory if it doesn't exist
+      await promises.mkdir(path.dirname(filePath), { recursive: true });
+
+      // create the file
+      await promises.writeFile(filePath, JSON.stringify({}));
+    }
+
+    return filePath;
+  }
+
+  public get ConnectionDatDir(): string {
+    return path.join(this._appDataPath, "connections");
   }
 
   public get MainWindowPreloadPath(): string {

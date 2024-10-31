@@ -11,7 +11,6 @@ export interface IMongoIpcEventsResponse {
     ok: 0 | 1;
   };
   [EMongoIpcEvents.TestConnection]: {
-    connectionId: string;
     ok: 0 | 1;
   };
 

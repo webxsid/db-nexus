@@ -75,36 +75,6 @@ export const ConnectionConfigTabs: FC<IConnectionConfigTabsProps> = ({
           </Typography>
         }
       />
-      <Tab
-        label={
-          <Typography
-            variant="body1"
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            TLS <KeyCombo keyCombo="Meta+3" size="smaller" />
-          </Typography>
-        }
-      />
-      <Tab
-        label={
-          <Typography
-            variant="body1"
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            Proxy <KeyCombo keyCombo="Meta+4" size="smaller" />
-          </Typography>
-        }
-      />
-      <Tab
-        label={
-          <Typography
-            variant="body1"
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            Advanced <KeyCombo keyCombo="Meta+5" size="smaller" />
-          </Typography>
-        }
-      />
     </Tabs>
   );
 };

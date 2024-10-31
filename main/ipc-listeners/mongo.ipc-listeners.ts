@@ -9,6 +9,7 @@ export class MongoIPCListeners {
   private _listeners: Map<TIpcListenersType, Function> = new Map();
 
   public registerConnectionListener(): this {
+    console.log("Registering Mongo Connection Listener");
     registerIpcListeners(ipcMain, MongoConnectionController);
     this._listeners.set("connection", MongoConnectionController);
 

@@ -14,15 +14,15 @@ export class CoreConnectionController {
   ) {}
 
   @Event("add-connection")
-  public addConnection(
+  public async addConnection(
     payload: ICoreIpcEventsPayload[ECoreIpcEvents.AddConnection],
-  ): ICoreIpcEventsResponse[ECoreIpcEvents.AddConnection] {
+  ): Promise<ICoreIpcEventsResponse[ECoreIpcEvents.AddConnection]> {
     try {
-      const connectionId = this._connectionService.addConnection(
+      const connectionId = await this._connectionService.addConnection(
         payload.provider,
         payload.meta,
       );
-      const meta = this._connectionService.getConnection(
+      const meta = await this._connectionService.getConnection(
         payload.provider,
         connectionId,
       );
@@ -35,13 +35,13 @@ export class CoreConnectionController {
   }
 
   @Event("remove-connection")
-  public removeConnection(
+  public async removeConnection(
     payload: ICoreIpcEventsPayload[ECoreIpcEvents.RemoveConnection],
-  ): ICoreIpcEventsResponse[ECoreIpcEvents.RemoveConnection] {
+  ): Promise<ICoreIpcEventsResponse[ECoreIpcEvents.RemoveConnection]> {
     try {
-      this._connectionService.removeConnection(
+      await this._connectionService.removeConnection(
         payload.provider,
-        payload.connectionId,
+        payload.id,
       );
       return { ok: 1, connectionId: payload.connectionId };
     } catch (error) {
@@ -51,38 +51,47 @@ export class CoreConnectionController {
   }
 
   @Event("update-connection")
-  public updateConnection(
+  public async updateConnection(
     payload: ICoreIpcEventsPayload[ECoreIpcEvents.UpdateConnection],
-  ): ICoreIpcEventsResponse[ECoreIpcEvents.UpdateConnection] {
+  ): Promise<ICoreIpcEventsResponse[ECoreIpcEvents.UpdateConnection]> {
     try {
-      this._connectionService.removeConnection(
+      await this._connectionService.updateConnection(
         payload.provider,
-        payload.connectionId,
-      );
-      const connectionId = this._connectionService.addConnection(
-        payload.provider,
+        payload.id,
         payload.meta,
       );
-      const meta = this._connectionService.getConnection(
+      const meta = await this._connectionService.getConnection(
         payload.provider,
-        connectionId,
+        payload.id,
       );
-      if (!meta) throw new Error("Error updating connection");
-      return { ok: 1, connectionId, meta };
+      return { ok: 1, connectionId: meta?.id, meta };
     } catch (error) {
       logger.error(error);
       return { ok: 0, connectionId: "", meta: {} };
     }
   }
 
-  @Event("get-connection")
-  public getConnection(
-    payload: ICoreIpcEventsPayload[ECoreIpcEvents.GetConnection],
-  ): ICoreIpcEventsResponse[ECoreIpcEvents.GetConnection] {
+  @Event("list-connections")
+  public async listConnections(): Promise<
+    ICoreIpcEventsResponse[ECoreIpcEvents.ListConnections]
+  > {
     try {
-      const meta = this._connectionService.getConnection(
+      const connections = await this._connectionService.listConnections();
+      return { ok: 1, connections };
+    } catch (error) {
+      logger.error(error);
+      return { ok: 0, connections: [] };
+    }
+  }
+
+  @Event("get-connection")
+  public async getConnection(
+    payload: ICoreIpcEventsPayload[ECoreIpcEvents.GetConnection],
+  ): Promise<ICoreIpcEventsResponse[ECoreIpcEvents.GetConnection]> {
+    try {
+      const meta = await this._connectionService.getConnection(
         payload.provider,
-        payload.connectionId,
+        payload.id,
       );
       if (!meta) throw new Error("Connection not found");
       return { ok: 1, connectionId: payload.connectionId, meta };
@@ -93,20 +102,15 @@ export class CoreConnectionController {
   }
 
   @Event("duplicate-connection")
-  public duplicateConnection(
+  public async duplicateConnection(
     payload: ICoreIpcEventsPayload[ECoreIpcEvents.DuplicateConnection],
-  ): ICoreIpcEventsResponse[ECoreIpcEvents.DuplicateConnection] {
+  ): Promise<ICoreIpcEventsResponse[ECoreIpcEvents.DuplicateConnection]> {
     try {
-      const connectionId = this._connectionService.duplicateConnection(
+      await this._connectionService.duplicateConnection(
         payload.provider,
-        payload.connectionId,
+        payload.id,
       );
-      const meta = this._connectionService.getConnection(
-        payload.provider,
-        connectionId,
-      );
-      if (!meta) throw new Error("Error duplicating connection");
-      return { ok: 1, connectionId, meta };
+      return { ok: 1 };
     } catch (error) {
       logger.error(error);
       return { ok: 0, connectionId: "", meta: {} };
@@ -114,12 +118,14 @@ export class CoreConnectionController {
   }
 
   @Event("query-connections")
-  public queryConnections(
+  public async queryConnections(
     payload: ICoreIpcEventsPayload[ECoreIpcEvents.QueryConnections],
-  ): ICoreIpcEventsResponse[ECoreIpcEvents.QueryConnections] {
+  ): Promise<ICoreIpcEventsResponse[ECoreIpcEvents.QueryConnections]> {
     try {
-      const connections = this._connectionService.queryConnections(
-        payload.provider,
+      const connections = await this._connectionService.queryConnections(
+        payload.searchTerm,
+        payload.sortField,
+        payload.sortDirection,
       );
       return { ok: 1, connections };
     } catch (error) {

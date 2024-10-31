@@ -16,6 +16,10 @@ export interface ICoreIpcEventsResponse {
     meta: IDatabaseConnection<unknown>;
     ok: 0 | 1;
   };
+  [ECoreIpcEvents.ListConnections]: {
+    connections: Array<IDatabaseConnection<unknown>>;
+    ok: 0 | 1;
+  };
   [ECoreIpcEvents.GetConnection]: {
     ok: 0 | 1;
     connectionId: string;
@@ -23,8 +27,6 @@ export interface ICoreIpcEventsResponse {
   };
   [ECoreIpcEvents.DuplicateConnection]: {
     ok: 0 | 1;
-    connectionId: string;
-    meta: IDatabaseConnection<unknown>;
   };
   [ECoreIpcEvents.QueryConnections]: {
     ok: 0 | 1;

@@ -52,12 +52,39 @@ export class FileManager {
     }
   }
 
-  addConnectionToFile(
+  private async readFromFileAsync(filePath: string): Promise<string | null> {
+    return new Promise((resolve) => {
+      try {
+        const data = readFileSync(filePath, "utf8");
+        resolve(data);
+      } catch (error) {
+        logger.error(error);
+        resolve(null);
+      }
+    });
+  }
+
+  private async writeToFileAsync(
+    filePath: string,
+    data: string,
+  ): Promise<0 | 1> {
+    return new Promise((resolve) => {
+      try {
+        writeFileSync(filePath, data);
+        resolve(1);
+      } catch (error) {
+        logger.error(error);
+        resolve(0);
+      }
+    });
+  }
+
+  async addConnectionToFile(
     provider: string,
     data: IDatabaseConnection<unknown>,
-  ): 0 | 1 {
-    const metaFilePath = this._pathManager.ConnectionDataDir(provider);
-    const metaFileData = this.readFromFile(metaFilePath);
+  ): Promise<0 | 1> {
+    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return 0;
     }
@@ -66,21 +93,22 @@ export class FileManager {
     const existingConnection = Object.values(meta).find(
       (conn) => conn.name === data.name,
     );
+    logger.info("Existing connection", existingConnection);
     if (existingConnection) {
       // prompt user to overwrite
-      const userChoice = dialog.showMessageBoxSync({
+      const userChoice = await dialog.showMessageBox({
         title: "Connection already exists",
         message:
           "Connection with same name already exists. Do you want to overwrite?",
         type: "question",
-        buttons: ["Duplicate", "Overwrite", "Cancel"],
+        buttons: ["Duplicate", "Overwrite", "Cancel", "Test"],
       });
 
-      if (userChoice === 2) {
+      if (userChoice.response === 2) {
         return 0;
       }
 
-      if (userChoice === 0) {
+      if (userChoice.response === 0) {
         const regex = /\((\d+)\)/;
         const match = regex.exec(data.name);
         if (match) {
@@ -89,68 +117,68 @@ export class FileManager {
         } else data.name = `${data.name} (1)`;
       }
 
-      if (userChoice === 1) {
+      if (userChoice.response === 1) {
         const id = existingConnection.id;
         data.id = id;
       }
     }
 
     meta[data.id] = data;
+    logger.info("Meta after adding", meta);
 
-    return this.writeToFile(metaFilePath, JSON.stringify(meta));
+    return await this.writeToFileAsync(metaFilePath, JSON.stringify(meta));
   }
 
-  removeConnectionFromFile(provider: string, connectionId: string): 0 | 1 {
-    const metaFilePath = this._pathManager.ConnectionDataDir(provider);
-    const metaFileData = this.readFromFile(metaFilePath);
+  async updateConnectionToFile(
+    provider: string,
+    connectionId: string,
+    data: IDatabaseConnection<unknown>,
+  ): Promise<0 | 1> {
+    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return 0;
     }
     const meta = JSON.parse(metaFileData);
-    delete meta[connectionId];
-    return this.writeToFile(metaFilePath, JSON.stringify(meta));
+    logger.info("Meta file data", meta);
+    meta[connectionId] = data;
+    logger.info("Meta after updating", meta);
+    return await this.writeToFileAsync(metaFilePath, JSON.stringify(meta));
   }
 
-  duplicateConnectionToFile(
+  async removeConnectionFromFile(
     provider: string,
     connectionId: string,
-    newId: string,
-  ): 0 | 1 {
-    const metaFilePath = this._pathManager.ConnectionDataDir(provider);
-    const metaFileData = this.readFromFile(metaFilePath);
+  ): Promise<0 | 1> {
+    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return 0;
     }
-    const meta = JSON.parse(metaFileData); // object of all connections
-    const connection = meta[connectionId];
-    if (!connection) {
-      return 0;
-    }
-
-    const regex = /\((\d+)\)/;
-    const match = regex.exec(connection.name);
-    if (match) {
-      const num = parseInt(match[1], 10);
-      connection.name = connection.name.replace(regex, `(${num + 1})`);
-    } else connection.name = `${connection.name} (1)`;
-
-    connection.id = newId;
-
-    meta[connection.id] = connection;
-
-    return this.writeToFile(metaFilePath, JSON.stringify(meta));
+    const meta = JSON.parse(metaFileData);
+    logger.info("Meta file data", meta);
+    delete meta[connectionId];
+    logger.info("Meta after removing", meta);
+    return await this.writeToFileAsync(metaFilePath, JSON.stringify(meta));
   }
 
-  getConnectionData(
+  async getConnectionData(
     provider: string,
-  ): Record<string, IDatabaseConnection<unknown>> | null {
-    const metaFilePath = this._pathManager.ConnectionDataDir(provider);
-    const metaFileData = this.readFromFile(metaFilePath);
+  ): Promise<Record<string, IDatabaseConnection<unknown>> | null> {
+    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return null;
     }
     const meta = JSON.parse(metaFileData);
     return meta;
+  }
+
+  async getAllConnections(): Promise<
+    Record<string, IDatabaseConnection<unknown>>
+  > {
+    const mongoConnections = await this.getConnectionData("mongo");
+    return { ...mongoConnections };
   }
 
   public get IconFile(): string {

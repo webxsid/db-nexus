@@ -1,6 +1,10 @@
 import {
   ArrowUpward,
   KeyboardAlt,
+  KeyboardArrowDown,
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+  KeyboardArrowUp,
   KeyboardCommandKey,
   KeyboardControlKey,
   KeyboardReturn,
@@ -90,6 +94,14 @@ export const KeyCombo: FC<IKeyComboProps> = ({ keyCombo, size }): ReactNode => {
                 return <KeyboardTab sx={{ fontSize }} />;
               case "space":
                 return <SpaceBar sx={{ fontSize }} />;
+              case "arrowup":
+                return <KeyboardArrowUp sx={{ fontSize }} />;
+              case "arrowdown":
+                return <KeyboardArrowDown sx={{ fontSize }} />;
+              case "arrowleft":
+                return <KeyboardArrowLeft sx={{ fontSize }} />;
+              case "arrowright":
+                return <KeyboardArrowRight sx={{ fontSize }} />;
               default:
                 return (
                   <Typography

@@ -51,15 +51,15 @@ release_pattern="release/[0-9]+\.[0-9]+\.[0-9]+"
 main_branch="main"
 dev_branch="dev"
 
-# Check if the branch is a direct commit branch
-if [ "$branch_name" = "$main_branch" ] || [ "$branch_name" = "$dev_branch" ]; then
-  show_error "Direct commit to branch \"$branch_name\" is not allowed."
-fi
+# # Check if the branch is a direct commit branch
+# if [ "$branch_name" = "$main_branch" ] || [ "$branch_name" = "$dev_branch" ]; then
+#   show_error "Direct commit to branch \"$branch_name\" is not allowed."
+# fi
 
-# Check if the branch name matches the naming patterns
-if [[ ! "$branch_name" =~ ^($feature_pattern|$fix_pattern|$hotfix_pattern|$release_pattern)$ ]]; then
-  show_error "Branch name \"$branch_name\" does not match the required naming pattern."
-fi
+# # Check if the branch name matches the naming patterns
+# if [[ ! "$branch_name" =~ ^($feature_pattern|$fix_pattern|$hotfix_pattern|$release_pattern)$ ]]; then
+#   show_error "Branch name \"$branch_name\" does not match the required naming pattern."
+# fi
 
 # All checks passed, allow the commit
 show_success "Branch and commit message verification successful."

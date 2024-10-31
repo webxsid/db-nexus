@@ -6,40 +6,55 @@ export class CoreConnectionService {
     private readonly _manager: ConnectionManager = new ConnectionManager(),
   ) {}
 
-  public addConnection(
+  public async addConnection(
     provider: ESupportedDatabases,
     connectionMeta: IDatabaseConnection<unknown>,
-  ): string {
-    return this._manager.addConnection(provider, connectionMeta);
+  ): Promise<string> {
+    return await this._manager.addConnection(provider, connectionMeta);
   }
 
-  public listConnections(): Array<IDatabaseConnection<unknown>> {
-    return this._manager.listConnections();
+  public async listConnections(): Promise<Array<IDatabaseConnection<unknown>>> {
+    return await this._manager.listConnections();
   }
 
-  public getConnection(
+  public async getConnection(
     provider: ESupportedDatabases,
     id: string,
-  ): IDatabaseConnection<unknown> | null {
-    return this._manager.getConnection(provider, id);
+  ): Promise<IDatabaseConnection<unknown> | null> {
+    return await this._manager.getConnection(provider, id);
   }
 
-  public queryConnections(
+  public async queryConnections(
     searchTerm: string,
     sortField: "name" | "createdAt" | "lastConnectedAt" = "name",
     sortDirection: "asc" | "desc" = "asc",
-  ): Array<IDatabaseConnection<unknown>> {
-    return this._manager.queryConnections(searchTerm, sortField, sortDirection);
+  ): Promise<Array<IDatabaseConnection<unknown>>> {
+    return await this._manager.queryConnections(
+      searchTerm,
+      sortField,
+      sortDirection,
+    );
   }
 
-  public removeConnection(provider: ESupportedDatabases, id: string): void {
-    this._manager.removeConnection(provider, id);
-  }
-
-  public duplicateConnection(
+  public async updateConnection(
     provider: ESupportedDatabases,
     id: string,
-  ): IDatabaseConnection<unknown> {
-    return this._manager.duplicateConnection(provider, id);
+    connectionMeta: IDatabaseConnection<unknown>,
+  ): Promise<void> {
+    await this._manager.updateConnection(provider, id, connectionMeta);
+  }
+
+  public async removeConnection(
+    provider: ESupportedDatabases,
+    id: string,
+  ): Promise<void> {
+    await this._manager.removeConnection(provider, id);
+  }
+
+  public async duplicateConnection(
+    provider: ESupportedDatabases,
+    id: string,
+  ): Promise<void> {
+    return await this._manager.duplicateConnection(provider, id);
   }
 }

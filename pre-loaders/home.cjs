@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-var-requires, no-undef */
 
-const { ipcRenderer } = require("electron");
-const { contextBridge } = require("electron");
+const { ipcRenderer, contextBridge } = require("electron");
 
 const addConnection = async (provider, meta) => {
   const result = await ipcRenderer.invoke(

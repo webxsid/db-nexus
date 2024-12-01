@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { createHashRouter } from "react-router-dom";
-import Home from "./pages/Home";
+import { Home } from "./pages";
 
 const Router = createHashRouter(
   [

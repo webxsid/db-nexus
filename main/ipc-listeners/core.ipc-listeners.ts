@@ -23,7 +23,7 @@ export class CoreIPCListeners {
   }
 
   public destroyAllListeners(): this {
-    this._listeners.entries().forEach(([type, listener]) => {
+    Array.from(this._listeners.entries()).forEach(([type, listener]: [TIpcListenersType, Function]) => {
       destroyIpcListeners(ipcMain, listener);
       this._listeners.delete(type);
     });

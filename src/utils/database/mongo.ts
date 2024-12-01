@@ -137,10 +137,10 @@ const mongoParamsValidator = (
     }).required(),
   });
 
-  return schema.validate(config);
+  return schema.validate(config) as unknown as IMongoConnectionParams;
 };
 
-const mongoURIGenerator = async (config: IMongoConnectionParams): string => {
+const mongoURIGenerator = (config: IMongoConnectionParams): string => {
   const { general, auth, tls, proxy, advanced } = config;
   const { scheme, hosts, directConnection } = general;
   const { method, passwordParams } = auth;
@@ -168,11 +168,11 @@ const mongoURIGenerator = async (config: IMongoConnectionParams): string => {
   } = advanced;
 
   try {
-    await mongoParamsValidator(config);
+    mongoParamsValidator(config);
   } catch (error) {
     toast.error("Invalid config");
-    throw new Error("Invalid config");
     console.error(error);
+    throw new Error("Invalid config");
   }
 
   let uri = `${scheme}://`;
@@ -184,7 +184,7 @@ const mongoURIGenerator = async (config: IMongoConnectionParams): string => {
 
   uri += `${hosts.join(",")}/`;
   if (authSource) uri += `${authSource}/`;
-  const query = await qs.stringify({
+  const query = qs.stringify({
     ...(directConnection && { directConnection }),
     ...(auth.method === "password" && {
       authMechanism: passwordParams?.authMechanism,
@@ -193,7 +193,7 @@ const mongoURIGenerator = async (config: IMongoConnectionParams): string => {
         : undefined,
     }),
     ...(tlsState !== "Default" && {
-      tls: tlsState === "Enabled" ? true : false,
+      tls: tlsState === "Enabled",
     }),
     ...(insecure && { tlsInsecure: insecure }),
     ...(invalidHostNameAllowed && {
@@ -224,11 +224,10 @@ const mongoURIGenerator = async (config: IMongoConnectionParams): string => {
     appName,
   });
 
-  const finalURI = query?.length ? `${uri}?${query}` : uri;
-  return finalURI;
+  return query?.length ? `${uri}?${query}` : uri;
 };
 
-const mongoConfigParser = async (uri: string): IMongoConnectionParams => {
+const mongoConfigParser = (uri: string): IMongoConnectionParams | null => {
   const parsed = qs.parse(uri);
   const scheme = uri.split("://")[0];
   const hosts = uri.split("://")[1].split("/")[0].split(",");
@@ -297,11 +296,11 @@ const mongoConfigParser = async (uri: string): IMongoConnectionParams => {
   };
 
   try {
-    await mongoParamsValidator({
+    mongoParamsValidator({
       general: {
         scheme: scheme as TMongoScheme,
         hosts,
-        directConnection: directConnection === "true" ? true : false,
+        directConnection: directConnection === "true",
       },
       auth,
       tls,
@@ -312,7 +311,7 @@ const mongoConfigParser = async (uri: string): IMongoConnectionParams => {
       general: {
         scheme: scheme as TMongoScheme,
         hosts,
-        directConnection: directConnection === "true" ? true : false,
+        directConnection: directConnection === "true",
       },
       auth,
       tls,

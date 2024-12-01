@@ -32,7 +32,6 @@ export const DatePicker: FC<IDatePickerProps> = ({
   anchorEl,
 }) => {
   const [searchText, setSearchText] = React.useState<string>("");
-  const [isStart, setIsStart] = React.useState<boolean>(true);
   const [showCalendar, setShowCalendar] = React.useState<boolean>(true);
 
   useEffect(() => {
@@ -40,14 +39,13 @@ export const DatePicker: FC<IDatePickerProps> = ({
   }, [searchText]);
 
   const handleDateChange = React.useCallback(
-    (newDate: Moment | null, isStart: boolean): void => {
-      if (selectedStartDate && selectedEndDate) {
+    (newDate: Moment | null): void => {
+      // if start date is not set, set it
+      if(!selectedStartDate) setSelectedStartDate(newDate);
+      else if (!selectedEndDate) setSelectedEndDate(newDate);
+      else {
         setSelectedStartDate(newDate);
         setSelectedEndDate(null);
-      } else if (isStart) {
-        setSelectedStartDate(newDate);
-      } else {
-        setSelectedEndDate(newDate);
       }
     },
     [
@@ -246,16 +244,12 @@ export const DatePicker: FC<IDatePickerProps> = ({
     setSelectedEndDate,
   ]);
 
-  useEffect(() => {
-    setIsStart(!selectedEndDate || !!selectedStartDate);
-  }, [selectedStartDate, selectedEndDate]);
 
   const handleArrowDown = useCallback(function arrowDownHandler() {
     // find the next li element or the first one if none is selected
-    console.log("Arrow Down");
     const nextElement =
-      document.activeElement?.nextElementSibling ||
-      document.querySelector("li");
+      (document.activeElement?.nextElementSibling ||
+      document.querySelector("li")) as HTMLElement | null;
     if (nextElement) {
       nextElement.focus();
     }
@@ -291,9 +285,7 @@ export const DatePicker: FC<IDatePickerProps> = ({
             <DateRangeCalendar
               startDate={selectedStartDate}
               endDate={selectedEndDate}
-              isStart={isStart}
-              setStartDate={(date) => handleDateChange(date, true)}
-              setEndDate={(date) => handleDateChange(date, false)}
+              setDate={handleDateChange}
             />
           </LocalizationProvider>
         ) : (

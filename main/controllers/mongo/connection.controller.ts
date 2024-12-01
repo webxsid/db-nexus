@@ -17,7 +17,7 @@ export class MongoConnectionController {
   public async connect(
     payload: IMongoIpcEventsPayload[EMongoIpcEvents.Connect],
   ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.Connect]> {
-    const ok = this._connectionService.connect(payload.connectionId);
+    const ok = await this._connectionService.connect(payload.connectionId);
     return {
       connectionId: payload.connectionId,
       ok,
@@ -28,7 +28,7 @@ export class MongoConnectionController {
   public async disconnect(
     payload: IMongoIpcEventsPayload[EMongoIpcEvents.Disconnect],
   ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.Disconnect]> {
-    const ok = this._connectionService.disconnect(payload.connectionId);
+    const ok = await this._connectionService.disconnect(payload.connectionId);
     return {
       connectionId: payload.connectionId,
       ok,

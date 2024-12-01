@@ -1,7 +1,7 @@
 import { ESupportedDatabases } from "@shared";
 import isDev from "electron-is-dev";
 import { existsSync, promises } from "fs";
-import path from "path";
+import * as path from "path";
 import { Singleton } from "../decorators";
 import { getOSAppDataPath } from "../utils";
 
@@ -44,6 +44,31 @@ export class PathManager {
     return filePath;
   }
 
+  public async SchemaFile(
+    provider: ESupportedDatabases,
+    connectionId: string,
+    databaseName: string,
+    collectionName: string,
+  ): Promise<string> {
+    const filePath = path.join(
+      this._appDataPath,
+      "schemas",
+      provider,
+      connectionId,
+      databaseName,
+      `${collectionName}.js`,
+    );
+    if (!existsSync(filePath)) {
+      // create the file directory if it doesn't exist
+      await promises.mkdir(path.dirname(filePath), { recursive: true });
+
+      // create the file
+      await promises.writeFile(filePath, JSON.stringify({}));
+    }
+
+    return filePath;
+  }
+
   public get ConnectionDatDir(): string {
     return path.join(this._appDataPath, "connections");
   }
@@ -53,7 +78,11 @@ export class PathManager {
   }
 
   public get MongoWindowPreloadPath(): string {
-    return path.resolve(this._basePreloadPath, "databases", "mongo.cjs");
+    return path.resolve(
+      this._basePreloadPath,
+      "databases",
+      "mongo.preloader.cjs",
+    );
   }
 
   public get BaseUrl(): string {
@@ -61,7 +90,7 @@ export class PathManager {
   }
 
   public get MongoWindowUrl(): string {
-    return `${this._baseUrl}databases/mongo?connectionId={{connectionId}}`;
+    return `${this._baseUrl}databases/mongo/{{connectionId}}`;
   }
 
   public get AppDataPath(): string {

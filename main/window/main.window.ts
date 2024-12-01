@@ -8,7 +8,7 @@ import {
 import { ConnectionManager, FileManager, PathManager } from "../managers";
 
 export class MainWindow {
-  private _window: BrowserWindow;
+  private _window: BrowserWindow | null = null;
 
   constructor(
     private readonly _pathManager: PathManager = new PathManager(),
@@ -21,15 +21,18 @@ export class MainWindow {
 
   public async init(): Promise<BrowserWindow> {
     await this._createWindow();
+    if (!this._window) {
+      throw new Error("Failed to create Main Window");
+    }
     return this._window;
   }
 
   public async destroy(): Promise<void> {
-    this._window.close();
+    this._window?.close();
   }
 
   public async focus(): Promise<void> {
-    this._window.focus();
+    this._window?.focus();
   }
 
   public async activate(): Promise<void> {
@@ -41,23 +44,22 @@ export class MainWindow {
   }
 
   private async _createWindow(): Promise<void> {
-    const icon = nativeImage.createFromPath(this._fileManager.IconFile);
-    // const tray = new Tray(icon);
-    console.log("Icon", icon);
     try {
       this._window = new BrowserWindow({
         width: kDefaultWindowWidth,
         height: kDefaultWindowHeight,
-        icon,
-        titleBarStyle: process.platform === "darwin" ? "hidden" : undefined,
-        trafficLightPosition:
-          process.platform === "darwin" ? { x: 12, y: 28 } : undefined,
+        icon: nativeImage.createFromPath(this._fileManager.IconFile),
+        titleBarStyle: "hidden",
+        fullscreenable: false,
+        ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
+        trafficLightPosition:{ x: 12, y: 28 },
         webPreferences: {
           nodeIntegration: true,
           preload: this._pathManager.MainWindowPreloadPath,
           additionalArguments: [`--platform=${process.platform}`],
         },
       });
+
 
       await this._window.loadURL(this._pathManager.BaseUrl);
       await this._registerIPCListeners();
@@ -74,14 +76,14 @@ export class MainWindow {
 
   private async _registerIPCListeners(): Promise<void> {
     console.log("Registering IPC Listeners");
-    await this._coreIpcListener.registerConnectionListener();
-    await this._mongoIpcListener.registerConnectionListener();
-    await this._processIpcListener.registerConnectionListener();
+    this._coreIpcListener.registerConnectionListener();
+    this._mongoIpcListener.registerConnectionListener();
+    this._processIpcListener.registerConnectionListener();
   }
 
   private async _destroyIPCListeners(): Promise<void> {
-    await this._coreIpcListener.deregisterConnectionListener();
-    await this._mongoIpcListener.deregisterConnectionListener();
-    await this._processIpcListener.deregisterConnectionListener();
+    this._coreIpcListener.deregisterConnectionListener();
+    this._mongoIpcListener.deregisterConnectionListener();
+    this._processIpcListener.deregisterConnectionListener();
   }
 }

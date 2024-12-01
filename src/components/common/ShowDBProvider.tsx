@@ -1,19 +1,19 @@
-import { SxProps, Typography, TypographyOwnProps } from "@mui/material";
+import { SxProps, Typography, TypographyOwnProps, TypographyTypeMap } from "@mui/material";
 import { Box } from "@mui/system";
 import { ESupportedDatabases } from "@shared";
-import React, { FC } from "react";
+import { FC, useMemo } from "react";
 import firestore from "../../assets/logos/firestore.svg";
 import mongoDb from "../../assets/logos/mongodb.svg";
 
 export interface IShowDBProviderOptions {
   provider: string;
-  showName: boolean;
-  showLogo: boolean;
+  showName?: boolean;
+  showLogo?: boolean;
   logoSx?: SxProps;
   sx?: SxProps;
   textSx?: SxProps;
   textVariant?: TypographyOwnProps["variant"];
-  textComponent?: TypographyOwnProps["component"];
+  textComponent?: TypographyTypeMap["defaultComponent"]
 }
 const ShowDBProvider: FC<IShowDBProviderOptions> = ({
   provider,
@@ -25,7 +25,7 @@ const ShowDBProvider: FC<IShowDBProviderOptions> = ({
   textVariant,
   textComponent,
 }) => {
-  const providerDisplayMap = React.useMemo(
+  const providerDisplayMap = useMemo(
     () => ({
       [ESupportedDatabases.Mongo]: {
         name: "Mongo DB",

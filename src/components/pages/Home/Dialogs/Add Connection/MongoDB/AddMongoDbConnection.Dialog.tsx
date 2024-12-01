@@ -7,7 +7,11 @@ import {
   isEditConnectionAtom,
   selectedConnectionAtom,
 } from "@/store";
-import { mongoConnectionInit, mongoURIGenerator } from "@/utils/database/mongo";
+import {
+  mongoConfigParser,
+  mongoConnectionInit,
+  mongoURIGenerator,
+} from "@/utils/database/mongo";
 import { Add, ArrowBack, Cancel, Settings } from "@mui/icons-material";
 import {
   Box,
@@ -97,11 +101,11 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
   useEffect(() => {
     if (isEdit && selectedConnection) {
       const { name, color, uri, connectionParams } = selectedConnection;
-      setConnectionName(name);
-      setConnectionColor(color);
-      setConnectionUrl(uri);
-      setGeneralConfig(connectionParams.general);
-      setAuthConfig(connectionParams.auth);
+      setConnectionName(name!);
+      setConnectionColor(color!);
+      setConnectionUrl(uri!);
+      setGeneralConfig((connectionParams as IMongoConnectionParams)!.general);
+      setAuthConfig((connectionParams as IMongoConnectionParams)!.auth);
     }
   }, [isEdit, selectedConnection]);
 
@@ -189,6 +193,8 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
         if (prev !== ccOptions.length) {
           return prev + 1;
         }
+
+        return prev;
       });
     },
     [ccOptions],
@@ -208,13 +214,15 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       if (prev !== 0) {
         return prev - 1;
       }
+
+      return prev;
     });
   }, []);
 
-  const handleSaveConnection = async (): void => {
+  const handleSaveConnection = async (): Promise<void> => {
     setLoading(true);
     setLoadingText("Saving Connection...");
-    const meta: IMongoConnection = {
+    const meta: Omit<IMongoConnection, "id" | "createdAt" | "updatedAt"> = {
       name: connectionName,
       color: connectionColor,
       connectionParams: config,
@@ -240,16 +248,16 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       setIsEdit(false);
     } catch (error) {
       console.error(error);
-      toast.error(error.message);
+      toast.error((error as Error).message);
       setLoading(false);
       setLoadingText("");
     }
   };
 
-  const handleUpdateConnection = async (): void => {
+  const handleUpdateConnection = async (): Promise<void> => {
     setLoading(true);
     setLoadingText("Updating Connection...");
-    const meta: IMongoConnection = {
+    const meta: Omit<IMongoConnection, "id" | "createdAt" | "updatedAt"> = {
       name: connectionName,
       color: connectionColor,
       connectionParams: config,
@@ -276,7 +284,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       setIsEdit(false);
     } catch (error) {
       console.error(error);
-      toast.error(error.message);
+      toast.error((error as Error).message);
       setLoading(false);
       setLoadingText("");
     }
@@ -290,8 +298,8 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
     }));
   }, [generalConfig, authConfig]);
 
-  const generateAndSetUri = useCallback(async () => {
-    const url = await mongoURIGenerator(config);
+  const generateAndSetUri = useCallback(() => {
+    const url = mongoURIGenerator(config);
     setConnectionUrl(url);
   }, [config]);
 
@@ -341,13 +349,24 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
     handleArrowUp,
   ]);
 
+  const handleTextChange = (text: string): void => {
+    setConnectionUrl(text);
+    const updatedParams = mongoConfigParser(text);
+    if (!updatedParams) return;
+    setConfig((prev) => ({
+      ...prev,
+      general: updatedParams.general,
+      auth: updatedParams.auth,
+    }));
+  };
+
   return (
     <CommandCentre
       textPlaceholder="Enter MongoDB connection string..."
       dialogType="addMongoConnection"
       keybindings={["Meta+m"]}
       text={connectionUrl}
-      onTextChange={setConnectionUrl}
+      onTextChange={handleTextChange}
       startAdornment={
         <InputAdornment position="start">
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -459,7 +478,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
           <HotkeyButton
             onClick={toggleAdvancedConfig}
             keyBindings={["Meta+Shift+a"]}
-            showhotkey={"true"}
+            showhotkey={true}
             tooltip="Close Advanced Config"
             sx={{ textTransform: "none" }}
           >
@@ -500,7 +519,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
           <HotkeyButton
             onClick={closeCustomizeDb}
             keyBindings={["Meta+ArrowLeft"]}
-            showhotkey={"true"}
+            showhotkey={true}
             tooltip="Close Customization"
             disabled={loading}
             sx={{ textTransform: "none" }}
@@ -511,7 +530,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
             variant="outlined"
             onClick={isEdit ? handleUpdateConnection : handleSaveConnection}
             keyBindings={["Meta+Enter"]}
-            showhotkey={"true"}
+            showhotkey={true}
             tooltip="Save Connection"
             disabled={loading}
             sx={{

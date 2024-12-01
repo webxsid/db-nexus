@@ -4,7 +4,7 @@
 
 const { contextBridge } = require("electron");
 const filePreloader = require("./file.preloader.cjs");
-const mongodbPreloader = require("./mongodb.preloader.cjs");
+const mongodbPreloader = require("./databases/mongo.preloader.cjs");
 
 contextBridge.exposeInMainWorld("uploadFile", filePreloader.uploadFile);
 

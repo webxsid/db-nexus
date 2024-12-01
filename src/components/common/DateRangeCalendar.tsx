@@ -47,8 +47,8 @@ const CustomPickersDay = styled(PickersDay, {
 
 const isInBetween = (
   day: Moment,
-  startDate: Moment | null,
-  endDate: Moment | null,
+  startDate?: Moment | null,
+  endDate?: Moment | null,
 ): boolean => {
   if (!startDate || !endDate) return false;
   return day.isBetween(startDate, endDate, "day", "[]");
@@ -61,7 +61,7 @@ function Day(
     startDate?: Moment | null;
     endDate?: Moment | null;
   },
-): FC {
+): React.JSX.Element {
   const { day, hoveredDay, endDate, startDate, ...other } = props;
   return (
     <CustomPickersDay
@@ -79,18 +79,14 @@ function Day(
 }
 
 export interface IDateRangeCalendarProps {
-  startDate: Moment;
-  endDate: Moment;
-  isStart: boolean;
-  setStartDate: React.Dispatch<React.SetStateAction<Moment>>;
-  setEndDate: React.Dispatch<React.SetStateAction<Moment>>;
+  startDate: Moment | null;
+  endDate: Moment | null;
+  setDate: (date: Moment | null) => void;
 }
 export const DateRangeCalendar: FC<IDateRangeCalendarProps> = ({
   startDate,
   endDate,
-  isStart,
-  setEndDate,
-  setStartDate,
+  setDate,
 }) => {
   const [hoveredDay, setHoveredDay] = React.useState<Moment | null>(null);
   const [selectedDate, setSelectedDate] = React.useState<Moment | null>(null);
@@ -101,11 +97,7 @@ export const DateRangeCalendar: FC<IDateRangeCalendarProps> = ({
       onChange={(newDate) => {
         console.log(newDate);
         setSelectedDate(newDate);
-        if (isStart) {
-          setStartDate(newDate);
-        } else {
-          setEndDate(newDate);
-        }
+        setDate(newDate);
       }}
       disableFuture
       showDaysOutsideCurrentMonth

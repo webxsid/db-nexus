@@ -43,10 +43,10 @@ export class CoreConnectionController {
         payload.provider,
         payload.id,
       );
-      return { ok: 1, connectionId: payload.connectionId };
+      return { ok: 1, connectionId: payload.id };
     } catch (error) {
       logger.error(error);
-      return { ok: 0, connectionId: payload.connectionId };
+      return { ok: 0, connectionId: payload.id };
     }
   }
 
@@ -64,7 +64,8 @@ export class CoreConnectionController {
         payload.provider,
         payload.id,
       );
-      return { ok: 1, connectionId: meta?.id, meta };
+      if(!meta || !meta.id) throw new Error("Error updating connection");
+      return { ok: 1, connectionId: meta.id, meta };
     } catch (error) {
       logger.error(error);
       return { ok: 0, connectionId: "", meta: {} };
@@ -94,10 +95,10 @@ export class CoreConnectionController {
         payload.id,
       );
       if (!meta) throw new Error("Connection not found");
-      return { ok: 1, connectionId: payload.connectionId, meta };
+      return { ok: 1, connectionId: payload.id, meta };
     } catch (error) {
       logger.error(error);
-      return { ok: 0, connectionId: payload.connectionId, meta: {} };
+      return { ok: 0, connectionId: payload.id, meta: {} };
     }
   }
 
@@ -113,7 +114,7 @@ export class CoreConnectionController {
       return { ok: 1 };
     } catch (error) {
       logger.error(error);
-      return { ok: 0, connectionId: "", meta: {} };
+      return { ok: 0 };
     }
   }
 

@@ -1,6 +1,11 @@
 import { ipcMain } from "electron";
 import { TIpcListenersType } from "../constants";
-import { MongoConnectionController } from "../controllers";
+import {
+  MongoCollectionController,
+  MongoConnectionController,
+  MongoDatabaseController,
+  MongoDataController
+} from "../controllers";
 import { Singleton } from "../decorators";
 import { destroyIpcListeners, registerIpcListeners } from "../utils";
 
@@ -23,8 +28,53 @@ export class MongoIPCListeners {
     return this;
   }
 
+  public registerDatabaseListener(): this {
+    console.log("Registering Mongo Database Listener");
+    registerIpcListeners(ipcMain, MongoDatabaseController);
+    this._listeners.set("database", MongoDatabaseController);
+
+    return this;
+  }
+
+  public deregisterDatabaseListener(): this {
+    destroyIpcListeners(ipcMain, MongoDatabaseController);
+    this._listeners.delete("database");
+
+    return this;
+  }
+
+  public registerCollectionListener(): this {
+    console.log("Registering Mongo Collection Listener");
+    registerIpcListeners(ipcMain, MongoCollectionController);
+    this._listeners.set("collection", MongoCollectionController);
+
+    return this;
+  }
+
+  public deregisterCollectionListener(): this {
+    destroyIpcListeners(ipcMain, MongoCollectionController);
+    this._listeners.delete("collection");
+
+    return this;
+  }
+
+  public registerDataListener(): this {
+    console.log("Registering Mongo Data Listener");
+    registerIpcListeners(ipcMain, MongoDataController);
+    this._listeners.set("document", MongoDataController);
+
+    return this;
+  }
+
+  public deregisterDataListener(): this {
+    destroyIpcListeners(ipcMain, MongoDataController);
+    this._listeners.delete("document");
+
+    return this;
+  }
+
   public destroyAllListeners(): this {
-    this._listeners.entries().forEach(([type, listener]) => {
+    Array.from(this._listeners.entries()).forEach(([type, listener]:[TIpcListenersType, Function]) => {
       destroyIpcListeners(ipcMain, listener);
       this._listeners.delete(type);
     });

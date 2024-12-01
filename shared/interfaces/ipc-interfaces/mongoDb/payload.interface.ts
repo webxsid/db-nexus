@@ -19,13 +19,9 @@ export interface IMongoIpcEventsPayload {
   [EMongoIpcEvents.CreateDatabase]: {
     connectionId: string;
     dbName: string;
-    firstCollectionName: string;
+    firstCollection: string;
   };
   [EMongoIpcEvents.DropDatabase]: {
-    connectionId: string;
-    dbName: string;
-  };
-  [EMongoIpcEvents.GetDatabaseStats]: {
     connectionId: string;
     dbName: string;
   };
@@ -44,11 +40,6 @@ export interface IMongoIpcEventsPayload {
     dbName: string;
     collectionName: string;
   };
-  [EMongoIpcEvents.GetCollectionStats]: {
-    connectionId: string;
-    dbName: string;
-    collectionName: string;
-  };
 
   [EMongoIpcEvents.GetDocumentList]: {
     connectionId: string;
@@ -56,19 +47,23 @@ export interface IMongoIpcEventsPayload {
     collectionName: string;
     query: Filter<unknown>;
     queryOptions?: FindOptions;
+    ignoreMongoose?: boolean;
   };
   [EMongoIpcEvents.CreateDocument]: {
     connectionId: string;
     dbName: string;
     collectionName: string;
     document: unknown;
+    ignoreMongoose?: boolean;
   };
   [EMongoIpcEvents.UpdateDocument]: {
     connectionId: string;
     dbName: string;
     collectionName: string;
     documentId: string;
+    updateOptions: unknown;
     document: unknown;
+    ignoreMongoose?: boolean;
   };
   [EMongoIpcEvents.UpdateDocumentBulk]: {
     connectionId: string;
@@ -77,12 +72,15 @@ export interface IMongoIpcEventsPayload {
     query: Filter<unknown>;
     queryOptions?: FindOptions;
     document: unknown;
+    ignoreMongoose?: boolean;
   };
   [EMongoIpcEvents.DeleteDocument]: {
     connectionId: string;
     dbName: string;
     collectionName: string;
     documentId: string;
+    deleteOptions: unknown;
+    ignoreMongoose?: boolean;
   };
   [EMongoIpcEvents.DeleteDocumentBulk]: {
     connectionId: string;
@@ -90,6 +88,7 @@ export interface IMongoIpcEventsPayload {
     collectionName: string;
     query: Filter<unknown>;
     queryOptions?: FindOptions;
+    ignoreMongoose?: boolean;
   };
   [EMongoIpcEvents.GetDocument]: {
     connectionId: string;

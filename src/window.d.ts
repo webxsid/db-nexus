@@ -7,6 +7,7 @@ import {
   IMongoIpcEventsResponse,
   IWindowIpcEventsResponse,
 } from "@shared";
+import { Filter, FindOptions } from "mongodb";
 
 export interface IFileApis {
   uploadFile: (file: File) => Promise<string>;
@@ -59,8 +60,66 @@ export interface IMongoApis {
     id: string,
   ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.Disconnect]>;
   testConnection: (
-    meta: IMongoConnection,
+    meta: Omit<IMongoConnection, "id" | "createdAt" | "updatedAt">,
   ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.TestConnection]>;
+  listDatabases: (
+    connectionId: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetDatabaseList]>;
+  createDatabase: (
+    connectionId: string,
+    dbName: string,
+    firstCollection: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.CreateDatabase]>;
+  dropDatabase: (
+    connectionId: string,
+    dbName: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.DropDatabase]>;
+  listCollections: (
+    connectionId: string,
+    dbName: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetCollectionList]>;
+  createCollection: (
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.CreateCollection]>;
+  dropCollection: (
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.DropCollection]>;
+  listDocuments: (
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    query?: Filter<unknown>,
+    queryOptions?: FindOptions,
+    ignoreMongoose?: boolean,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetDocumentList]>;
+  insertDocument: (
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    document: unknown,
+    ignoreMongoose?: boolean,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.CreateDocument]>;
+  updateDocument: (
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    documentId: string,
+    document: unknown,
+    updateOptions?: FindOptions,
+    ignoreMongoose?: boolean,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.UpdateDocument]>;
+  deleteDocument: (
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    documentId: string,
+    deleteOptions?: FindOptions,
+    ignoreMongoose?: boolean,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.DeleteDocument]>;
 }
 
 export interface IMainApis {

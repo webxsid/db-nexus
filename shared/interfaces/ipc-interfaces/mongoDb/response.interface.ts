@@ -1,5 +1,6 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId, Document } from "mongodb";
 import { EMongoIpcEvents } from "shared/constants";
+import { IMongoCollectionList, IMongoDatabaseList } from "@shared/interfaces";
 
 export interface IMongoIpcEventsResponse {
   [EMongoIpcEvents.Connect]: {
@@ -14,23 +15,12 @@ export interface IMongoIpcEventsResponse {
     ok: 0 | 1;
   };
 
-  [EMongoIpcEvents.GetDatabaseList]: {
+  [EMongoIpcEvents.GetDatabaseList]: IMongoDatabaseList & {
     connectionId: string;
-    ok: 0 | 1;
-    databases: Array<{
-      name: string;
-      size: number;
-      empty: 0 | 1;
-      numOfCollections: number;
-      numOfIndexes: number;
-    }>;
-  };
+  }
   [EMongoIpcEvents.CreateDatabase]: {
     connectionId: string;
     dbName: string;
-    size: number;
-    numOfCollections: number;
-    numOfIndexes: number;
     ok: 0 | 1;
   };
   [EMongoIpcEvents.DropDatabase]: {
@@ -38,25 +28,10 @@ export interface IMongoIpcEventsResponse {
     dbName: string;
     ok: 0 | 1;
   };
-  [EMongoIpcEvents.GetDatabaseStats]: {
-    connectionId: string;
-    dbName: string;
-    size: number;
-    numOfCollections: number;
-    numOfIndexes: number;
-    ok: 0 | 1;
-  };
 
-  [EMongoIpcEvents.GetCollectionList]: {
+  [EMongoIpcEvents.GetCollectionList]: IMongoCollectionList & {
     connectionId: string;
     dbName: string;
-    ok: 0 | 1;
-    collections: Array<{
-      name: string;
-      size: number;
-      numOfDocuments: number;
-      numOfIndexes: number;
-    }>;
   };
   [EMongoIpcEvents.CreateCollection]: {
     connectionId: string;
@@ -73,40 +48,27 @@ export interface IMongoIpcEventsResponse {
     collectionName: string;
     ok: 0 | 1;
   };
-  [EMongoIpcEvents.GetCollectionStats]: {
-    connectionId: string;
-    dbName: string;
-    collectionName: string;
-    size: number;
-    numOfDocuments: number;
-    numOfIndexes: number;
-    ok: 0 | 1;
-  };
 
   [EMongoIpcEvents.GetDocumentList]: {
     connectionId: string;
     dbName: string;
     collectionName: string;
     ok: 0 | 1;
-    docs: Array<{ _id: ObjectId } & object>;
-    totalDocs: number;
-    from: number;
-    count: number;
+    docs: Array<WithId<Document>>
   };
   [EMongoIpcEvents.CreateDocument]: {
     connectionId: string;
     dbName: string;
     collectionName: string;
     ok: 0 | 1;
-    insertedId: ObjectId;
+    doc?: WithId<Document>
   };
   [EMongoIpcEvents.UpdateDocument]: {
     connectionId: string;
     dbName: string;
     collectionName: string;
     ok: 0 | 1;
-    matched: number;
-    modified: number;
+    doc?: WithId<Document>
   };
   [EMongoIpcEvents.UpdateDocumentBulk]: {
     connectionId: string;
@@ -121,7 +83,6 @@ export interface IMongoIpcEventsResponse {
     dbName: string;
     collectionName: string;
     ok: 0 | 1;
-    deleted: number;
   };
   [EMongoIpcEvents.DeleteDocumentBulk]: {
     connectionId: string;

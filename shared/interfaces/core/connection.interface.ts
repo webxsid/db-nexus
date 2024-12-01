@@ -12,12 +12,12 @@ export interface IDatabaseConnection<T> {
   /**
    * Optional human-readable name for the database connection instance.
    */
-  name?: string;
+  name: string;
 
   /**
    * Optional URI for the database connection. This can be useful for connection strings.
    */
-  uri?: string;
+  uri: string;
 
   /**
    * Optional color code for visual representation in the UI.
@@ -30,14 +30,14 @@ export interface IDatabaseConnection<T> {
   provider: ESupportedDatabases;
 
   /**
-   * Optional timestamp indicating when the database connection was created.
+   * Timestamp indicating when the database connection was created.
    */
-  createdAt?: Date;
+  createdAt: Date;
 
   /**
-   * Optional timestamp indicating when the database connection was last updated.
+   * Timestamp indicating when the database connection was last updated.
    */
-  updatedAt?: Date;
+  updatedAt: Date;
 
   /**
    * Optional timestamp for the last time the database was connected to.

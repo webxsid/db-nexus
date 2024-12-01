@@ -8,8 +8,8 @@ import { useDialogManager } from "@/managers";
 import {
   connectionsAtom,
   isEditConnectionAtom,
-  refreshConnectionsAtom,
-  selectConnectionAtom,
+  refreshConnectionsAtom, resetConfirmAtom,
+  selectConnectionAtom
 } from "@/store";
 import { confirmAtom } from "@/store/atoms/confirm-dialog.atom";
 import {
@@ -53,7 +53,7 @@ import { FC, useState } from "react";
 import { toast } from "react-toastify";
 
 interface IRowContextMenuProps {
-  connection: IDatabaseConnection<unknown>;
+  connection?: IDatabaseConnection<unknown>;
   handleClose: () => void;
 }
 const RowContextMenu: FC<IRowContextMenuProps> = ({
@@ -65,30 +65,37 @@ const RowContextMenu: FC<IRowContextMenuProps> = ({
   const refreshConnections = useSetAtom(refreshConnectionsAtom);
   const { openDialog } = useDialogManager();
   const setConfirmDialog = useSetAtom(confirmAtom);
+  const resetConfirmDialog = useSetAtom(resetConfirmAtom);
 
   const onClose = React.useCallback((): void => {
-    setConfirmDialog({ open: false });
+    resetConfirmDialog();
 
     handleClose();
-  }, [setConfirmDialog, handleClose]);
+  }, [resetConfirmDialog, handleClose]);
 
-  const handleCopyConnectionURI = async (): void => {
-    await navigator.clipboard.writeText(connection.uri);
-    toast.success("Connection URI copied to clipboard");
-    onClose();
+  const handleCopyConnectionURI = async (): Promise<void> => {
+    if(connection) {
+      await navigator.clipboard.writeText(connection?.uri);
+      toast.success("Connection URI copied to clipboard");
+      onClose();
+    }
   };
 
   const handleEditConnection = (): void => {
-    selectConnection(connection.id);
-    setIsEdit(true);
-    openDialog("addMongoConnection");
-    onClose();
+    if(connection) {
+      selectConnection(connection.id);
+      setIsEdit(true);
+      openDialog("addMongoConnection");
+      onClose();
+    }
   };
 
   const handleDeleteConnection = (): void => {
+    if(!connection) return;
     setConfirmDialog({
       open: true,
       title: `Delete Connection - ${connection.name}`,
+      severity:"error",
       message:
         "Are you sure you want to delete this connection? This action cannot be undone.",
       confirmLabel: "Delete",
@@ -117,9 +124,11 @@ const RowContextMenu: FC<IRowContextMenuProps> = ({
   };
 
   const handleDuplicateConnection = (): void => {
+    if(!connection) return;
     setConfirmDialog({
       open: true,
       title: `Duplicate Connection - ${connection.name}`,
+      severity:"info",
       message:
         "Are you sure you want to duplicate this connection? This will create a new connection with the same details.",
       confirmLabel: "Duplicate",
@@ -155,7 +164,7 @@ const RowContextMenu: FC<IRowContextMenuProps> = ({
               component="span"
               sx={{ display: "flex", alignItems: "center", gap: 1 }}
             >
-              <CopyAll fontSize="smaller" />
+              <CopyAll fontSize="small" />
               Copy Connection URI
             </Typography>
           }
@@ -169,7 +178,7 @@ const RowContextMenu: FC<IRowContextMenuProps> = ({
               component="span"
               sx={{ display: "flex", alignItems: "center", gap: 1 }}
             >
-              <Edit fontSize="smaller" />
+              <Edit fontSize="small" />
               Edit Connection
             </Typography>
           }
@@ -183,7 +192,7 @@ const RowContextMenu: FC<IRowContextMenuProps> = ({
               component="span"
               sx={{ display: "flex", alignItems: "center", gap: 1 }}
             >
-              <CopyAll fontSize="smaller" />
+              <CopyAll fontSize="small" />
               Duplicate Connection
             </Typography>
           }
@@ -203,7 +212,7 @@ const RowContextMenu: FC<IRowContextMenuProps> = ({
                 color: "error.main",
               }}
             >
-              <Delete fontSize="smaller" />
+              <Delete fontSize="small" />
               Delete Connection
             </Typography>
           }
@@ -220,7 +229,8 @@ interface IConnection {
   uri: string;
   createdAt: Date;
   updatedAt: Date;
-  lastConnectionAt: Date;
+  lastConnectionAt?: Date;
+  color?: string;
 }
 
 type TOrder = "asc" | "desc";
@@ -318,10 +328,19 @@ export const ConnectionsTable: FC = () => {
    */
   const sortedConnections = React.useMemo(() => {
     return [...searchResults].sort((a, b) => {
-      if (a[orderBy] < b[orderBy]) {
+
+      if(!a || !b) return 0;
+      const aOrderBy = a[orderBy];
+      const bOrderBy = b[orderBy];
+
+      if(!aOrderBy || !bOrderBy) return 0;
+
+      if(typeof aOrderBy !==  typeof bOrderBy ) return 0;
+
+      if (aOrderBy < bOrderBy) {
         return order === "asc" ? -1 : 1;
       }
-      if (a[orderBy] > b[orderBy]) {
+      if (aOrderBy > bOrderBy) {
         return order === "asc" ? 1 : -1;
       }
       return 0;
@@ -343,14 +362,15 @@ export const ConnectionsTable: FC = () => {
   }, [sortedConnections, page, rowsPerPage]);
 
   const handleRowContextMenu = (
-    e: React.MouseEvent<HTMLTableRowElement> | null,
+    e: React.MouseEvent<HTMLTableRowElement | HTMLButtonElement> | null,
     id: string,
   ): void => {
+    if(!e) return;
+    e.preventDefault();
+    e?.stopPropagation();
     const mouseX = e.clientX;
     const mouseY = e.clientY;
 
-    if (e) e.preventDefault();
-    e?.stopPropagation();
     showContextMenu(
       { mouseX, mouseY },
       {
@@ -582,27 +602,22 @@ export const ConnectionsTable: FC = () => {
           sx={{ borderRadius: 3 }}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end" sx={{ gap: 2 }}>
-                <Typography variant="caption" component="span">
-                  {paginatedConnections.length} of {savedConnections.length}
-                </Typography>
-                <KeyCombo
-                  keyCombo={"Meta+f"}
-                  size="small"
-                  sx={{
-                    marginLeft: 1,
-                    color: "text.secondary",
-                  }}
-                />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end" sx={{ gap: 2 }}>
+                  <Typography variant="caption" component="span">
+                    {paginatedConnections.length} of {savedConnections.length}
+                  </Typography>
+                  <KeyCombo keyCombo={"Meta+f"} size="small" />
+                </InputAdornment>
+              ),
+            }
           }}
         />
         <Box sx={{ display: "flex", gap: 1, alignItems: "center", px: 1 }}>
@@ -664,7 +679,7 @@ export const ConnectionsTable: FC = () => {
                     gap: 1,
                   }}
                 >
-                  <Storage fontSize="smaller" />
+                  <Storage fontSize="small" />
                   Provider
                 </TableSortLabel>
               </TableCell>
@@ -678,7 +693,7 @@ export const ConnectionsTable: FC = () => {
                     gap: 1,
                   }}
                 >
-                  <Cable fontSize="smaller" />
+                  <Cable fontSize="small" />
                   Connection URI
                 </TableSortLabel>
               </TableCell>
@@ -692,7 +707,7 @@ export const ConnectionsTable: FC = () => {
                     gap: 1,
                   }}
                 >
-                  <Event fontSize="smaller" />
+                  <Event fontSize="small" />
                   Last Updated
                 </TableSortLabel>
               </TableCell>
@@ -706,7 +721,7 @@ export const ConnectionsTable: FC = () => {
                     gap: 1,
                   }}
                 >
-                  <Event fontSize="smaller" />
+                  <Event fontSize="small" />
                   Last Connection
                 </TableSortLabel>
               </TableCell>
@@ -765,7 +780,7 @@ export const ConnectionsTable: FC = () => {
                     <Typography variant="body1" component="span">
                       <ShowDBProvider
                         provider={connection.provider}
-                        showLogo="true"
+                        showLogo
                         logoSx={{
                           width: "100%",
                         }}
@@ -786,7 +801,7 @@ export const ConnectionsTable: FC = () => {
                   </TableCell>
                   <TableCell>
                     <Render
-                      if={connection.updatedAt}
+                      if={!!connection.updatedAt}
                       then={
                         <Typography variant="caption" component="span">
                           {new Date(connection.updatedAt).toDateString()}
@@ -801,7 +816,7 @@ export const ConnectionsTable: FC = () => {
                   </TableCell>
                   <TableCell>
                     <Render
-                      if={connection.lastConnectionAt}
+                      if={!!connection.lastConnectionAt}
                       then={
                         <Typography variant="caption" component="span">
                           {connection.lastConnectionAt?.toLocaleString()}
@@ -832,7 +847,7 @@ export const ConnectionsTable: FC = () => {
                       size="small"
                       onClick={(e) => handleRowContextMenu(e, connection.id)}
                     >
-                      <MoreVert fontSize="smaller" />
+                      <MoreVert fontSize="small" />
                     </IconButton>
                   </Box>
                 </TableRow>
@@ -841,10 +856,10 @@ export const ConnectionsTable: FC = () => {
               <TableRow>
                 <Render
                   if={
-                    searchQuery ||
+                    !!(searchQuery ||
                     providerFilter.length > 0 ||
                     updatedAtFilter ||
-                    lastConnectionAtFilter
+                    lastConnectionAtFilter)
                   }
                   then={
                     <TableCell colSpan={6}>

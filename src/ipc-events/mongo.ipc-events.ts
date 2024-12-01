@@ -3,6 +3,7 @@ import {
   IMongoConnection,
   IMongoIpcEventsResponse,
 } from "@shared";
+import { Filter, FindOptions } from "mongodb";
 
 class _MongoIpcEvents {
   private static _instance: _MongoIpcEvents;
@@ -26,10 +27,99 @@ class _MongoIpcEvents {
   }
 
   public async testConnection(
-    meta: IMongoConnection,
+    meta: Omit<IMongoConnection, "id" | "createdAt" | "updatedAt">,
   ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.TestConnection]> {
     return window.mongo.testConnection(meta);
   }
+
+  public async listDatabases(
+    connectionId: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetDatabaseList]> {
+    return window.mongo.listDatabases(connectionId);
+  }
+
+  public async createDatabase(
+    connectionId: string,
+    dbName: string,
+    firstCollection: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.CreateDatabase]> {
+    return window.mongo.createDatabase(connectionId, dbName, firstCollection);
+  }
+
+  public async dropDatabase(
+    connectionId: string,
+    dbName: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.DropDatabase]> {
+    return window.mongo.dropDatabase(connectionId, dbName);
+  }
+
+  public async listCollections(
+    connectionId: string,
+    dbName: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetCollectionList]> {
+    return window.mongo.listCollections(connectionId, dbName);
+  }
+
+  public async createCollection(
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.CreateCollection]> {
+    return window.mongo.createCollection(connectionId, dbName, collectionName);
+  }
+
+  public async dropCollection(
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.DropCollection]> {
+    return window.mongo.dropCollection(connectionId, dbName, collectionName);
+  }
+
+  public async listDocuments(
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    query: Filter<unknown>,
+    queryOptions?: FindOptions,
+    ignoreMongoose?: boolean,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetDocumentList]> {
+    return window.mongo.listDocuments(connectionId, dbName, collectionName, query, queryOptions, ignoreMongoose);
+  }
+
+  public async createDocument(
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    document: unknown,
+    ignoreMongoose?: boolean,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.CreateDocument]> {
+    return window.mongo.insertDocument(connectionId, dbName, collectionName, document, ignoreMongoose);
+  }
+
+  public async updateDocument(
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    documentId: string,
+    document: unknown,
+    updateOptions?: FindOptions,
+    ignoreMongoose?: boolean,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.UpdateDocument]> {
+    return window.mongo.updateDocument(connectionId, dbName, collectionName, documentId, document, updateOptions, ignoreMongoose);
+  }
+
+  public async deleteDocument(
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+    documentId: string,
+    deleteOptions: FindOptions,
+    ignoreMongoose?: boolean,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.DeleteDocument]> {
+    return window.mongo.deleteDocument(connectionId, dbName, collectionName, documentId, deleteOptions, ignoreMongoose);
+  }
+
 }
 
 export const MongoIpcEvents = _MongoIpcEvents.instance;

@@ -12,7 +12,7 @@ import { useAtom } from "jotai";
 import { ReactNode, useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 
-const Home = (): ReactNode => {
+export const Home = (): ReactNode => {
   const [_, refreshConnections] = useAtom(refreshConnectionsAtom);
 
   const fetchConnections = useCallback(
@@ -94,4 +94,3 @@ const Home = (): ReactNode => {
   );
 };
 
-export default Home;

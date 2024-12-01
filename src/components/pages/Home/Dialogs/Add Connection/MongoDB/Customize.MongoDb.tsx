@@ -64,7 +64,7 @@ export const CustomizeMongoConnection: FC<ICustomizeMongoConnectionProps> = ({
   }, []);
 
   const colorSpaceHandler = useCallback(
-    function colorSpaceHandler(event: SyntheticEvent): void {
+    function colorSpaceHandler(_event: KeyboardEvent): void {
       console.log("colorSpaceHandler");
       // cycle through colors
       const currentIndex = availableColors.indexOf(color);
@@ -87,7 +87,7 @@ export const CustomizeMongoConnection: FC<ICustomizeMongoConnectionProps> = ({
   }, [selectedIndex]);
 
   const handleArrowDown = useCallback(
-    function tabHandler(event: SyntheticEvent): void {
+    function tabHandler(event: KeyboardEvent): void {
       event.preventDefault();
       handleNext();
     },
@@ -95,7 +95,7 @@ export const CustomizeMongoConnection: FC<ICustomizeMongoConnectionProps> = ({
   );
 
   const handleArrowUp = useCallback(
-    function shiftTabHandler(event: SyntheticEvent): void {
+    function shiftTabHandler(event: KeyboardEvent): void {
       event.preventDefault();
       handlePrev();
     },
@@ -190,6 +190,9 @@ export const CustomizeMongoConnection: FC<ICustomizeMongoConnectionProps> = ({
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 fullWidth
+                onClick={(event: SyntheticEvent) => {
+                  event.stopPropagation();
+                }}
               />
             </Box>
           }

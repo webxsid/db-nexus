@@ -2,7 +2,7 @@
   box-sizing: border-box;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
-  transition: all 0.3s ease-in-out;
+  transition: color 0.3s ease-in-out;
   font-family: "Fira Code", "Courier New", monospace;
 }
 

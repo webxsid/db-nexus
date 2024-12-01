@@ -1,6 +1,5 @@
 import { ESupportedDatabases } from "@shared/constants";
 import { IDatabaseConnection } from "../core";
-import { IMongoCollectionStats, IMongoDatabaseStats } from "./stats.interface";
 export type TMongoScheme = "mongodb" | "mongodb+srv";
 export type TMongoAuthMethods = "none" | "password";
 export type TMongoPasswordAuthMechanism =
@@ -75,17 +74,5 @@ export interface IMongoConnectionParams {
 
 export interface IMongoConnection
   extends IDatabaseConnection<IMongoConnectionParams> {
-  provider: ESupportedDatabases.Mongo;
-}
-
-export interface IMongoDatabaseList {
-  sizeOnDisk: number;
-  empty: boolean;
-  db: {
-    [key: string]: IMongoDatabaseStats;
-  };
-}
-
-export interface IMongoCollectionList {
-  [key: string]: IMongoCollectionStats;
+  enableMongoose?: boolean;
 }

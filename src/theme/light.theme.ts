@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material";
+import { ComponentsTheme } from "@/theme/common.theme.ts";
 
 const lightTheme = createTheme({
   palette: {
@@ -28,14 +29,7 @@ const lightTheme = createTheme({
     },
   },
 
-  components: {
-    MuiTypography: {
-      defaultProps: {
-        color: "textPrimary", // Ensure the text color adapts to the mode
-        fontFamily: "'Fira Code', 'Courier New', monospace", // Keep the same font
-      },
-    },
-  },
+  components: ComponentsTheme
 });
 
 export default lightTheme;

@@ -1,6 +1,6 @@
-import { IDatabaseConnection } from "@shared";
+import { ESupportedDatabases, IDatabaseConnection } from "@shared";
 import { dialog } from "electron";
-import { readFileSync, unlinkSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { Singleton } from "../decorators";
 import { logger } from "../utils";
 import { PathManager } from "./path.manager";
@@ -11,6 +11,10 @@ export class FileManager {
 
   constructor() {
     this._pathManager = new PathManager();
+  }
+
+  fileExists(filePath: string): boolean {
+    return existsSync(filePath);
   }
 
   writeToFile(filePath: string, data: string): 0 | 1 {
@@ -83,12 +87,17 @@ export class FileManager {
     provider: string,
     data: IDatabaseConnection<unknown>,
   ): Promise<0 | 1> {
-    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFilePath = await this._pathManager.ConnectionDataFile(
+      provider as ESupportedDatabases,
+    );
     const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return 0;
     }
-    const meta = JSON.parse(metaFileData); // object of all connections
+    const meta = JSON.parse(metaFileData) as Record<
+      string,
+      IDatabaseConnection<unknown>
+    >; // object of all connections
     // check if connection with same name already exists
     const existingConnection = Object.values(meta).find(
       (conn) => conn.name === data.name,
@@ -118,8 +127,7 @@ export class FileManager {
       }
 
       if (userChoice.response === 1) {
-        const id = existingConnection.id;
-        data.id = id;
+        data.id = (existingConnection as IDatabaseConnection<unknown>).id;
       }
     }
 
@@ -134,7 +142,9 @@ export class FileManager {
     connectionId: string,
     data: IDatabaseConnection<unknown>,
   ): Promise<0 | 1> {
-    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFilePath = await this._pathManager.ConnectionDataFile(
+      provider as ESupportedDatabases,
+    );
     const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return 0;
@@ -150,7 +160,9 @@ export class FileManager {
     provider: string,
     connectionId: string,
   ): Promise<0 | 1> {
-    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFilePath = await this._pathManager.ConnectionDataFile(
+      provider as ESupportedDatabases,
+    );
     const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return 0;
@@ -165,7 +177,9 @@ export class FileManager {
   async getConnectionData(
     provider: string,
   ): Promise<Record<string, IDatabaseConnection<unknown>> | null> {
-    const metaFilePath = await this._pathManager.ConnectionDataFile(provider);
+    const metaFilePath = await this._pathManager.ConnectionDataFile(
+      provider as ESupportedDatabases,
+    );
     const metaFileData = await this.readFromFileAsync(metaFilePath);
     if (!metaFileData) {
       return null;

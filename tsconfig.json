@@ -25,7 +25,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src", "main", "shared"],
   "exclude": ["node_modules", "dist", "build", "coverage", "scripts"],

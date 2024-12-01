@@ -24,38 +24,18 @@ export class ConnectionManager {
 
   public async listConnections(): Promise<Array<IDatabaseConnection<unknown>>> {
     const mongoConnections = Array.from(this._mongoConnections.values());
-    const connections = [...mongoConnections];
-    return connections;
+    return [...mongoConnections];
   }
 
-  public async getConnection(
+  public async getConnection<T extends IDatabaseConnection<unknown>>(
     provider: ESupportedDatabases,
     id: string,
-  ): Promise<IDatabaseConnection<unknown> | null> {
+  ): Promise<T | null> {
     switch (provider) {
+      case ESupportedDatabases.Firestore:
+        return null;
       case ESupportedDatabases.Mongo:
-        return this._mongoConnections.get(id) || null;
-      default:
-        throw new Error("Unsupported provider.");
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-  public async connect(provider: ESupportedDatabases) {
-    switch (provider) {
-      case ESupportedDatabases.Mongo:
-        return this._connectToMongo;
-        break;
-      default:
-        throw new Error("Unsupported provider.");
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-  public async disconnect(provider: ESupportedDatabases) {
-    switch (provider) {
-      case ESupportedDatabases.Mongo:
-        return this._disconnectFromMongo;
+        return this._mongoConnections.get(id) as T || null;
       default:
         throw new Error("Unsupported provider.");
     }
@@ -63,7 +43,7 @@ export class ConnectionManager {
 
   public async queryConnections(
     searchTerm: string,
-    sortField: "name" | "createdAt" | "lastConnectedAt" = "name",
+    sortField: "name" | "createdAt" | "lastConnectionAt" = "name",
     sorDirection: "asc" | "desc" = "asc",
   ): Promise<Array<IDatabaseConnection<unknown>>> {
     const mongoConnections = Array.from(this._mongoConnections.values());
@@ -71,10 +51,13 @@ export class ConnectionManager {
     return connections
       .filter((connection) => connection.name.includes(searchTerm))
       .sort((a, b) => {
+        const aSortField = a[sortField];
+        const bSortField = b[sortField];
+        if(!aSortField || !bSortField) return 0;
         if (sorDirection === "asc") {
-          return a[sortField] > b[sortField] ? 1 : -1;
+          return aSortField > bSortField ? 1 : -1;
         }
-        return a[sortField] < b[sortField] ? 1 : -1;
+        return aSortField < bSortField ? 1 : -1;
       });
   }
 
@@ -82,7 +65,7 @@ export class ConnectionManager {
     // mongo connections
     const mongoConnections = await this._fileManager.getConnectionData(
       ESupportedDatabases.Mongo,
-    );
+    ) as Record<string, IMongoConnection>;
     if (mongoConnections) {
       this._mongoConnections = new Map(Object.entries(mongoConnections));
     }
@@ -149,12 +132,12 @@ export class ConnectionManager {
     connection: Omit<IMongoConnection, "id">,
   ): Promise<string> {
     const id = v4();
-    this._validateMongoConnection({ ...connection, id });
+    this._validateMongoConnection(connection );
     const data = {
       ...connection,
       id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     this._mongoConnections.set(id, data);
     const ok = await this._fileManager.addConnectionToFile(
@@ -178,11 +161,11 @@ export class ConnectionManager {
     id: string,
     connection: Omit<IMongoConnection, "id">,
   ): Promise<void> {
-    this._validateMongoConnection({ ...connection, id });
+    this._validateMongoConnection(connection);
     const data = {
       ...connection,
       id,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     };
     this._mongoConnections.set(id, data);
     await this._fileManager.updateConnectionToFile(
@@ -205,11 +188,11 @@ export class ConnectionManager {
       ...existingConnection,
       id: newId,
       name,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     this._mongoConnections.set(newId, newConnection);
-    this._fileManager.addConnectionToFile(
+    await this._fileManager.addConnectionToFile(
       ESupportedDatabases.Mongo,
       newConnection,
     );
@@ -224,4 +207,5 @@ export class ConnectionManager {
       id,
     );
   }
+
 }

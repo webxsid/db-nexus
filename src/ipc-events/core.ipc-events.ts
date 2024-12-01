@@ -18,7 +18,7 @@ class _CoreIpcEvents {
 
   public async addConnection(
     provider: ESupportedDatabases,
-    meta: IDatabaseConnection<unknown>,
+    meta: Omit<IDatabaseConnection<unknown>, "id" | "createdAt" | "updatedAt">,
   ): Promise<ICoreIpcEventsResponse[ECoreIpcEvents.AddConnection]> {
     return window.core.addConnection(provider, meta);
   }

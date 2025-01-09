@@ -22,7 +22,6 @@ const StyledMenu: FC<MenuProps> = ({
             color: "text.primary",
             mt: 1,
             opacity: 0.5,
-            ...slotProps?.paper?.sx,
           },
         },
         ...slotProps,

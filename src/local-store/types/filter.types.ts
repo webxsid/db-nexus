@@ -1,13 +1,13 @@
-type SortType = "asc" | "desc" | null;
-type SortField = "name" | "createdAt" | "lastConnectionAt" | null;
+type TSortType = "asc" | "desc" | null;
+type TSortField = "name" | "createdAt" | "lastConnectionAt" | null;
 interface IFilter {
   query: string;
-  types: Array<string>;
+  types: string[];
 }
 
 interface ISort {
-  field: SortField;
-  order: SortType;
+  field: TSortField;
+  order: TSortType;
 }
 
 interface IFilterState {
@@ -15,7 +15,7 @@ interface IFilterState {
   sort: ISort;
 }
 
-enum FilterActionTypes {
+enum EFilterActionTypes {
   SET_FILTER = "SET_FILTER",
   CLEAR_FILTER = "CLEAR_FILTER",
   ADD_QUERY = "ADD_QUERY",
@@ -27,20 +27,20 @@ enum FilterActionTypes {
   CLEAR_SORT = "CLEAR_SORT",
 }
 
-type FilterActionPayload = IFilter | ISort | string | undefined | null;
+type TFilterActionPayload = IFilter | ISort | string | undefined | null;
 
-interface FilterAction {
-  type: FilterActionTypes;
-  payload?: FilterActionPayload;
+interface IFilterAction {
+  type: EFilterActionTypes;
+  payload?: TFilterActionPayload;
 }
 
 export {
   IFilter,
   ISort,
-  FilterAction,
-  FilterActionPayload,
-  FilterActionTypes,
-  SortType,
-  SortField,
+  IFilterAction,
+  TFilterActionPayload,
+  EFilterActionTypes,
+  TSortType,
+  TSortField,
 };
 export default IFilterState;

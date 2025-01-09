@@ -1,6 +1,22 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/no-var-requires, no-undef */
 const { ipcRenderer, contextBridge } = require("electron");
+
+const getConnection = async (id) => {
+  const result = await ipcRenderer.invoke(
+    "mongo:get",
+    JSON.stringify({ connectionId: id }),
+  );
+
+  return JSON.parse(result);
+}
+
+const updateConnection = async (id, meta) => {
+  const result = await ipcRenderer.invoke(
+    "mongo:update",
+    JSON.stringify({ connectionId: id, meta }),
+  );
+
+  return JSON.parse(result);
+}
 
 const connect = async (id) => {
   const result = await ipcRenderer.invoke(
@@ -119,6 +135,33 @@ const deleteDocument = async (id, dbName, collection, documentId, deleteOptions,
   return JSON.parse(result);
 }
 
+const getConnectionStatus = async (id) => {
+  const result = await ipcRenderer.invoke(
+    "mongo/stats:connection-status",
+    JSON.stringify({ connectionId: id }),
+  );
+
+  return JSON.parse(result);
+}
+
+const getServerStats = async (id) => {
+  const result = await ipcRenderer.invoke(
+    "mongo/stats:server",
+    JSON.stringify({ connectionId: id }),
+  );
+
+  return JSON.parse(result);
+}
+
+const getOpsStats = async (id) => {
+  const result = await ipcRenderer.invoke(
+    "mongo/stats:ops",
+    JSON.stringify({ connectionId: id }),
+  );
+
+  return JSON.parse(result);
+}
+
 const getPlatform = async () => {
   const result = await ipcRenderer.invoke("window:platform");
   return JSON.parse(result);
@@ -147,7 +190,15 @@ const minimize = async () => {
   await ipcRenderer.invoke("window:minimize");
 };
 
+const openExternal = async (url) => {
+  await ipcRenderer.invoke("window:open-external",
+    JSON.stringify({ url }),
+  );
+};
+
 contextBridge.exposeInMainWorld("mongo", {
+  getConnection,
+  updateConnection,
   connect,
   disconnect,
   testConnection,
@@ -160,7 +211,10 @@ contextBridge.exposeInMainWorld("mongo", {
   listDocuments,
   insertDocument,
   updateDocument,
-  deleteDocument
+  deleteDocument,
+  getConnectionStatus,
+  getServerStats,
+  getOpsStats
 });
 
 contextBridge.exposeInMainWorld("mainApi", {
@@ -169,5 +223,6 @@ contextBridge.exposeInMainWorld("mainApi", {
   isMaximised,
   isFullScreen,
   maximize,
-  minimize
+  minimize,
+  openExternal
 });

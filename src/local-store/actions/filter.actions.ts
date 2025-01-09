@@ -1,64 +1,64 @@
 import {
-  FilterAction,
-  FilterActionTypes,
+  IFilterAction,
+  EFilterActionTypes,
   IFilter,
   ISort,
 } from "../types/filter.types";
 
-const setFilter = (payload: IFilter): FilterAction => {
+const setFilter = (payload: IFilter): IFilterAction => {
   return {
-    type: FilterActionTypes.SET_FILTER,
+    type: EFilterActionTypes.SET_FILTER,
     payload,
   };
 };
-const addQuery = (payload: string): FilterAction => {
+const addQuery = (payload: string): IFilterAction => {
   return {
-    type: FilterActionTypes.ADD_QUERY,
+    type: EFilterActionTypes.ADD_QUERY,
     payload,
   };
 };
-const removeQuery = (): FilterAction => {
+const removeQuery = (): IFilterAction => {
   return {
-    type: FilterActionTypes.REMOVE_QUERY,
+    type: EFilterActionTypes.REMOVE_QUERY,
   };
 };
 
-const addType = (payload: string): FilterAction => {
+const addType = (payload: string): IFilterAction => {
   return {
-    type: FilterActionTypes.ADD_TYPE,
-    payload,
-  };
-};
-
-const removeType = (payload: string): FilterAction => {
-  return {
-    type: FilterActionTypes.REMOVE_TYPE,
+    type: EFilterActionTypes.ADD_TYPE,
     payload,
   };
 };
 
-const clearType = (): FilterAction => {
+const removeType = (payload: string): IFilterAction => {
   return {
-    type: FilterActionTypes.CLEAR_TYPE,
-  };
-};
-
-const setSort = (payload: ISort): FilterAction => {
-  return {
-    type: FilterActionTypes.SET_SORT,
+    type: EFilterActionTypes.REMOVE_TYPE,
     payload,
   };
 };
 
-const clearFilter = (): FilterAction => {
+const clearType = (): IFilterAction => {
   return {
-    type: FilterActionTypes.CLEAR_FILTER,
+    type: EFilterActionTypes.CLEAR_TYPE,
   };
 };
 
-const clearSort = (): FilterAction => {
+const setSort = (payload: ISort): IFilterAction => {
   return {
-    type: FilterActionTypes.CLEAR_SORT,
+    type: EFilterActionTypes.SET_SORT,
+    payload,
+  };
+};
+
+const clearFilter = (): IFilterAction => {
+  return {
+    type: EFilterActionTypes.CLEAR_FILTER,
+  };
+};
+
+const clearSort = (): IFilterAction => {
+  return {
+    type: EFilterActionTypes.CLEAR_SORT,
   };
 };
 

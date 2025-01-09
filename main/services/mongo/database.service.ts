@@ -2,6 +2,7 @@ import { Singleton } from "../../decorators";
 import { MongoClientManager } from "../../managers";
 import { IMongoCollectionList, IMongoDatabaseList } from "@shared";
 import { ListDatabasesResult } from "mongodb";
+import { logger } from "../../utils";
 
 @Singleton
 export class MongoDatabaseService {
@@ -95,8 +96,9 @@ export class MongoDatabaseService {
   }
 
   private mapListDatabases(databases: ListDatabasesResult): IMongoDatabaseList {
+    logger.info("Mapping list databases result:", databases);
     return {
-      totalSize: databases.totalSizeMb,
+      totalSize: databases.totalSize,
       ok: databases.ok,
       databases: databases.databases.reduce(
         (acc, db) => {

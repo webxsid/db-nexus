@@ -117,16 +117,13 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
   }, []);
 
   const toggleAdvancedConfig = useCallback(() => {
-    console.log("Toggle Advanced Config");
     setShowAdvancedConfig((prev) => {
-      console.log("Toggle Advanced Config");
       if (!prev) {
         setSelectedTab(0);
         // blur the input field
         const inputField = document.getElementById(
           `${EDialogIds.AddMongoConnection}-search`,
         );
-        console.log(inputField);
         if (inputField) {
           inputField.blur();
         }
@@ -169,9 +166,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
 
   const handleEnter = useCallback(
     function enterHandler() {
-      console.log("Enter Handler");
       const option = ccOptions[selectedIndex - 1];
-      console.log(option);
       if (option) {
         option.handler();
       }
@@ -234,7 +229,6 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
     try {
       setLoadingText("Testing Connection...");
       const testResult = await MongoIpcEvents.testConnection(meta);
-      console.log("Test Result", testResult);
       setLoadingText("Saving Connection...");
       if (!testResult.ok) throw new Error("Connection test failed");
       const saveResult = await CoreIpcEvents.addConnection(
@@ -269,7 +263,6 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
     try {
       setLoadingText("Testing Connection...");
       const testResult = await MongoIpcEvents.testConnection(meta);
-      console.log("Test Result", testResult);
       setLoadingText("Updating Connection...");
       if (!testResult.ok) throw new Error("Connection test failed");
       const saveResult = await CoreIpcEvents.updateConnection(

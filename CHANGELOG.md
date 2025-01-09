@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - v0.1.0
 > 🚧 This version is under active development and not ready for production use.
 
+### In Progress
+- Mongo DB Page
+  - Left Panel
+    - [x] Collection List
+    - [x] Active Collections
+    - [x] Pinned Collections
+    - [x] Connection Stats
+    
 ### Added
 - Initial implementation of DB Nexus home page.
 - Support for MongoDB connections and CRUD operations.

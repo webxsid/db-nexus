@@ -7,13 +7,13 @@ import {
 import Header from "@/components/pages/Home/Header";
 import { CoreIpcEvents, WindowIPCEvents } from "@/ipc-events";
 import { refreshConnectionsAtom } from "@/store";
-import { Container, Grid } from "@mui/material";
-import { useAtom } from "jotai";
+import { Container, Grid2 as Grid } from "@mui/material";
+import { useSetAtom } from "jotai";
 import { ReactNode, useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 
 export const Home = (): ReactNode => {
-  const [_, refreshConnections] = useAtom(refreshConnectionsAtom);
+  const refreshConnections = useSetAtom(refreshConnectionsAtom);
 
   const fetchConnections = useCallback(
     async function () {
@@ -49,8 +49,7 @@ export const Home = (): ReactNode => {
       <AddMongoDbConnectionDialog />
       <Grid
         onDoubleClick={handleHeaderDoubleClick}
-        xs={12}
-        item
+        size={12}
         className="draggable"
         sx={{
           width: "100%",
@@ -63,8 +62,7 @@ export const Home = (): ReactNode => {
         <Header />
       </Grid>
       <Grid
-        item
-        xs={12}
+        size={12}
         sx={{
           height: "calc(100vh - 70px)",
           width: "100vw",
@@ -93,4 +91,3 @@ export const Home = (): ReactNode => {
     </Grid>
   );
 };
-

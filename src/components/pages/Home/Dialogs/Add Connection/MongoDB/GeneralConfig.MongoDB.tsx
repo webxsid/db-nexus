@@ -1,7 +1,6 @@
 import { TransparentTextField } from "@/components/common";
 import Render from "@/components/common/Render";
 import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
-import { useTheme } from "@emotion/react";
 import { Info } from "@mui/icons-material";
 import {
   Box,
@@ -14,16 +13,18 @@ import {
   Tab,
   Tabs,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { IMongoConnectionParams } from "@shared";
 import React, {
+  Dispatch,
   FC,
   ReactNode,
-  SyntheticEvent,
   useCallback,
   useEffect,
   useRef,
 } from "react";
+import { SetStateAction } from "jotai";
 
 const schemeInfo = {
   mongodb:
@@ -35,7 +36,7 @@ const schemeInfo = {
 interface IProps {
   isActive: boolean;
   generalConfig: IMongoConnectionParams["general"];
-  setGeneralConfig: (config: IMongoConnectionParams["general"]) => void;
+  setGeneralConfig: Dispatch<SetStateAction<IMongoConnectionParams["general"]>>;
 }
 
 export const GeneralConfig: FC<IProps> = ({
@@ -69,9 +70,7 @@ export const GeneralConfig: FC<IProps> = ({
   }, []);
 
   const toggleMongoScheme = useCallback(() => {
-    console.log("Toggle Mongo Scheme");
     setGeneralConfig((prev) => {
-      console.log("Toggle Mongo Scheme", prev);
       return {
         ...prev,
         scheme: prev.scheme === "mongodb" ? "mongodb+srv" : "mongodb",
@@ -110,7 +109,7 @@ export const GeneralConfig: FC<IProps> = ({
 
   const handleNext = useCallback(() => {
     if (selectedIndex < maxIndex) {
-      if ((selectedIndex === 0) & skipDirectConnection) {
+      if (selectedIndex === 0 && skipDirectConnection) {
         setSelectedIndex(selectedIndex + 2);
       } else {
         setSelectedIndex(selectedIndex + 1);
@@ -120,7 +119,7 @@ export const GeneralConfig: FC<IProps> = ({
 
   const handlePrev = useCallback(() => {
     if (selectedIndex > 0) {
-      if ((selectedIndex === 2) & skipDirectConnection) {
+      if (selectedIndex === 2 && skipDirectConnection) {
         setSelectedIndex(selectedIndex - 2);
       } else {
         setSelectedIndex(selectedIndex - 1);
@@ -129,7 +128,7 @@ export const GeneralConfig: FC<IProps> = ({
   }, [selectedIndex, skipDirectConnection]);
 
   const handleArrowDown = useCallback(
-    function tabHandler(event: SyntheticEvent): void {
+    function tabHandler(event: KeyboardEvent): void {
       event.preventDefault();
       handleNext();
     },
@@ -137,7 +136,7 @@ export const GeneralConfig: FC<IProps> = ({
   );
 
   const handleArrowUp = useCallback(
-    function shiftTabHandler(event: SyntheticEvent): void {
+    function shiftTabHandler(event: KeyboardEvent): void {
       event.preventDefault();
       handlePrev();
     },
@@ -176,12 +175,13 @@ export const GeneralConfig: FC<IProps> = ({
           : undefined;
 
     if (spaceHandler) {
-      console.log("Adding Event Listener");
       currentRef.current?.addEventListener("keydown", spaceHandler);
     }
 
     return () => {
-      currentRef.current?.removeEventListener("keydown", spaceHandler);
+      if (spaceHandler) {
+        currentRef.current?.removeEventListener("keydown", spaceHandler);
+      }
     };
   }, [
     selectedIndex,

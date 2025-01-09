@@ -14,6 +14,19 @@ class _MongoIpcEvents {
     return this._instance;
   }
 
+  public async getConnection(
+    id: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetConnection]> {
+    return window.mongo.getConnection(id);
+  }
+
+  public async updateConnection(
+    id: string,
+    meta: Omit<IMongoConnection, "id"| "createdAt" | "updatedAt">,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.UpdateConnection]> {
+    return window.mongo.updateConnection(id, meta);
+  }
+
   public async connect(
     id: string,
   ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.Connect]> {
@@ -120,6 +133,23 @@ class _MongoIpcEvents {
     return window.mongo.deleteDocument(connectionId, dbName, collectionName, documentId, deleteOptions, ignoreMongoose);
   }
 
+  public async getConnectionStatus(
+    connectionId: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetConnectionStatus]> {
+    return window.mongo.getConnectionStatus(connectionId);
+  }
+
+  public async getServerStats(
+    connectionId: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetServerStatus]> {
+    return window.mongo.getServerStats(connectionId);
+  }
+
+  public async getOpsStats(
+    connectionId: string,
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetOpsStats]> {
+    return window.mongo.getOpsStats(connectionId);
+  }
 }
 
 export const MongoIpcEvents = _MongoIpcEvents.instance;

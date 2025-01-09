@@ -1,11 +1,10 @@
-import { ECoreIpcEvents } from "../../../constants";
-import { IDatabaseConnection } from "../../ipc-interfaces";
+import { IDatabaseConnection, ECoreIpcEvents } from "@shared";
 
 export interface ICoreIpcEventsResponse {
   [ECoreIpcEvents.AddConnection]: {
     ok: 0 | 1;
     connectionId: string;
-    meta: IDatabaseConnection<unknown>;
+    meta?: IDatabaseConnection<unknown>;
   };
   [ECoreIpcEvents.RemoveConnection]: {
     connectionId: string;
@@ -13,7 +12,7 @@ export interface ICoreIpcEventsResponse {
   };
   [ECoreIpcEvents.UpdateConnection]: {
     connectionId: string;
-    meta: IDatabaseConnection<unknown>;
+    meta?: IDatabaseConnection<unknown>;
     ok: 0 | 1;
   };
   [ECoreIpcEvents.ListConnections]: {
@@ -23,7 +22,7 @@ export interface ICoreIpcEventsResponse {
   [ECoreIpcEvents.GetConnection]: {
     ok: 0 | 1;
     connectionId: string;
-    meta: IDatabaseConnection<unknown>;
+    meta?: IDatabaseConnection<unknown>;
   };
   [ECoreIpcEvents.DuplicateConnection]: {
     ok: 0 | 1;

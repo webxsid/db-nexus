@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/no-var-requires, no-undef */
-
 const { ipcRenderer, contextBridge } = require("electron");
 
 const addConnection = async (provider, meta) => {
@@ -119,6 +116,10 @@ const minimize = async () => {
   await ipcRenderer.invoke("window:minimize");
 };
 
+const openExternal = async (url) => {
+  await ipcRenderer.invoke("window:open-external", url);
+};
+
 // expose the functions to the window object
 contextBridge.exposeInMainWorld("core", {
   addConnection,
@@ -143,6 +144,7 @@ contextBridge.exposeInMainWorld("mainApi", {
   isFullScreen,
   maximize,
   minimize,
+  openExternal,
 });
 
 console.log("[Home Preloader] preload.js loaded");

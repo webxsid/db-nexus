@@ -1,4 +1,3 @@
-import { ESupportedDatabases } from "@shared/constants";
 import { IDatabaseConnection } from "../core";
 export type TMongoScheme = "mongodb" | "mongodb+srv";
 export type TMongoAuthMethods = "none" | "password";
@@ -75,4 +74,45 @@ export interface IMongoConnectionParams {
 export interface IMongoConnection
   extends IDatabaseConnection<IMongoConnectionParams> {
   enableMongoose?: boolean;
+}
+
+export type TMongoConnectionStatus = "connected" | "disconnected" | "warning" | "critical";
+
+export type TMongoConnectionType = "Standalone" | "ReplicaSet" | "Sharded" | "Unknown";
+
+export interface IMongoConnectionServerStats {
+  memory: {
+    total: number;
+    used: number;
+    free: number;
+  }
+  cpu: {
+    usage: number;
+  }
+  connections: {
+    current: number;
+    available: number;
+  }
+  network: {
+    in: number;
+    out: number;
+  },
+  version: string;
+  connectionType: TMongoConnectionType
+}
+
+export interface IMongoConnectionOpsStats {
+  insert: number;
+  query: number;
+  update: number;
+  delete: number;
+  getmore: number;
+  command: number;
+}
+
+export interface IMongoConnectionStats {
+  connectionStatus: TMongoConnectionStatus;
+  connectionLatency: number;
+  serverStats: IMongoConnectionServerStats;
+  opsStats: IMongoConnectionOpsStats;
 }

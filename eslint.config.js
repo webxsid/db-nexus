@@ -41,7 +41,7 @@ export default [
       "*.config.js",
       "*.config.ts",
     ],
-    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+    files: ["**/*.{ts,tsx}"],
     plugins: {
       eslint,
       react,
@@ -78,7 +78,7 @@ export default [
           selector: "variable",
           leadingUnderscore: "allow",
           trailingUnderscore: "allow",
-          format: ["camelCase", "PascalCase"],
+          format: ["camelCase", "PascalCase", "UPPER_CASE"],
         },
         {
           selector: "function",
@@ -90,7 +90,7 @@ export default [
         },
         {
           selector: "enumMember",
-          format: ["PascalCase"],
+          format: ["PascalCase", "UPPER_CASE"],
         },
         {
           selector: "method",

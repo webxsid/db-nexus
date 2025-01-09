@@ -6,7 +6,6 @@ enum ELoadingActionTypes {
 }
 
 interface IStartLoadingPayload {
-  r;
   message: string;
 }
 
@@ -27,6 +26,7 @@ interface ILoadingState {
   active: boolean;
   reason: string;
   message: string;
+  status?: TLoadingStatus;
 }
 
 export {

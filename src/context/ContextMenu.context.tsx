@@ -15,7 +15,7 @@ export interface IContextMenuContextType {
     options: IShowContextMenuOptions,
   ) => void;
   hideContextMenu: () => void;
-  anchor: { mouseX: number; mouseY: number };
+  anchor: { mouseX: number; mouseY: number } | null;
   content: ReactNode | null;
   transformOrigin?: MenuProps["transformOrigin"];
   anchorOrigin?: MenuProps["anchorOrigin"];
@@ -44,7 +44,7 @@ export const ContextMenuProvider: React.FC<{ children: ReactNode }> = ({
     horizontal: "left",
   });
   const [content, setContent] = useState<ReactNode | null>(null);
-  const [onClose, setOnClose] = useState<() => void | null>(null);
+  const [onClose, setOnClose] = useState<(() => void) | null>(null);
 
   const handleClose = (): void => {
     setAnchor(null);

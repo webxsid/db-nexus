@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const Singleton = <T extends new (...args: any[]) => any>(
   constructor: T,
-): T => {
+): { new(...args: any[]): ({} & any); prototype: {} } => {
   let instance: InstanceType<T>;
 
   return class extends constructor {
@@ -10,7 +10,7 @@ export const Singleton = <T extends new (...args: any[]) => any>(
       if (instance) {
         return instance;
       }
-      instance = this;
+      instance = this as InstanceType<T>;
     }
   };
 };

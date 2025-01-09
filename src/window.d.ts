@@ -53,6 +53,13 @@ export interface ICoreApis {
 }
 
 export interface IMongoApis {
+  getConnection: (
+    id: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetConnection]>;
+  updateConnection: (
+    id: string,
+    meta: Omit<IMongoConnection, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.UpdateConnection]>;
   connect: (
     id: string,
   ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.Connect]>;
@@ -120,10 +127,19 @@ export interface IMongoApis {
     deleteOptions?: FindOptions,
     ignoreMongoose?: boolean,
   ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.DeleteDocument]>;
+  getConnectionStatus: (
+    connectionId: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetConnectionStatus]>;
+  getServerStats: (
+    connectionId: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetServerStatus]>;
+  getOpsStats: (
+    connectionId: string,
+  ) => Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetOpsStats]>;
 }
 
 export interface IMainApis {
-  openExternal: (url: string) => Promise<void>;
+  openExternal: ( url: string ) => Promise<void>;
   maximize: () => Promise<void>;
   minimize: () => Promise<void>;
   close: () => Promise<void>;

@@ -1,8 +1,32 @@
 import { ObjectId, WithId, Document } from "mongodb";
 import { EMongoIpcEvents } from "shared/constants";
-import { IMongoCollectionList, IMongoDatabaseList } from "@shared/interfaces";
+import { IMongoCollectionList, IMongoConnection, IMongoConnectionStats, IMongoDatabaseList } from "@shared/interfaces";
 
 export interface IMongoIpcEventsResponse {
+  [EMongoIpcEvents.GetConnection]: {
+    meta: IMongoConnection | null,
+    ok: 0 | 1;
+  },
+
+  [EMongoIpcEvents.UpdateConnection]: {
+    ok: 0 | 1;
+    meta: IMongoConnection | null;
+  }
+
+  [EMongoIpcEvents.GetConnectionStatus]:{
+    status: IMongoConnectionStats['connectionStatus'],
+    latency: IMongoConnectionStats['connectionLatency'],
+    ok: 0 | 1;
+  },
+  [EMongoIpcEvents.GetServerStatus]:{
+    stats: IMongoConnectionStats['serverStats'],
+    ok: 0 | 1;
+  }
+  [EMongoIpcEvents.GetOpsStats]:{
+    stats: IMongoConnectionStats['opsStats'],
+    ok: 0 | 1;
+  },
+
   [EMongoIpcEvents.Connect]: {
     connectionId: string;
     ok: 0 | 1;

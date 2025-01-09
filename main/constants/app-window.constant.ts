@@ -1,2 +1,2 @@
-export const kDefaultWindowWidth = 800;
-export const kDefaultWindowHeight = 600;
+export const kDefaultWindowWidth = 1100;
+export const kDefaultWindowHeight = 800;

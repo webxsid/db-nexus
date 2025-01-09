@@ -13,6 +13,38 @@ export class MongoConnectionController {
     private readonly _connectionService: MongoConnectionService = new MongoConnectionService(),
   ) {}
 
+  @Event("get")
+  public async getConnection(
+    payload: IMongoIpcEventsPayload[EMongoIpcEvents.GetConnection],
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetConnection]> {
+    const connection = await this._connectionService.getConnection(payload.connectionId);
+    return {
+      meta: connection,
+      ok: connection ? 1 : 0,
+    };
+  }
+
+  @Event("update")
+  public async updateConnection(
+    payload: IMongoIpcEventsPayload[EMongoIpcEvents.UpdateConnection],
+  ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.UpdateConnection]> {
+    try {
+      await this._connectionService.updateConnection(payload.id, payload.meta);
+      const meta = await this._connectionService.getConnection(payload.id);
+      if(!meta) throw new Error("Connection not found");
+      return {
+        ok: 1,
+        meta,
+      };
+    } catch (error) {
+      logger.error(error);
+      return {
+        ok: 0,
+        meta: null,
+      };
+    }
+  }
+
   @Event("connect")
   public async connect(
     payload: IMongoIpcEventsPayload[EMongoIpcEvents.Connect],
@@ -40,7 +72,6 @@ export class MongoConnectionController {
     payload: IMongoIpcEventsPayload[EMongoIpcEvents.TestConnection],
   ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.TestConnection]> {
     const ok = await this._connectionService.testConnection(payload.meta);
-    logger.info("Testing connection", ok);
     return {
       ok,
     };

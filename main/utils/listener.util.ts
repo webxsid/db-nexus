@@ -29,13 +29,18 @@ export const registerIpcListeners = <T>(
   });
 };
 
-export const destroyIpcListeners = <T>(ipcMain: IpcMain, target: T): void => {
-  const prototype = Object.getPrototypeOf(target);
+export const destroyIpcListeners = <T>(
+  ipcMain: IpcMain,
+  target: new () => T,
+): void => {
+  const prototype = target.prototype;
 
   Object.getOwnPropertyNames(prototype).forEach((methodName) => {
     const event = Reflect.getMetadata("event", prototype, methodName);
     if (event) {
-      ipcMain.removeHandler(event);
+      const baseEvent = Reflect.getMetadata("baseEvent", prototype);
+      const eventName = baseEvent ? `${baseEvent}:${event}` : event;
+      ipcMain.removeHandler(eventName);
     }
   });
 };

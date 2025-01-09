@@ -30,7 +30,7 @@ export class CoreConnectionController {
       return { ok: 1, connectionId, meta };
     } catch (error) {
       logger.error(error);
-      return { ok: 0, connectionId: "", meta: {} };
+      return { ok: 0, connectionId: "" };
     }
   }
 
@@ -68,7 +68,7 @@ export class CoreConnectionController {
       return { ok: 1, connectionId: meta.id, meta };
     } catch (error) {
       logger.error(error);
-      return { ok: 0, connectionId: "", meta: {} };
+      return { ok: 0, connectionId: "" };
     }
   }
 
@@ -98,7 +98,7 @@ export class CoreConnectionController {
       return { ok: 1, connectionId: payload.id, meta };
     } catch (error) {
       logger.error(error);
-      return { ok: 0, connectionId: payload.id, meta: {} };
+      return { ok: 0, connectionId: payload.id };
     }
   }
 

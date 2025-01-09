@@ -273,7 +273,6 @@ export const DatePicker: FC<IDatePickerProps> = ({
           onChange={handleInputChange}
           fullWidth
           onKeyDown={(e) => {
-            console.log(e.key);
             if (e.key === "ArrowDown") {
               e.preventDefault();
               handleArrowDown();

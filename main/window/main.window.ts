@@ -6,6 +6,7 @@ import {
   ProcessIPCListeners,
 } from "../ipc-listeners";
 import { ConnectionManager, FileManager, PathManager } from "../managers";
+import { logger } from "../utils";
 
 export class MainWindow {
   private _window: BrowserWindow | null = null;
@@ -19,8 +20,8 @@ export class MainWindow {
     private readonly _connectionManager: ConnectionManager = new ConnectionManager(),
   ) {}
 
-  public async init(): Promise<BrowserWindow> {
-    await this._createWindow();
+  public async init(width?: number, height?: number): Promise<BrowserWindow> {
+    await this._createWindow(width, height);
     if (!this._window) {
       throw new Error("Failed to create Main Window");
     }
@@ -35,19 +36,27 @@ export class MainWindow {
     this._window?.focus();
   }
 
-  public async activate(): Promise<void> {
+  public async activate(width?: number, height?: number): Promise<void> {
     if (this._window) {
       this._window.show();
     } else {
-      await this.init();
+      await this.init(width, height);
     }
   }
 
-  private async _createWindow(): Promise<void> {
+  public get Size(): [number, number] {
+    if (!this._window) {
+      throw new Error("Window not found");
+    }
+    const windowSize = this._window.getSize();
+    return [windowSize[0], windowSize[1]];
+  }
+
+  private async _createWindow(width?: number, height?: number): Promise<void> {
     try {
       this._window = new BrowserWindow({
-        width: kDefaultWindowWidth,
-        height: kDefaultWindowHeight,
+        width: width ?? kDefaultWindowWidth,
+        height: height ?? kDefaultWindowHeight,
         icon: nativeImage.createFromPath(this._fileManager.IconFile),
         titleBarStyle: "hidden",
         fullscreenable: false,
@@ -65,7 +74,7 @@ export class MainWindow {
       await this._registerIPCListeners();
       await this._connectionManager.initConnections();
     } catch (error) {
-      console.error("Failed to create Main Window:", error);
+      logger.error("Failed to create Main Window:", error);
     }
 
     this._window?.on("closed", () => {
@@ -75,7 +84,6 @@ export class MainWindow {
   }
 
   private async _registerIPCListeners(): Promise<void> {
-    console.log("Registering IPC Listeners");
     this._coreIpcListener.registerConnectionListener();
     this._mongoIpcListener.registerConnectionListener();
     this._processIpcListener.registerConnectionListener();

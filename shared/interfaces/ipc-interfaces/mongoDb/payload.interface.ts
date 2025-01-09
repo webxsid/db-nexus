@@ -1,8 +1,23 @@
 import { AggregateOptions, Document, Filter, FindOptions } from "mongodb";
-import { EMongoIpcEvents } from "../../../constants";
-import { IMongoConnection } from "../../connection-interfaces";
+import { EMongoIpcEvents, IMongoConnection } from "@shared";
 
 export interface IMongoIpcEventsPayload {
+  [EMongoIpcEvents.GetConnection]: {
+    connectionId: string;
+  };
+  [EMongoIpcEvents.UpdateConnection]: {
+    id: string;
+    meta: Omit<IMongoConnection, "id" | "createdAt" | "updatedAt">;
+  };
+  [EMongoIpcEvents.GetConnectionStatus]: {
+    connectionId: string;
+  };
+  [EMongoIpcEvents.GetServerStatus]: {
+    connectionId: string;
+  };
+  [EMongoIpcEvents.GetOpsStats]: {
+    connectionId: string;
+  };
   [EMongoIpcEvents.Connect]: {
     connectionId: string;
   };

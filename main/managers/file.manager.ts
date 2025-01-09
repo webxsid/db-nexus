@@ -102,7 +102,6 @@ export class FileManager {
     const existingConnection = Object.values(meta).find(
       (conn) => conn.name === data.name,
     );
-    logger.info("Existing connection", existingConnection);
     if (existingConnection) {
       // prompt user to overwrite
       const userChoice = await dialog.showMessageBox({
@@ -132,7 +131,6 @@ export class FileManager {
     }
 
     meta[data.id] = data;
-    logger.info("Meta after adding", meta);
 
     return await this.writeToFileAsync(metaFilePath, JSON.stringify(meta));
   }
@@ -150,9 +148,7 @@ export class FileManager {
       return 0;
     }
     const meta = JSON.parse(metaFileData);
-    logger.info("Meta file data", meta);
     meta[connectionId] = data;
-    logger.info("Meta after updating", meta);
     return await this.writeToFileAsync(metaFilePath, JSON.stringify(meta));
   }
 
@@ -168,9 +164,7 @@ export class FileManager {
       return 0;
     }
     const meta = JSON.parse(metaFileData);
-    logger.info("Meta file data", meta);
     delete meta[connectionId];
-    logger.info("Meta after removing", meta);
     return await this.writeToFileAsync(metaFilePath, JSON.stringify(meta));
   }
 

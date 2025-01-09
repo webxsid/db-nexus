@@ -16,7 +16,7 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    getIsMac();
+    getIsMac().then();
   }, [getIsMac]);
   return (
     <Box
@@ -57,7 +57,8 @@ const Header: React.FC = () => {
             borderRadius: 2,
           }}
           keyBindings={["Meta+n"]}
-          skipBind={"true"}
+          skipBind
+          showhotkey={false}
           hotKeySize="small"
           size="small"
           startIcon={<Add />}

@@ -12,7 +12,7 @@ class Tunnel {
   private tunnelOptions: TunnelOptions = {
     autoClose: false,
   };
-  private forwardOPtions: ForwardOptions = {
+  private forwardOptions: ForwardOptions = {
     dstPort: 0,
   };
 
@@ -20,12 +20,12 @@ class Tunnel {
 
   constructor(private config: SshOptions) {}
 
-  public init = async () => {
+  public async _init (): Promise<void> {
     const [server, client] = await createTunnel(
       this.tunnelOptions,
       this.serverConfig,
       this.config,
-      this.forwardOPtions
+      this.forwardOptions
     );
     server.on("connection", (socket) => {
       console.log("connection", socket);

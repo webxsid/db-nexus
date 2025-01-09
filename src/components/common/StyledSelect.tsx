@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import { useTheme, Select, Box, Chip, SelectProps } from "@mui/material";
 
-interface Props {
+interface IStyledSelectProps {
   value: string | string[];
   multiple?: boolean;
   onChange?: SelectProps["onChange"];
@@ -12,7 +12,7 @@ interface Props {
   size?: "small" | "medium";
   fullWidth?: boolean;
 }
-const StyledSelect: React.FC<Props> = ({
+const StyledSelect: React.FC<IStyledSelectProps> = ({
   value,
   onChange,
   children,

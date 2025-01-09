@@ -27,6 +27,9 @@ export const StyledPopper: FC = () => {
       placement={placement}
       keepMounted
       transition
+      sx={{
+        zIndex: 999999,
+      }}
     >
       {({ TransitionProps }) => (
         <Grow {...TransitionProps} timeout={350}>

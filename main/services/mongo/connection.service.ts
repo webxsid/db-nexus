@@ -17,6 +17,26 @@ export class MongoConnectionService {
     private readonly _windowManager: WindowManager = new WindowManager(),
   ) {}
 
+  public async getConnection(id: string): Promise<IMongoConnection | null> {
+    return this._connectionManager.getConnection(
+      ESupportedDatabases.Mongo,
+      id,
+    );
+  }
+
+  public async updateConnection(
+    id: string,
+    meta: Omit<IMongoConnection, "id" | "createdAt" | "updatedAt">,
+  ): Promise<void> {
+    const existingMeta = await this._connectionManager.getConnection(
+      ESupportedDatabases.Mongo,
+      id,
+    );
+    if (!existingMeta) throw new Error("Connection not found");
+    const updatedMeta = { ...existingMeta, ...meta, updatedAt: new Date() };
+    await this._connectionManager.updateConnection(ESupportedDatabases.Mongo, id, updatedMeta);
+  }
+
   public async connect(id: string): Promise<0 | 1> {
     const meta = await this._connectionManager.getConnection<IMongoConnection>(
       ESupportedDatabases.Mongo,
@@ -66,8 +86,9 @@ export class MongoConnectionService {
 
     // Create the database window
     try {
-      await this._windowManager.createMongoWindow(id);
+      const size = this._windowManager.MainWindow.Size;
       await this._windowManager.MainWindow.destroy();
+      await this._windowManager.createMongoWindow(id, ...size);
       return 1;
     } catch (error) {
       logger.error("Failed to create database window:", error);
@@ -103,7 +124,6 @@ export class MongoConnectionService {
   }
 
   public async testConnection(meta: IMongoConnection): Promise<0 | 1> {
-    logger.info("Testing connection", meta);
     if (!meta.uri) throw new Error("URI not found");
     const client = new MongoClient(meta.uri);
     try {

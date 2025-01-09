@@ -1,18 +1,19 @@
 import {
   ArrowUpward,
-  KeyboardAlt,
   KeyboardArrowDown,
   KeyboardArrowLeft,
   KeyboardArrowRight,
   KeyboardArrowUp,
   KeyboardCommandKey,
   KeyboardControlKey,
+  KeyboardOptionKey,
   KeyboardReturn,
   KeyboardTab,
   SpaceBar,
 } from "@mui/icons-material";
 import { Box, Typography, useTheme } from "@mui/material";
-import { FC, ReactNode, useEffect, useState } from "react";
+import { FC, ReactNode, useCallback, useEffect, useState } from "react";
+import { WindowIPCEvents } from "@/ipc-events";
 
 const fontSizeMap = {
   smaller: 10,
@@ -37,6 +38,16 @@ export const KeyCombo: FC<IKeyComboProps> = ({ keyCombo, size }): ReactNode => {
   const [fontSize, setFontSize] = useState<number>(12);
   const [keys, setKeys] = useState<string[]>([]);
   const [dimension, setDimension] = useState<number>(24);
+  const [isMac, setIsMac] = useState<boolean>(false);
+
+  const getIsMac = useCallback(async () => {
+    const { ok } = await WindowIPCEvents.isMac();
+    setIsMac(ok === 1);
+  }, []);
+
+  useEffect(() => {
+    getIsMac().then();
+  }, [getIsMac]);
 
   const theme = useTheme();
 
@@ -76,7 +87,6 @@ export const KeyCombo: FC<IKeyComboProps> = ({ keyCombo, size }): ReactNode => {
           {(() => {
             switch (key.toLowerCase()) {
               case "meta":
-                const isMac = navigator.platform.toLowerCase().includes("mac");
                 return isMac ? (
                   <KeyboardCommandKey sx={{ fontSize }} />
                 ) : (
@@ -85,7 +95,21 @@ export const KeyCombo: FC<IKeyComboProps> = ({ keyCombo, size }): ReactNode => {
               case "shift":
                 return <ArrowUpward sx={{ fontSize }} />;
               case "alt":
-                return <KeyboardAlt sx={{ fontSize }} />;
+                return isMac ? (
+                  <KeyboardOptionKey sx={{ fontSize }} />
+                ) : (
+                  <Typography
+                    variant="h6"
+                    component={"span"}
+                    sx={{
+                      fontSize,
+                      color: "inherit",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {key.toUpperCase()}
+                  </Typography>
+                );
               case "ctrl":
                 return <KeyboardControlKey sx={{ fontSize }} />;
               case "enter":

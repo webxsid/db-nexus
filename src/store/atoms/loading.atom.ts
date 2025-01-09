@@ -2,9 +2,9 @@ import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { toast } from "react-toastify";
 import IRootState, { ILoadingState } from "../types";
-import { CoreAtom } from "./core.atom";
+import { CoreAtom } from "@/store";
 
-export const LoadingAtom = focusAtom<IRootState, ILoadingState>(
+export const LoadingAtom = focusAtom(
   CoreAtom,
   (optic) => optic.prop("loading"),
 );
@@ -53,6 +53,8 @@ export const stopLoadingAtom = atom(
           position: "bottom-center",
         });
         break;
+      default:
+          break;
     }
 
     set(LoadingAtom, { active: false, reason: "", message: "" });

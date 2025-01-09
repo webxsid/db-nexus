@@ -6,4 +6,4 @@ export * from "./ShowDBProvider";
 export * from "./StyledContextMenu";
 export * from "./StyledPopper";
 export * from "./TextFields";
-export * from "./types";
+export * from "./Display"

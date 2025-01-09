@@ -40,7 +40,7 @@ const Logo: React.FC<ILogoProps> = ({
         height={height ?? 40}
       />
       <Render
-        if={showText}
+        if={!!showText}
         then={
           <Typography variant="h6" color="textPrimary">
             DB Nexus

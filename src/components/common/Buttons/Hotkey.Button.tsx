@@ -7,7 +7,7 @@ export interface IHotkeyButtonProps extends ButtonProps {
   keyBindings?: string[]; // Array of key combinations like ['Meta+s', 'Ctrl+Shift+S']
   tooltip?: string;
   onClick: () => void;
-  showhotkey: boolean;
+  showhotkey?: boolean;
   skipBind?: boolean;
   disabled?: boolean;
   hotKeySize?: "smaller" | "small" | "normal" | "large";
@@ -75,7 +75,7 @@ export const HotkeyButton: FC<IHotkeyButtonProps> = ({
       {...props}
       onClick={onClick}
       endIcon={
-        props.showhotkey ? (
+        props.showhotkey && keyBindings?.length? (
           <KeyCombo keyCombo={keyBindings[0]} size={hotKeySize} />
         ) : null
       }

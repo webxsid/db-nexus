@@ -10,11 +10,13 @@ import {
 import moment from "moment";
 import * as path from "path";
 
+type TLogLevel = "log" | "info" | "warn" | "error" | "success" | "reset";
+
 export class Logger {
   private static instance: Logger;
-  private readonly #logFilePath: string;
-  private readonly #logStream: WriteStream;
-  private readonly #logColors = {
+  readonly #logFilePath: string;
+  readonly #logStream: WriteStream;
+  readonly #logColors: Record<TLogLevel, string> = {
     log: "\x1b[32m",
     info: "\x1b[34m",
     warn: "\x1b[33m",
@@ -76,7 +78,7 @@ export class Logger {
   }
 
   // Private Methods
-  private #saveLog(logLevel: string, message: unknown[]): void {
+  #saveLog(logLevel: TLogLevel, message: unknown[]): void {
     const date = moment().format("YYYY-MM-DD HH:mm:ss");
     this.#logStream.write(`======================= \n`);
     this.#logStream.write(`${date} [${logLevel.toUpperCase()}]: \n`);

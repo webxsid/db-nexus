@@ -64,6 +64,7 @@ const ShowDBProvider: FC<IShowDBProviderOptions> = ({
           component={textComponent ?? "h1"}
           align="left"
           color={"text.primary"}
+          sx={textSx}
         >
           {providerDisplayMap[provider as ESupportedDatabases].name}
         </Typography>

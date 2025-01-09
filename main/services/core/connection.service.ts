@@ -26,7 +26,7 @@ export class CoreConnectionService {
 
   public async queryConnections(
     searchTerm: string,
-    sortField: "name" | "createdAt" | "lastConnectedAt" = "name",
+    sortField: "name" | "createdAt" | "lastConnectionAt" = "name",
     sortDirection: "asc" | "desc" = "asc",
   ): Promise<Array<IDatabaseConnection<unknown>>> {
     return await this._manager.queryConnections(

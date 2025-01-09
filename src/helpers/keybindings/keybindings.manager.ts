@@ -23,6 +23,15 @@ const forcedKeyCombos: string[] = [
   "Meta+9",
   "Meta+0",
   "Meta+Shift+a",
+  "Meta+Shift+1",
+  "Meta+Shift+2",
+  "Meta+Shift+3",
+  "Meta+Shift+4",
+  "Meta+Shift+5",
+  "Meta+Shift+6",
+  "Meta+Shift+7",
+  "Meta+Shift+8",
+  "Meta+Shift+9"
 ];
 
 class _KeybindingManager {

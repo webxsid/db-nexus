@@ -1,5 +1,8 @@
-import { ECoreIpcEvents, ESupportedDatabases } from "../../../constants";
-import { IDatabaseConnection } from "../../ipc-interfaces";
+import {
+  ECoreIpcEvents,
+  ESupportedDatabases,
+  IDatabaseConnection,
+} from "@shared";
 
 export interface ICoreIpcEventsPayload {
   [ECoreIpcEvents.AddConnection]: {
@@ -25,7 +28,7 @@ export interface ICoreIpcEventsPayload {
   };
   [ECoreIpcEvents.QueryConnections]: {
     searchTerm: string;
-    sortField: "name" | "createdAt" | "lastConnectedAt";
+    sortField: "name" | "createdAt" | "lastConnectionAt";
     sortDirection: "asc" | "desc";
   };
 }

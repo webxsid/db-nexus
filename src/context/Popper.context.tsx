@@ -36,7 +36,7 @@ export const PopperProvider: React.FC<{ children: ReactNode }> = ({
   ): void => {
     setAnchorEl(el);
     setContent(options.content);
-    setPlacement(options.placement || "bottom");
+    setPlacement(options.placement || "auto");
   };
 
   const hidePopper = (): void => {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires, no-undef */
 // This file will be loaded before the other scripts in the renderer process.
 // It will expose the functions from the pre-loaders to the window object.
 

@@ -1,2 +1,2 @@
-export * from "./Mongo";
+export * from "./MongoDB";
 export * from "./Home";

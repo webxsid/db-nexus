@@ -14,11 +14,11 @@ export class WindowManager {
     return this._mainWindow;
   }
 
-  public async createMongoWindow(connectionId: string): Promise<void> {
+  public async createMongoWindow(connectionId: string, width?: number, height?: number): Promise<void> {
     const window = new MongoDbWindow(() =>
       this._onDestroyMongoWindow(connectionId),
     );
-    await window.init(connectionId);
+    await window.init(connectionId, width, height);
 
     this._mongoWindows.set(connectionId, window);
   }
@@ -27,33 +27,60 @@ export class WindowManager {
     return this._mongoWindows.get(connectionId);
   }
 
-  public async destroyMongoWindow(connectionId: string): Promise<void> {
+public async destroyMongoWindow(connectionId: string): Promise<void> {
+try {
     const window = this._mongoWindows.get(connectionId);
     if (window) {
-      await window.destroy();
-      this._mongoWindows.delete(connectionId);
-      await this.MainWindow.activate();
+    const size = window.Size;
+    await window.destroy();
+    this._mongoWindows.delete(connectionId);
+    
+    // Only activate main window if size is valid
+    if (size[0] > 0 && size[1] > 0) {
+        await this.MainWindow.activate(...size).catch(error => {
+        console.error("Error activating main window:", error);
+        });
     }
-  }
+    }
+} catch (error) {
+    console.error("Error destroying mongo window:", error);
+    // Clean up the window reference even if destruction fails
+    this._mongoWindows.delete(connectionId);
+}
+}
 
   public MainWindowExists(): boolean {
     return !!this._mainWindow;
   }
 
-  public async destroyAllWindows(): Promise<void> {
+public async destroyAllWindows(): Promise<void> {
+try {
     if (this._mainWindow) {
-      await this._mainWindow.destroy();
+    await this._mainWindow.destroy().catch(error => {
+        console.error("Error destroying main window:", error);
+    });
+    this._mainWindow = undefined;
     }
 
-    this._mongoWindows.forEach((window) => {
-      window.destroy();
-    });
+    // Destroy all mongo windows
+    const destroyPromises = Array.from(this._mongoWindows.values()).map(window => 
+    window.destroy().catch(error => {
+        console.error("Error destroying mongo window:", error);
+    })
+    );
 
+    await Promise.all(destroyPromises);
     this._mongoWindows.clear();
-  }
+} catch (error) {
+    console.error("Error in destroyAllWindows:", error);
+    // Clean up references even if destruction fails
+    this._mainWindow = undefined;
+    this._mongoWindows.clear();
+}
+}
+
   private async _onDestroyMongoWindow(connectionId: string): Promise<void> {
-    this._mongoWindows.delete(connectionId);
-    await this.MainWindow.activate();
+    await this.destroyMongoWindow(connectionId);
   }
 
   public get ActiveWindow(): BrowserWindow | null {

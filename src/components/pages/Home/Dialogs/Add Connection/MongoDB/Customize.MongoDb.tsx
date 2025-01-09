@@ -65,7 +65,6 @@ export const CustomizeMongoConnection: FC<ICustomizeMongoConnectionProps> = ({
 
   const colorSpaceHandler = useCallback(
     function colorSpaceHandler(_event: KeyboardEvent): void {
-      console.log("colorSpaceHandler");
       // cycle through colors
       const currentIndex = availableColors.indexOf(color);
       const nextIndex = (currentIndex + 1) % availableColors.length;

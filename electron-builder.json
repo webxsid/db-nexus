@@ -1,6 +1,6 @@
 {
-  "appId": "com.dbclient.app",
-  "productName": "DB Client",
+  "appId": "com.webxsid.db-nexus",
+  "productName": "DB Nexus",
   "directories": {
     "output": "release/${version}"
   },
@@ -11,7 +11,7 @@
     }
   ],
   "mac": {
-    "appId": "com.dbclient.app",
+    "appId": "com.webxsid.db-nexus",
     "target": ["dmg"]
   }
 }

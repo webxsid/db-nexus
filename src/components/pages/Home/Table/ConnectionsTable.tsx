@@ -3,7 +3,7 @@ import Render from "@/components/common/Render";
 import ShowDBProvider from "@/components/common/ShowDBProvider";
 import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
 import { useContextMenu, usePopper } from "@/hooks";
-import { CoreIpcEvents } from "@/ipc-events";
+import { CoreIpcEvents, MongoIpcEvents } from "@/ipc-events";
 import { useDialogManager } from "@/managers";
 import {
   connectionsAtom,
@@ -49,7 +49,7 @@ import { ESupportedDatabases, IDatabaseConnection } from "@shared";
 import { useAtomValue, useSetAtom } from "jotai";
 import moment, { Moment } from "moment";
 import * as React from "react";
-import { FC, useState } from "react";
+import { FC, SyntheticEvent, useState } from "react";
 import { toast } from "react-toastify";
 
 interface IRowContextMenuProps {
@@ -569,6 +569,31 @@ export const ConnectionsTable: FC = () => {
     inputRef.current?.focus();
   }, []);
 
+  const handleConnect = async (e: SyntheticEvent, connectionId :string, provider: ESupportedDatabases): Promise<void> => {
+    e.stopPropagation();
+    try {
+      const res = await CoreIpcEvents.getConnection(provider, connectionId);
+      if(res.ok){
+        switch (provider) {
+          case ESupportedDatabases.Mongo:
+            await MongoIpcEvents.connect(connectionId);
+            return;
+          default:
+            throw new Error("Unsupported database provider");
+        }
+      } else {
+        toast.error("Failed to load connection", {
+          autoClose: 5000,
+          position: "bottom-center",
+          closeButton: false,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load connection");
+    }
+  }
+
   React.useEffect(() => {
     if (searchResults.length === 0) {
       setPage(0);
@@ -742,6 +767,7 @@ export const ConnectionsTable: FC = () => {
                       },
                     },
                   }}
+                  onClick={(e) => handleConnect(e, connection.id, connection.provider as ESupportedDatabases)}
                   onContextMenu={(e) => handleRowContextMenu(e, connection.id)}
                 >
                   <TableCell sx={{ maxWidth: 250 }}>

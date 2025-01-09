@@ -4,17 +4,17 @@ import {
   MongoCollectionController,
   MongoConnectionController,
   MongoDatabaseController,
-  MongoDataController
+  MongoDataController, MongoStatsController
 } from "../controllers";
 import { Singleton } from "../decorators";
 import { destroyIpcListeners, registerIpcListeners } from "../utils";
 
 @Singleton
 export class MongoIPCListeners {
-  private _listeners: Map<TIpcListenersType, Function> = new Map();
+  private _listeners: Map<TIpcListenersType, new () => unknown> = new Map();
 
   public registerConnectionListener(): this {
-    console.log("Registering Mongo Connection Listener");
+    if (this._listeners.has("connection")) return this;
     registerIpcListeners(ipcMain, MongoConnectionController);
     this._listeners.set("connection", MongoConnectionController);
 
@@ -29,7 +29,7 @@ export class MongoIPCListeners {
   }
 
   public registerDatabaseListener(): this {
-    console.log("Registering Mongo Database Listener");
+    if (this._listeners.has("database")) return this;
     registerIpcListeners(ipcMain, MongoDatabaseController);
     this._listeners.set("database", MongoDatabaseController);
 
@@ -44,7 +44,7 @@ export class MongoIPCListeners {
   }
 
   public registerCollectionListener(): this {
-    console.log("Registering Mongo Collection Listener");
+    if (this._listeners.has("collection")) return this;
     registerIpcListeners(ipcMain, MongoCollectionController);
     this._listeners.set("collection", MongoCollectionController);
 
@@ -59,7 +59,7 @@ export class MongoIPCListeners {
   }
 
   public registerDataListener(): this {
-    console.log("Registering Mongo Data Listener");
+    if (this._listeners.has("document")) return this;
     registerIpcListeners(ipcMain, MongoDataController);
     this._listeners.set("document", MongoDataController);
 
@@ -73,11 +73,28 @@ export class MongoIPCListeners {
     return this;
   }
 
+  public registerStatsListener(): this {
+    if (this._listeners.has("stats")) return this;
+    registerIpcListeners(ipcMain, MongoStatsController);
+    this._listeners.set("stats", MongoStatsController);
+
+    return this;
+  }
+
+  public deregisterStatsListener(): this {
+    destroyIpcListeners(ipcMain, MongoStatsController);
+    this._listeners.delete("stats");
+
+    return this;
+  }
+
   public destroyAllListeners(): this {
-    Array.from(this._listeners.entries()).forEach(([type, listener]:[TIpcListenersType, Function]) => {
-      destroyIpcListeners(ipcMain, listener);
-      this._listeners.delete(type);
-    });
+    Array.from(this._listeners.entries()).forEach(
+      ([type, listener]: [TIpcListenersType, new () => unknown]) => {
+        destroyIpcListeners(ipcMain, listener);
+        this._listeners.delete(type);
+      },
+    );
 
     return this;
   }

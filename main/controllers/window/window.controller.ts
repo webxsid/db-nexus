@@ -2,6 +2,7 @@ import { IWindowIpcEventsResponse } from "@shared";
 import { shell } from "electron";
 import { Controller, Event } from "main/decorators";
 import { WindowManager } from "main/managers";
+import { logger } from "../../utils";
 
 @Controller("window")
 export class WindowController {
@@ -74,8 +75,10 @@ export class WindowController {
   }
 
   @Event("open-external")
-  public openExternal(url: string): void {
-    shell.openExternal(url);
+  public async openExternal(payload: { url: string }): Promise<void> {
+    logger.info("Opening external URL", payload);
+    const { url } = payload;
+    await shell.openExternal(url);
   }
 
   @Event("platform")

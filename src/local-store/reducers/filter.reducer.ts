@@ -1,6 +1,6 @@
 import IFilterState, {
-  FilterAction,
-  FilterActionTypes,
+  IFilterAction,
+  EFilterActionTypes,
   IFilter,
   ISort,
 } from "../types/filter.types";
@@ -18,15 +18,15 @@ const initialState: IFilterState = {
 
 const filterReducer = (
   state = initialState,
-  action: FilterAction
+  action: IFilterAction
 ): IFilterState => {
   switch (action.type) {
-    case FilterActionTypes.SET_FILTER:
+    case EFilterActionTypes.SET_FILTER:
       return {
         ...state,
         filter: action.payload as IFilter,
       };
-    case FilterActionTypes.ADD_QUERY:
+    case EFilterActionTypes.ADD_QUERY:
       return {
         ...state,
         filter: {
@@ -34,7 +34,7 @@ const filterReducer = (
           query: action.payload as string,
         },
       };
-    case FilterActionTypes.REMOVE_QUERY:
+    case EFilterActionTypes.REMOVE_QUERY:
       return {
         ...state,
         filter: {
@@ -42,7 +42,7 @@ const filterReducer = (
           query: "",
         },
       };
-    case FilterActionTypes.ADD_TYPE:
+    case EFilterActionTypes.ADD_TYPE:
       return {
         ...state,
         filter: {
@@ -50,7 +50,7 @@ const filterReducer = (
           types: [...state.filter.types, action.payload as string],
         },
       };
-    case FilterActionTypes.REMOVE_TYPE:
+    case EFilterActionTypes.REMOVE_TYPE:
       return {
         ...state,
         filter: {
@@ -60,7 +60,7 @@ const filterReducer = (
           ),
         },
       };
-    case FilterActionTypes.CLEAR_TYPE:
+    case EFilterActionTypes.CLEAR_TYPE:
       return {
         ...state,
         filter: {
@@ -68,12 +68,12 @@ const filterReducer = (
           types: [],
         },
       };
-    case FilterActionTypes.SET_SORT:
+    case EFilterActionTypes.SET_SORT:
       return {
         ...state,
         sort: action.payload as ISort,
       };
-    case FilterActionTypes.CLEAR_FILTER:
+    case EFilterActionTypes.CLEAR_FILTER:
       return {
         ...state,
         filter: {
@@ -81,7 +81,7 @@ const filterReducer = (
           types: [],
         },
       };
-    case FilterActionTypes.CLEAR_SORT:
+    case EFilterActionTypes.CLEAR_SORT:
       return {
         ...state,
         sort: {

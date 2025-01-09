@@ -90,7 +90,7 @@ export class PathManager {
   }
 
   public get MongoWindowUrl(): string {
-    return `${this._baseUrl}databases/mongo/{{connectionId}}`;
+    return `${this._baseUrl}${ESupportedDatabases.Mongo}/{{connectionId}}`;
   }
 
   public get AppDataPath(): string {

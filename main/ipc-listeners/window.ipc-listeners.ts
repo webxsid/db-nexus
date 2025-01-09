@@ -6,7 +6,7 @@ import { destroyIpcListeners, registerIpcListeners } from "main/utils";
 
 @Singleton
 export class ProcessIPCListeners {
-  private _listeners: Map<TIpcListenersType, Function> = new Map();
+  private _listeners: Map<TIpcListenersType, new () => unknown> = new Map();
 
   public registerConnectionListener(): this {
     registerIpcListeners(ipcMain, WindowController);
@@ -23,7 +23,7 @@ export class ProcessIPCListeners {
   }
 
   public destroyAllListeners(): this {
-    this._listeners.entries().forEach(([type, listener]) => {
+    Array.from(this._listeners.entries()).forEach(([type, listener]: [TIpcListenersType, new () => unknown]) => {
       destroyIpcListeners(ipcMain, listener);
       this._listeners.delete(type);
     });

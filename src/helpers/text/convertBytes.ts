@@ -1,6 +1,6 @@
-export type DestUnit = "KB" | "MB" | "GB" | "Auto";
+export type TDestUnit = "KB" | "MB" | "GB" | "Auto";
 
-const convertBytes = (bytes: number, destUnit: DestUnit = "Auto") => {
+const convertBytes = (bytes: number, destUnit: TDestUnit = "Auto"): string => {
   if (bytes === 0) return "0 B";
   const units = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));

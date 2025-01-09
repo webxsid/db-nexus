@@ -3,4 +3,5 @@ export type TIpcListenersType =
   | "database"
   | "collection"
   | "document"
+  | "stats"
   | "process";

@@ -1,4 +1,11 @@
 export enum EMongoIpcEvents {
+  GetConnection = "mongo:get",
+  UpdateConnection = "mongo:update",
+
+  GetConnectionStatus = "mongo/stats:connection-status",
+  GetServerStatus = "mongo/stats:server",
+  GetOpsStats = "mongo/stats:ops",
+
   Connect = "mongo:connect",
   Disconnect = "mongo:disconnect",
   TestConnection = "mongo:test-connection",

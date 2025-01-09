@@ -43,7 +43,7 @@ export class ConnectionManager {
 
   public async queryConnections(
     searchTerm: string,
-    sortField: "name" | "createdAt" | "lastConnectionAt" = "name",
+    sortField: "name" | "createdAt" | "lastConnectionAt",
     sorDirection: "asc" | "desc" = "asc",
   ): Promise<Array<IDatabaseConnection<unknown>>> {
     const mongoConnections = Array.from(this._mongoConnections.values());
@@ -201,7 +201,6 @@ export class ConnectionManager {
 
   private async _removeMongoConnection(id: string): Promise<void> {
     this._mongoConnections.delete(id);
-    logger.info(`Removed connection with id: ${id}`);
     await this._fileManager.removeConnectionFromFile(
       ESupportedDatabases.Mongo,
       id,

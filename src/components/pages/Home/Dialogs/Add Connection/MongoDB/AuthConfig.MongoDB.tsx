@@ -1,7 +1,6 @@
 import { TransparentTextField } from "@/components/common";
 import Render from "@/components/common/Render";
 import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
-import { useTheme } from "@emotion/react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
@@ -13,6 +12,7 @@ import {
   Tab,
   Tabs,
   Typography,
+  useTheme
 } from "@mui/material";
 import {
   IMongoConnectionParams,
@@ -24,7 +24,6 @@ import React, {
   Dispatch,
   FC,
   ReactNode,
-  SyntheticEvent,
   useCallback,
   useEffect,
 } from "react";
@@ -94,7 +93,7 @@ export const AuthConfig: FC<IProps> = ({
     }
   };
 
-  const selectAuthMethod = (newMethod: string): void => {
+  const selectAuthMethod = (newMethod: TMongoAuthMethods): void => {
     setAuthConfig((prev) => ({
       ...prev,
       method: newMethod,
@@ -118,9 +117,9 @@ export const AuthConfig: FC<IProps> = ({
 
   const toggleAuthMechanism = useCallback(() => {
     setAuthConfig((prev) => {
-      const currentIndex = availableAuthMechanisms.indexOf(
-        prev.passwordParams.authMechanism,
-      );
+      const currentIndex = prev.passwordParams?.authMechanism ? availableAuthMechanisms.indexOf(
+        prev.passwordParams?.authMechanism,
+      ): 0;
       const nextIndex = currentIndex + 1;
       const nextMechanism =
         nextIndex < availableAuthMechanisms.length
@@ -169,7 +168,7 @@ export const AuthConfig: FC<IProps> = ({
   }, [selectedIndex]);
 
   const handleArrowDown = useCallback(
-    function tabHandler(event: SyntheticEvent): void {
+    function tabHandler(event: KeyboardEvent): void {
       event.preventDefault();
       handleNext();
     },
@@ -177,7 +176,7 @@ export const AuthConfig: FC<IProps> = ({
   );
 
   const handleArrowUp = useCallback(
-    function shiftTabHandler(event: SyntheticEvent): void {
+    function shiftTabHandler(event: KeyboardEvent): void {
       event.preventDefault();
       handlePrev();
     },
@@ -228,11 +227,11 @@ export const AuthConfig: FC<IProps> = ({
           : undefined;
 
     if (spaceHandler) {
-      console.log("Adding Event Listener");
       currentRef.current?.addEventListener("keydown", spaceHandler);
     }
 
     return () => {
+      if(spaceHandler)
       currentRef.current?.removeEventListener("keydown", spaceHandler);
     };
   }, [
@@ -386,7 +385,7 @@ export const AuthConfig: FC<IProps> = ({
                   >
                     <TransparentTextField
                       placeholder="Username"
-                      value={authConfig.passwordParams.username}
+                      value={authConfig?.passwordParams?.username || ""}
                       onChange={(event) =>
                         setAuthConfig((prev) => ({
                           ...prev,
@@ -456,7 +455,6 @@ export const AuthConfig: FC<IProps> = ({
                       placeholder="Password"
                       type={passwordFieldType}
                       onKeyDown={(event) => {
-                        console.log(event);
                         if (event.altKey && event.code === "KeyV") {
                           togglePasswordFieldType();
                         }
@@ -609,7 +607,7 @@ export const AuthConfig: FC<IProps> = ({
                       Auth Mechanism
                     </Typography>
                     <Tabs
-                      value={authConfig.passwordParams.authMechanism}
+                      value={authConfig?.passwordParams?.authMechanism || "DEFAULT"}
                       sx={{
                         backgroundColor: "background.default",
                         borderRadius: 2,

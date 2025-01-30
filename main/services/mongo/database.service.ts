@@ -1,4 +1,4 @@
-import { IMongoCollectionList, IMongoDatabaseList, safeExecute } from "@shared";
+import { IMongoCollectionList, IMongoDatabaseList } from "@shared";
 import { ListDatabasesResult } from "mongodb";
 import { Singleton } from "../../decorators";
 import { MongoClientManager } from "../../managers";
@@ -135,24 +135,23 @@ export class MongoDatabaseService {
 
     const db = client.db(dbName);
 
-    const [stats, err] = await safeExecute<Document>(
-      db.command({ collStats: collectionName }),
-    );
-
-    if (err) {
-      logger.error("Error while getting collection stats", err);
-      return {
-        name: collectionName,
-        size: -1,
-        numOfDocuments: -1,
-        numOfIndexes: -1,
-      };
-    }
-    return {
+    const returnObj = {
       name: collectionName,
-      size: stats.size,
-      numOfDocuments: stats.count,
-      numOfIndexes: stats.nindexes,
+      size: -1,
+      numOfDocuments: -1,
+      numOfIndexes: -1,
     };
+
+    try {
+      const stats = await db.command({ collStats: collectionName });
+
+      returnObj.size = stats.size;
+      returnObj.numOfDocuments = stats.count;
+      returnObj.numOfIndexes = stats.nindexes;
+    } catch (error) {
+      logger.error("Error getting collection stats:", error);
+    }
+
+    return returnObj;
   }
 }

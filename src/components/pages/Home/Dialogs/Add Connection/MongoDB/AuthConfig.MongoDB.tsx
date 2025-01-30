@@ -136,8 +136,8 @@ export const AuthConfig: FC<IProps> = ({
             : Math.max(prev - 1, 0);
 
         if (prev === 0) {
-          const input = document.querySelector(
-            `#${EDialogIds.SelectDbProvider}-search`,
+          const input = document.getElementById(
+            `${EDialogIds.SelectDbProvider}-search`,
           );
           if (input) {
             input.focus();

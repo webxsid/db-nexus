@@ -1,6 +1,6 @@
 export enum EMongoSidebarModule {
   CollectionList = "collection-list",
-  ActiveCollections = "active-collections",
+  ActiveTabs = "active-tabs",
   PinnedCollections = "pinned-collections",
   ConnectionInfo = "connection-info",
   Stats = "stats",

@@ -1,5 +1,5 @@
 import { BrowserWindow, nativeImage } from "electron";
-import { kDefaultWindowHeight, kDefaultWindowWidth } from "../constants";
+import { kDefaultWindowHeight, kDefaultWindowWidth, kMinWindowHeight, kMinWindowWidth } from "../constants";
 import {
   CoreIPCListeners,
   MongoIPCListeners,
@@ -57,11 +57,13 @@ export class MainWindow {
       this._window = new BrowserWindow({
         width: width ?? kDefaultWindowWidth,
         height: height ?? kDefaultWindowHeight,
+        minWidth: kMinWindowWidth,
+        minHeight: kMinWindowHeight,
         icon: nativeImage.createFromPath(this._fileManager.IconFile),
         titleBarStyle: "hidden",
         fullscreenable: false,
         ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
-        trafficLightPosition:{ x: 12, y: 28 },
+        trafficLightPosition:{ x: 12, y: 18 },
         webPreferences: {
           nodeIntegration: true,
           preload: this._pathManager.MainWindowPreloadPath,

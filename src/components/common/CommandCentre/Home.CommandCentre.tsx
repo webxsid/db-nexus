@@ -1,14 +1,9 @@
+import { CC } from "@/components/common";
 import { KeybindingManager } from "@/helpers/keybindings";
 import { useDialogManager } from "@/managers";
+import { EDialogIds } from "@/store";
 import { Add, Person, Search, Settings } from "@mui/icons-material";
-import {
-  Box,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  useTheme,
-} from "@mui/material";
+import { List, ListItemText } from "@mui/material";
 import {
   FC,
   ReactNode,
@@ -25,16 +20,12 @@ export interface IHomeCCAction {
   onClick: () => void;
 }
 
-export type THomeCCMode = "new" | "search" | "actions";
-
 export const HomeCommandCentre: FC = () => {
   const [text, setText] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [currentActions, setCurrentActions] = useState<IHomeCCAction[]>([]);
   const [selectedItem, setSelectedItem] = useState<number>(0);
   const { openDialog, isDialogOpen } = useDialogManager();
-
-  const theme = useTheme();
 
   const handleTextChange = (text: string): void => {
     setText(text);
@@ -77,18 +68,62 @@ export const HomeCommandCentre: FC = () => {
     setCurrentActions(actions);
   }, [actions]);
 
-  const handleArrowDown = useCallback(() => {
-    setSelectedItem((prev) => (prev + 1) % currentActions.length);
-  }, [currentActions.length]);
+  const handleArrowDown = useCallback(
+    function arrowDownHandler() {
+      setSelectedItem((prev) => {
+        if (prev === 0) {
+          const inputField = document.getElementById(
+            `${EDialogIds.CommandCentre}-search`,
+          );
+          console.log(inputField);
+          if (inputField) {
+            inputField.blur();
+          }
+        }
+        if (prev !== currentActions.length) {
+          return prev + 1;
+        }
+        return prev;
+      });
+      const selectedListItem = document.querySelector(
+        `#${EDialogIds.CommandCentre}-list .SelectedListItem`,
+      );
 
-  const handleArrowUp = useCallback(() => {
-    setSelectedItem(
-      (prev) => (prev - 1 + currentActions.length) % currentActions.length,
+      if (selectedListItem) {
+        selectedListItem.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+    },
+    [currentActions],
+  );
+
+  const handleArrowUp = useCallback(function arrowUpHandler() {
+    setSelectedItem((prev) => {
+      if (prev === 1) {
+        // focus on the input field
+        const inputField = document.getElementById(
+          `${EDialogIds.CommandCentre}-search`,
+        );
+        if (inputField) {
+          inputField.focus();
+        }
+      }
+      if (prev !== 0) {
+        return prev - 1;
+      }
+      return prev;
+    });
+
+    const selectedListItem = document.querySelector(
+      `#${EDialogIds.CommandCentre}-list .SelectedListItem`,
     );
-  }, [currentActions.length]);
+
+    if (selectedListItem) {
+      selectedListItem.scrollIntoView({ block: "end", behavior: "smooth" });
+    }
+  }, []);
 
   const handleEnter = useCallback(() => {
-    currentActions[selectedItem].onClick();
+    currentActions[selectedItem - 1].onClick();
   }, [currentActions, selectedItem]);
 
   useEffect(() => {
@@ -122,43 +157,15 @@ export const HomeCommandCentre: FC = () => {
     >
       <List sx={{ width: "100%", px: 2 }}>
         {currentActions.map((action, index) => (
-          <ListItemButton
+          <CC.ListButton
+            selected={selectedItem === index + 1}
             key={index}
             onClick={action.onClick}
-            sx={{
-              borderRadius: 2,
-              py: 1.5,
-              border: "1px solid",
-              borderColor:
-                index === selectedItem ? "primary.main" : "transparent",
-              backgroundColor:
-                index === selectedItem
-                  ? `${theme.palette.primary.main}22`
-                  : "transparent",
-              color: index === selectedItem ? "tex.secondary" : "text.primary",
-              "&:hover": {
-                backgroundColor: "primary.main",
-              },
-            }}
+            className={selectedItem === index + 1 ? "SelectedListItem" : ""}
           >
-            <ListItemIcon>
-              <Box
-                sx={{
-                  backgroundColor: "secondary.light",
-                  color: "secondary.contrastText",
-                  aspectRatio: 1,
-                  borderRadius: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  p: 1,
-                }}
-              >
-                {action.icon}
-              </Box>
-            </ListItemIcon>
+            <CC.ListIcon>{action.icon}</CC.ListIcon>
             <ListItemText primary={action.label} />
-          </ListItemButton>
+          </CC.ListButton>
         ))}
       </List>
     </CommandCentre>

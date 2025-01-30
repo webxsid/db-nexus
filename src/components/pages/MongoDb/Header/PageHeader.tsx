@@ -213,14 +213,14 @@ export const MongoDbPageHeader: React.FC = () => {
         justifyContent: "space-between",
         gap: 1,
         pr: 3,
-        py: 2,
+        py: 1.3,
         position: "relative",
       }}
       onContextMenu={openLogoContextMenu}
     >
       <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
         {isMac ? <Box sx={{ height: "100%", width: 75 }} /> : null}
-        <Logo />
+        <Logo width={30} height={30} />
         <Render
           if={!!connection?.color}
           then={

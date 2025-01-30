@@ -56,7 +56,7 @@ export const Home = (): ReactNode => {
           zIndex: 100,
           top: 0,
           left: 0,
-          height: "70px",
+          height: "50px",
         }}
       >
         <Header />
@@ -64,12 +64,11 @@ export const Home = (): ReactNode => {
       <Grid
         size={12}
         sx={{
-          height: "calc(100vh - 70px)",
+          height: "calc(100vh - 50px)",
           width: "100vw",
           overflowY: "hidden",
           // pt: 10,
           pb: 2,
-          px: 4,
         }}
       >
         <Container
@@ -79,8 +78,6 @@ export const Home = (): ReactNode => {
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            border: "2px solid",
-            borderColor: "background.paper",
             pt: 2,
             borderRadius: 4,
           }}

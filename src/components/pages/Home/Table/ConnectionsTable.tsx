@@ -669,8 +669,8 @@ export const ConnectionsTable: FC = () => {
           ))}
         </Box>
       </Box>
-      <TableContainer sx={{ flex: 1 }}>
-        <Table stickyHeader sx={{ width: "100%" }}>
+      <TableContainer sx={{ flex: 1, overflow:"auto" }}>
+        <Table stickyHeader sx={{ width: "100%", overflow:"auto" }}>
           <TableHead>
             <TableRow
               sx={{
@@ -845,7 +845,7 @@ export const ConnectionsTable: FC = () => {
                       if={!!connection.lastConnectionAt}
                       then={
                         <Typography variant="caption" component="span">
-                          {connection.lastConnectionAt?.toLocaleString()}
+                          {new Date(connection.lastConnectionAt!).toDateString()}
                         </Typography>
                       }
                       else={

@@ -1,11 +1,11 @@
 import { MongoSidebarModuleRegistry } from "../../Registry.ts";
-import { MongoPinnedCollectionThumbnail } from "./Thumbnail.tsx";
+import { MongoPinnedCollectionsThumbnail } from "./Thumbnail.tsx";
 import {
-  MongoPinnedCollectionListPanel
+  MongoPinnedCollectionsPanel
 } from "@/components/pages/MongoDb/Sidebars/Modules/MongoPinnedCollections/Panel.tsx";
 
 MongoSidebarModuleRegistry.registerModule(
   "pinned-collections",
-  <MongoPinnedCollectionThumbnail />,
-  <MongoPinnedCollectionListPanel />
+  <MongoPinnedCollectionsThumbnail />,
+  <MongoPinnedCollectionsPanel />
 );

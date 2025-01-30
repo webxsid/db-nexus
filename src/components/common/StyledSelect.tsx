@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import { useTheme, Select, Box, Chip, SelectProps } from "@mui/material";
+import { useTheme, Select, Box, Chip, SelectProps, alpha } from "@mui/material";
 
 interface IStyledSelectProps {
   value: string | string[];
@@ -11,6 +11,7 @@ interface IStyledSelectProps {
   input?: ReactElement;
   size?: "small" | "medium";
   fullWidth?: boolean;
+  sx?: SelectProps['sx'];
 }
 const StyledSelect: React.FC<IStyledSelectProps> = ({
   value,
@@ -22,8 +23,8 @@ const StyledSelect: React.FC<IStyledSelectProps> = ({
   input,
   size = "small",
   fullWidth,
+  sx
 }) => {
-  const theme = useTheme();
   return (
     <Select
       value={value}
@@ -46,22 +47,26 @@ const StyledSelect: React.FC<IStyledSelectProps> = ({
         },
       })}
       sx={{
-        borderRadius: 3,
-        "& .MuiPaper-root": {
-          backgroundColor: `${theme.palette.background.paper}cc`,
-        },
+        borderRadius: 2,
         "& legend": {
-          color: theme.palette.text.primary,
+          color: "text.primary",
         },
+        ...(!!sx && sx),
       }}
       MenuProps={{
         slotProps: {
           paper: {
             sx: {
-              backgroundColor: `${theme.palette.background.default}33`,
+              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.3),
               backdropFilter: "blur(10px)",
-              borderRadius: 4,
+              borderRadius: 2,
+              color: "text.primary",
+              border: 1,
+              borderColor: "divider",
               mt: 1,
+              "& .MuiList-root": {
+                py: 0
+              }
             },
           },
         },

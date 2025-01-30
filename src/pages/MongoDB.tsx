@@ -2,29 +2,57 @@ import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
+  mongoCollectionListAtom,
   mongoConnectionOpsStatsAtom,
   mongoConnectionServerStatsAtom,
   mongoConnectionStatusAtom,
   mongoDatabaseListAtom,
   MongoLeftSidebarModuleActiveAtom,
   MongoRightSidebarModuleActiveAtom,
-  selectedConnectionAtom,
+  selectedConnectionAtom, TMongoCollectionListAtom
 } from "@/store";
 import { MongoIpcEvents } from "@/ipc-events";
 import { toast } from "react-toastify";
-import { Box, Grid2 as Grid } from "@mui/material";
+import { Box, Grid2 as Grid, styled } from "@mui/material";
 import { Helmet } from "react-helmet-async";
 import {
   MongoDbPageHeader,
   MongoLeftSidebar,
+  MongoDbCommandCentre,
+  NewMongoCollectionCommandCenter,
+  NewMongoDatabaseCommandCenter,
+  MongoDbWorkarea
 } from "@/components/pages/MongoDb";
 import Render from "@/components/common/Render.tsx";
+import {
+  DropMongoDatabaseCommandCenter
+} from "@/components/pages/MongoDb/CommandCenters/DropMongoDatabase.CommandCenter.tsx";
 
 /* global NodeJS */
 
+const DragHandle = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "side",  // Prevent 'side' from being passed to DOM
+})<{ side: "left" | "right" }>(({ theme, side }) => ({
+  overflow: "hidden",
+  position: "absolute",
+  left: side === "left" ? 0 : "unset",
+  right: side === "right" ? 0 : "unset",
+  top: 0,
+  height: "100%",
+  width: "2px",
+  cursor: "ew-resize",
+  transition: "transform 0.2s",
+  backgroundColor: "transparent",
+  "&:hover, &:active, &:focus, &:focus-visible": {
+    transform: `scaleX(4) ${side === "left" ? "translateX(-50%)" : "translateX(50%)"}`,
+    backgroundColor: theme.palette.background.paper,
+  },
+}));
+
 export const MongoDbPage: FC = () => {
   const [connection, setConnection] = useAtom(selectedConnectionAtom);
-  const setDatabaseList = useSetAtom(mongoDatabaseListAtom);
+  const [databaseList, setDatabaseList] = useAtom(mongoDatabaseListAtom);
+  const setCollectionList = useSetAtom(mongoCollectionListAtom);
   const setConnectionStatus = useSetAtom(mongoConnectionStatusAtom);
   const setServerStats = useSetAtom(mongoConnectionServerStatsAtom);
   const setOpsStats = useSetAtom(mongoConnectionOpsStatsAtom);
@@ -36,7 +64,7 @@ export const MongoDbPage: FC = () => {
   const [kMinWidth] = useState<[number, number]>([60, 50]);
   const [enableResize, setEnableResize] = useState<[boolean, boolean]>([
     true,
-    false,
+    true,
   ]);
   const [isDragging, setIsDragging] = useState<"left" | "right" | null>(null);
 
@@ -78,9 +106,27 @@ export const MongoDbPage: FC = () => {
     }
   }, [connectionId, setDatabaseList]);
 
+  const loadCollections = useCallback(async () => {
+    const dbNames = Object.keys(databaseList.databases);
+    const collections: TMongoCollectionListAtom = [];
+    for (const dbName of dbNames) {
+      const res = await MongoIpcEvents.listCollections(connectionId!, dbName);
+      if (res.ok) {
+        collections.push(...res.collections.map((c) => ({ ...c, database: dbName })));
+      } else {
+        toast.error(`Failed to load collections for ${dbName}`);
+      }
+    }
+    setCollectionList(collections);
+  },[connectionId, databaseList.databases, setCollectionList])
+
   useEffect(() => {
     loadDatabaseList();
   }, [loadDatabaseList]);
+
+  useEffect(() => {
+    loadCollections();
+  }, [loadCollections]);
 
   const loadConnectionStatus = useCallback(async () => {
     try {
@@ -222,7 +268,7 @@ export const MongoDbPage: FC = () => {
   useEffect(() => {
     if (!rightActiveModule) {
       setWidthDistribution(([width]) => [width, kMinWidth[1]]);
-      setEnableResize(([left]) => [left, false]);
+      setEnableResize(([left]) => [left, true]);
     } else {
       setWidthDistribution(([width]) => [width, kMaxWidth[1]]);
       setEnableResize(([left]) => [left, true]);
@@ -237,6 +283,13 @@ export const MongoDbPage: FC = () => {
       height="100%"
       width="100vw"
     >
+      <MongoDbCommandCentre />
+      <NewMongoDatabaseCommandCenter />
+      <NewMongoCollectionCommandCenter
+        loadDatabaseList={loadDatabaseList}
+        loadCollectionList={loadCollections}
+      />
+      <DropMongoDatabaseCommandCenter loadDatabaseList={loadDatabaseList} />
       <Helmet>
         <title>
           {connection?.name ? `DB Nexus - ${connection.name}` : "DB Nexus"}
@@ -245,7 +298,7 @@ export const MongoDbPage: FC = () => {
       <Grid
         size={12}
         className="draggable"
-        sx={{ width: "100%", zIndex: 100, top: 0, left: 0, height: "70px" }}
+        sx={{ width: "100%", zIndex: 100, top: 0, left: 0, height: "50px" }}
       >
         <MongoDbPageHeader />
       </Grid>
@@ -253,7 +306,7 @@ export const MongoDbPage: FC = () => {
         size={12}
         container
         sx={{
-          height: "calc(100vh - 70px)",
+          height: "calc(100vh - 50px)",
           width: "100vw",
           overflowY: "hidden",
         }}
@@ -265,66 +318,37 @@ export const MongoDbPage: FC = () => {
           container
           sx={{
             height: "100%",
-            width: `calc(100% - (${widthDistribution[0]}px + ${widthDistribution[1]}px))`,
-            py: 2,
+            flexGrow: 1,
+            minWidth: "50vw",
             position: "relative",
-            px: 1,
           }}
         >
           <Render
             if={enableResize[0]}
             then={
-              <Box
-                component="span"
+              <DragHandle
+                side="left"
                 ref={leftDragHandleRef}
                 onMouseDown={() => setIsDragging("left")}
-                sx={{
-                  overflow: "hidden",
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  height: "100%",
-                  width: "2px",
-                  cursor: "ew-resize",
-                  transition: "transform 0.2s",
-                  "&&:hover, &&:active, &&:focus, &&:focus-visible": {
-                    cursor: "ew-resize",
-                    transform: "scaleX(4) translateX(-50%)",
-                    backgroundColor: "background.paper",
-                  },
-                }}
               />
             }
           />
           <Grid
             sx={{
               height: "100%",
-              width: "calc(100% - 30px)",
-              backgroundColor: "background.paper",
+              width: "100%",
               borderRadius: 2,
             }}
-          ></Grid>
+          >
+            <MongoDbWorkarea />
+          </Grid>
           <Render
             if={enableResize[1]}
             then={
-              <Grid
+              <DragHandle
+                side="right"
                 ref={rightDragHandleRef}
                 onMouseDown={() => setIsDragging("right")}
-                sx={{
-                  overflow: "hidden",
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  height: "100%",
-                  width: "1px",
-                  cursor: "ew-resize",
-                  transition: "transform 0.2s",
-                  "&&:hover, &&:active, &&:focus, &&:focus-visible": {
-                    cursor: "ew-resize",
-                    transform: "scaleX(4) translateX(50%)",
-                    backgroundColor: "background.paper",
-                  },
-                }}
               />
             }
           />
@@ -335,6 +359,8 @@ export const MongoDbPage: FC = () => {
             width: `${widthDistribution[1]}px`,
             py: 2,
             px: 1,
+            borderLeft: "1px solid",
+            borderColor: "divider",
           }}
         ></Grid>
       </Grid>

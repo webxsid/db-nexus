@@ -5,7 +5,6 @@ export const MongoLeftSidebarModuleAtom = atomWithStorage<TMongoSidebarModule[]>
   "mongo-left-sidebar-modules",
   [
     "collection-list",
-    "active-collections",
     "pinned-collections",
     "stats",
   ],

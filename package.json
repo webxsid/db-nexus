@@ -1,11 +1,12 @@
 {
   "name": "db-client",
+  "description": "DB Nexus",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "author": {
     "name": "Siddharth Mittal",
-    "email": "siddharthmittal2101@gmail.com"
+    "email": "hello@webxsid.com"
   },
   "debug": {
     "env": {
@@ -18,7 +19,7 @@
   "scripts": {
     "build:watch": "tsc",
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "build": "tsc && vite build && electron-builder --mac --win --linux",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepare": "husky"
@@ -87,6 +88,7 @@
     "electron": "^28.2.2",
     "electron-builder": "^24.9.1",
     "electron-devtools-installer": "^3.2.0",
+    "electron-notarize": "^1.2.2",
     "eslint": "8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-alias": "^1.1.2",

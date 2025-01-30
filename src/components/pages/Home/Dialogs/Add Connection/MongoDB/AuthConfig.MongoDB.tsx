@@ -1,6 +1,7 @@
 import { TransparentTextField } from "@/components/common";
 import Render from "@/components/common/Render";
-import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
+import { KeybindingManager } from "@/helpers/keybindings";
+import { EDialogIds } from "@/store";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
@@ -12,7 +13,6 @@ import {
   Tab,
   Tabs,
   Typography,
-  useTheme
 } from "@mui/material";
 import {
   IMongoConnectionParams,
@@ -20,12 +20,15 @@ import {
   TMongoPasswordAuthMechanism,
 } from "@shared";
 import { SetStateAction } from "jotai";
-import React, {
+import {
   Dispatch,
   FC,
   ReactNode,
   useCallback,
   useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 
 interface IProps {
@@ -46,288 +49,177 @@ export const AuthConfig: FC<IProps> = ({
   authConfig,
   setAuthConfig,
 }): ReactNode => {
-  const [selectedIndex, setSelectedIndex] = React.useState<number>(0);
-  const [maxIndex, _setMaxIndex] = React.useState<number>(0);
-  const [passwordFieldType, setPasswordFieldType] = React.useState<
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [maxIndex, setMaxIndex] = useState(0);
+  const [passwordFieldType, setPasswordFieldType] = useState<
     "text" | "password"
   >("password");
-  const theme = useTheme();
 
-  const authMethodRef = React.useRef<HTMLDivElement>(null);
-  const usernameRef = React.useRef<HTMLDivElement>(null);
-  const passwordRef = React.useRef<HTMLDivElement>(null);
-  const authDbRef = React.useRef<HTMLDivElement>(null);
-  const authMechanismRef = React.useRef<HTMLDivElement>(null);
+  // Refs initialized at the top level to follow the Rules of Hooks
+  const authMethodRef = useRef<HTMLDivElement>(null);
+  const usernameRef = useRef<HTMLDivElement>(null);
+  const passwordRef = useRef<HTMLDivElement>(null);
+  const authDbRef = useRef<HTMLDivElement>(null);
+  const authMechanismRef = useRef<HTMLDivElement>(null);
 
-  const focusAuthMethodRef = useCallback(function authMethodFocus(): void {
-    authMethodRef.current?.focus();
-  }, []);
+  // Group the refs into an object
+  const inputRefs = useMemo(
+    () => ({
+      authMethod: authMethodRef,
+      username: usernameRef,
+      password: passwordRef,
+      authDb: authDbRef,
+      authMechanism: authMechanismRef,
+    }),
+    [],
+  );
 
-  const focusUsernameRef = useCallback(function usernameFocus(): void {
-    const input = usernameRef.current?.querySelector("input");
-    input?.focus();
-  }, []);
+  const focusField = useCallback(
+    (field: keyof typeof inputRefs) => {
+      if (field === "authMethod") {
+        inputRefs[field]?.current?.focus();
+      } else {
+        inputRefs[field]?.current?.querySelector("input")?.focus();
+      }
+    },
+    [inputRefs],
+  );
 
-  const focusPasswordRef = useCallback(function passwordFocus(): void {
-    const input = passwordRef.current?.querySelector("input");
-    input?.focus();
-  }, []);
+  const togglePasswordFieldType = (): void =>
+    setPasswordFieldType((prev) => (prev === "text" ? "password" : "password"));
 
-  const focusAuthDbRef = useCallback(function authDbFocus(): void {
-    const input = authDbRef.current?.querySelector("input");
-    input?.focus();
-  }, []);
+  const selectAuthMethod = (newMethod: TMongoAuthMethods): void => {
+    setAuthConfig((prev) => ({ ...prev, method: newMethod }));
+  };
 
-  const focusAuthMechanismRef = useCallback(
-    function authMechanismFocus(): void {
-      authMechanismRef.current?.focus();
+  const cycleOptions = useCallback(
+    (options: string[], current: string, updater: (value: string) => void) => {
+      const nextIndex = (options.indexOf(current) + 1) % options.length;
+      updater(options[nextIndex]);
     },
     [],
   );
 
-  const togglePasswordFieldType = (): void => {
-    if (passwordFieldType === "text") {
-      setPasswordFieldType("password");
-    } else {
-      setPasswordFieldType("text");
-    }
-  };
-
-  const selectAuthMethod = (newMethod: TMongoAuthMethods): void => {
-    setAuthConfig((prev) => ({
-      ...prev,
-      method: newMethod,
-    }));
-  };
-
-  const toggleAuthMethod = useCallback(() => {
-    setAuthConfig((prev) => {
-      const currentIndex = availableAuthMethods.indexOf(prev.method);
-      const nextIndex = currentIndex + 1;
-      const nextMethod =
-        nextIndex < availableAuthMethods.length
-          ? availableAuthMethods[nextIndex]
-          : availableAuthMethods[0];
-      return {
-        ...prev,
-        method: nextMethod,
-      };
-    });
-  }, [setAuthConfig]);
-
-  const toggleAuthMechanism = useCallback(() => {
-    setAuthConfig((prev) => {
-      const currentIndex = prev.passwordParams?.authMechanism ? availableAuthMechanisms.indexOf(
-        prev.passwordParams?.authMechanism,
-      ): 0;
-      const nextIndex = currentIndex + 1;
-      const nextMechanism =
-        nextIndex < availableAuthMechanisms.length
-          ? availableAuthMechanisms[nextIndex]
-          : availableAuthMechanisms[0];
-      return {
-        ...prev,
-        passwordParams: {
-          ...prev.passwordParams,
-          authMechanism: nextMechanism,
-        },
-      };
-    });
-  }, [setAuthConfig]);
-
-  const handleAuthMethodSpace = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === " ") {
-        event.preventDefault();
-        toggleAuthMethod();
+  const handleSpaceKey = useCallback(
+    function onSpaceKey() {
+      if (selectedIndex === 0) {
+        cycleOptions(availableAuthMethods, authConfig.method, (val) =>
+          setAuthConfig((prev) => ({
+            ...prev,
+            method: val as TMongoAuthMethods,
+          })),
+        );
+      } else if (selectedIndex === 4) {
+        cycleOptions(
+          availableAuthMechanisms,
+          authConfig.passwordParams?.authMechanism || "DEFAULT",
+          (val) =>
+            setAuthConfig((prev) => ({
+              ...prev,
+              passwordParams: {
+                ...prev.passwordParams,
+                authMechanism: val as TMongoPasswordAuthMechanism,
+              },
+            })),
+        );
       }
     },
-    [toggleAuthMethod],
+    [selectedIndex, authConfig, cycleOptions, setAuthConfig],
   );
 
-  const handleAuthMechanismSpace = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === " ") {
-        event.preventDefault();
-        toggleAuthMechanism();
-      }
+  const handleArrowNavigation = useCallback(
+    (direction: "up" | "down") => {
+      setSelectedIndex((prev) => {
+        const nextIndex =
+          direction === "down"
+            ? Math.min(prev + 1, maxIndex)
+            : Math.max(prev - 1, 0);
+
+        if (prev === 0) {
+          const input = document.querySelector(
+            `#${EDialogIds.SelectDbProvider}-search`,
+          );
+          if (input) {
+            input.focus();
+          }
+        } else {
+          const refKeys = Object.keys(inputRefs) as Array<
+            keyof typeof inputRefs
+          >;
+          focusField(refKeys[nextIndex]);
+        }
+        return nextIndex;
+      });
     },
-    [toggleAuthMechanism],
-  );
-
-  const handleNext = useCallback(() => {
-    if (selectedIndex < maxIndex) {
-      setSelectedIndex(selectedIndex + 1);
-    }
-  }, [selectedIndex, maxIndex]);
-
-  const handlePrev = useCallback(() => {
-    if (selectedIndex > 0) {
-      setSelectedIndex(selectedIndex - 1);
-    }
-  }, [selectedIndex]);
-
-  const handleArrowDown = useCallback(
-    function tabHandler(event: KeyboardEvent): void {
-      event.preventDefault();
-      handleNext();
-    },
-    [handleNext],
+    [maxIndex, focusField, inputRefs],
   );
 
   const handleArrowUp = useCallback(
-    function shiftTabHandler(event: KeyboardEvent): void {
-      event.preventDefault();
-      handlePrev();
+    function onArrowUp() {
+      handleArrowNavigation("up");
     },
-    [handlePrev],
+    [handleArrowNavigation],
+  );
+
+  const handleArrowDown = useCallback(
+    function onArrowDown() {
+      handleArrowNavigation("down");
+    },
+    [handleArrowNavigation],
   );
 
   useEffect(() => {
-    if (isActive) {
-      KeybindingManager.registerKeybinding(["ArrowDown"], handleArrowDown);
-      KeybindingManager.registerKeybinding(["ArrowUp"], handleArrowUp);
-    } else {
-      KeybindingManager.unregisterKeybinding(["ArrowDown"], handleArrowDown);
-      KeybindingManager.unregisterKeybinding(["ArrowUp"], handleArrowUp);
-    }
-  }, [isActive, handleArrowDown, handleArrowUp]);
-
-  useEffect(() => {
-    const currentRef =
-      selectedIndex === 0
-        ? authMethodRef
-        : selectedIndex === 1
-          ? usernameRef
-          : selectedIndex === 2
-            ? passwordRef
-            : selectedIndex === 3
-              ? authDbRef
-              : authMechanismRef;
-    const focusHandler =
-      selectedIndex === 0
-        ? focusAuthMethodRef
-        : selectedIndex === 1
-          ? focusUsernameRef
-          : selectedIndex === 2
-            ? focusPasswordRef
-            : selectedIndex === 3
-              ? focusAuthDbRef
-              : focusAuthMechanismRef;
-
-    if (focusHandler) {
-      focusHandler();
-    }
-
-    const spaceHandler =
-      selectedIndex === 0
-        ? handleAuthMethodSpace
-        : selectedIndex === 4
-          ? handleAuthMechanismSpace
-          : undefined;
-
-    if (spaceHandler) {
-      currentRef.current?.addEventListener("keydown", spaceHandler);
-    }
+    // Key bindings
+    KeybindingManager.registerKeybinding("ArrowUp", handleArrowUp);
+    KeybindingManager.registerKeybinding("ArrowDown", handleArrowDown);
+    KeybindingManager.registerKeybinding("Space", handleSpaceKey);
 
     return () => {
-      if(spaceHandler)
-      currentRef.current?.removeEventListener("keydown", spaceHandler);
+      KeybindingManager.unregisterKeybinding("ArrowUp", handleArrowUp);
+      KeybindingManager.unregisterKeybinding("ArrowDown", handleArrowDown);
+      KeybindingManager.unregisterKeybinding("Space", handleSpaceKey);
     };
-  }, [
-    selectedIndex,
-    authMethodRef,
-    handleAuthMethodSpace,
-    handleAuthMechanismSpace,
-    focusAuthMethodRef,
-    focusAuthDbRef,
-    focusAuthMechanismRef,
-    focusPasswordRef,
-    focusUsernameRef,
-  ]);
+  }, [handleSpaceKey, handleArrowUp, handleArrowDown]);
 
   useEffect(() => {
     if (isActive) {
+      focusField("authMethod");
       setSelectedIndex(0);
     }
-  }, [isActive]);
+  }, [isActive, focusField]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (isActive) {
-        focusAuthMethodRef();
-      }
-    }, 100);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [isActive, focusAuthMethodRef]);
-
-  useEffect(() => {
-    if (authConfig.method === "password") {
-      _setMaxIndex(4);
-    }
+    setMaxIndex(authConfig.method === "password" ? 3 : 0);
   }, [authConfig.method]);
 
   return (
     <List sx={{ width: "100%" }}>
+      {/* Auth Method */}
       <ListItemButton
-        ref={authMethodRef}
+        ref={inputRefs.authMethod}
         selected={selectedIndex === 0}
         onClick={() => setSelectedIndex(0)}
-        sx={{
-          borderRadius: 2,
-          py: 1.5,
-          pb: selectedIndex === 0 ? 4 : 1.5,
-          border: "1px solid",
-          borderColor: "transparent",
-          backgroundColor: "transparent",
-          color: "text.primary",
-          my: 0.5,
-          "&:hover": {
-            backgroundColor: `${theme.palette.primary.main}22`,
-          },
-          position: "relative",
-        }}
+        sx={{ borderRadius: 2, py: 1.5, my: 0.5 }}
       >
-        <Box
-          sx={{
-            display: selectedIndex === 0 ? "flex" : "none",
-            alignItems: "center",
-            gap: 1,
-            position: "absolute",
-            bottom: 0,
-            right: 0,
-            backgroundColor: "background.default",
-            px: 1,
-            py: 0.5,
-            borderRadius: 2,
-          }}
-        >
-          <KeyCombo keyCombo="Space" size="smaller" />
-          <Typography variant="body2">to toggle</Typography>
-        </Box>
         <ListItemText
           primary={
             <Box
-              component={"span"}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
             >
-              <Typography component={"span"} variant="body1">
-                Authentication Method
-              </Typography>
+              <Typography variant="body1">Authentication Method</Typography>
               <Tabs
                 value={authConfig.method}
-                onChange={(event, newValue) => selectAuthMethod(newValue)}
+                ref={authMethodRef}
+                onChange={(_, newValue) => selectAuthMethod(newValue)}
                 sx={{
-                  backgroundColor: "background.default",
                   borderRadius: 2,
+                  backgroundColor: "background.default",
                   px: 1,
+                  "& .MuiTab-root.Mui-selected": {
+                    color: "primary.main",
+                  },
                 }}
               >
                 {availableAuthMethods.map((method) => (
@@ -338,291 +230,106 @@ export const AuthConfig: FC<IProps> = ({
           }
         />
       </ListItemButton>
+
+      {/* Password Auth Fields */}
       <Render
         if={authConfig.method === "password"}
         then={
           <>
+            {/* Username */}
             <ListItemButton
+              ref={inputRefs.username}
+              selected={selectedIndex === 1}
               onClick={() => setSelectedIndex(1)}
-              ref={usernameRef}
-              sx={{
-                borderRadius: 2,
-                py: 1.5,
-                pb: 1.5,
-                border: "1px solid",
-                borderColor: "transparent",
-                backgroundColor: "transparent",
-                color: "text.primary",
-                my: 0.5,
-                "&:hover": {
-                  backgroundColor: `${theme.palette.primary.main}22`,
-                },
-              }}
+              sx={{ borderRadius: 2, my: 0.5 }}
             >
               <ListItemText
-                primary={
-                  <Box
-                    component={"span"}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Typography component={"span"} variant="body1">
-                      Username
-                    </Typography>
-                  </Box>
-                }
+                primary="Username"
                 secondary={
-                  <Box
-                    sx={{
-                      width: "100%",
-                      backgroundColor: "background.default",
-                      borderRadius: 2,
-                      mt: 1,
-                    }}
-                  >
-                    <TransparentTextField
-                      placeholder="Username"
-                      value={authConfig?.passwordParams?.username || ""}
-                      onChange={(event) =>
-                        setAuthConfig((prev) => ({
-                          ...prev,
-                          passwordParams: {
-                            ...prev.passwordParams,
-                            username: event.target.value,
-                          },
-                        }))
-                      }
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Typography variant="body2" color={"primary.main"}>
-                              optional
-                            </Typography>
-                          </InputAdornment>
-                        ),
-                      }}
-                      fullWidth
-                    />
-                  </Box>
+                  <TransparentTextField
+                    placeholder="Username"
+                    value={authConfig.passwordParams?.username || ""}
+                    onChange={(e) =>
+                      setAuthConfig((prev) => ({
+                        ...prev,
+                        passwordParams: {
+                          ...prev.passwordParams,
+                          username: e.target.value,
+                        },
+                      }))
+                    }
+                    fullWidth
+                  />
                 }
               />
             </ListItemButton>
+
+            {/* Password */}
             <ListItemButton
+              ref={inputRefs.password}
+              selected={selectedIndex === 2}
               onClick={() => setSelectedIndex(2)}
-              ref={passwordRef}
-              sx={{
-                borderRadius: 2,
-                py: 1.5,
-                pb: selectedIndex === 1 ? 4 : 1.5,
-                border: "1px solid",
-                borderColor: "transparent",
-                backgroundColor: "transparent",
-                color: "text.primary",
-                my: 0.5,
-                "&:hover": {
-                  backgroundColor: `${theme.palette.primary.main}22`,
-                },
-              }}
+              sx={{ borderRadius: 2, my: 0.5 }}
             >
               <ListItemText
-                primary={
-                  <Box
-                    component={"span"}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Typography component={"span"} variant="body1">
-                      Password
-                    </Typography>
-                  </Box>
-                }
+                primary="Password"
                 secondary={
-                  <Box
-                    sx={{
-                      width: "100%",
-                      backgroundColor: "background.default",
-                      borderRadius: 2,
-                      mt: 1,
+                  <TransparentTextField
+                    placeholder="Password"
+                    type={passwordFieldType}
+                    value={authConfig.passwordParams?.password || ""}
+                    onChange={(e) =>
+                      setAuthConfig((prev) => ({
+                        ...prev,
+                        passwordParams: {
+                          ...prev.passwordParams,
+                          password: e.target.value,
+                        },
+                      }))
+                    }
+                    fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={togglePasswordFieldType}>
+                            {passwordFieldType === "text" ? (
+                              <Visibility />
+                            ) : (
+                              <VisibilityOff />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
                     }}
-                  >
-                    <TransparentTextField
-                      placeholder="Password"
-                      type={passwordFieldType}
-                      onKeyDown={(event) => {
-                        if (event.altKey && event.code === "KeyV") {
-                          togglePasswordFieldType();
-                        }
-                      }}
-                      value={authConfig.passwordParams?.password}
-                      onChange={(event) =>
-                        setAuthConfig((prev) => ({
-                          ...prev,
-                          passwordParams: {
-                            ...prev.passwordParams,
-                            password: event.target.value,
-                          },
-                        }))
-                      }
-                      fullWidth
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Typography variant="body2" color={"primary.main"}>
-                              optional
-                            </Typography>
-                            <IconButton onClick={togglePasswordFieldType}>
-                              {passwordFieldType === "text" ? (
-                                <Visibility />
-                              ) : (
-                                <VisibilityOff />
-                              )}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Box>
+                  />
                 }
               />
             </ListItemButton>
+
+            {/* Auth DB */}
             <ListItemButton
+              ref={inputRefs.authDb}
+              selected={selectedIndex === 3}
               onClick={() => setSelectedIndex(3)}
-              ref={authDbRef}
-              sx={{
-                borderRadius: 2,
-                py: 1.5,
-                pb: selectedIndex === 1 ? 4 : 1.5,
-                border: "1px solid",
-                borderColor: "transparent",
-                backgroundColor: "transparent",
-                color: "text.primary",
-                my: 0.5,
-                "&:hover": {
-                  backgroundColor: `${theme.palette.primary.main}22`,
-                },
-              }}
+              sx={{ borderRadius: 2, my: 0.5 }}
             >
               <ListItemText
-                primary={
-                  <Box
-                    component={"span"}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Typography component={"span"} variant="body1">
-                      Auth Source
-                    </Typography>
-                  </Box>
-                }
+                primary="Auth Database"
                 secondary={
-                  <Box
-                    sx={{
-                      width: "100%",
-                      backgroundColor: "background.default",
-                      borderRadius: 2,
-                      mt: 1,
-                    }}
-                  >
-                    <TransparentTextField
-                      placeholder="Auth Source"
-                      value={authConfig.passwordParams?.authDb}
-                      onChange={(event) =>
-                        setAuthConfig((prev) => ({
-                          ...prev,
-                          passwordParams: {
-                            ...prev.passwordParams,
-                            authDb: event.target.value,
-                          },
-                        }))
-                      }
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Typography variant="body2" color={"primary.main"}>
-                              optional
-                            </Typography>
-                          </InputAdornment>
-                        ),
-                      }}
-                      fullWidth
-                    />
-                  </Box>
-                }
-              />
-            </ListItemButton>
-            <ListItemButton
-              onClick={() => setSelectedIndex(4)}
-              ref={authMechanismRef}
-              sx={{
-                borderRadius: 2,
-                py: 1.5,
-                pb: selectedIndex === 4 ? 4 : 1.5,
-                border: "1px solid",
-                borderColor: "transparent",
-                backgroundColor: "transparent",
-                color: "text.primary",
-                my: 0.5,
-                "&:hover": {
-                  backgroundColor: `${theme.palette.primary.main}22`,
-                },
-                position: "relative",
-              }}
-            >
-              <Box
-                sx={{
-                  display: selectedIndex === 4 ? "flex" : "none",
-                  alignItems: "center",
-                  gap: 1,
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  backgroundColor: "background.default",
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 2,
-                }}
-              >
-                <KeyCombo keyCombo="Space" size="smaller" /> to toggle
-              </Box>
-              <ListItemText
-                primary={
-                  <Box
-                    component={"span"}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Typography component={"span"} variant="body1">
-                      Auth Mechanism
-                    </Typography>
-                    <Tabs
-                      value={authConfig?.passwordParams?.authMechanism || "DEFAULT"}
-                      sx={{
-                        backgroundColor: "background.default",
-                        borderRadius: 2,
-                        px: 1,
-                      }}
-                    >
-                      {availableAuthMechanisms.map((mechanism) => (
-                        <Tab
-                          key={mechanism}
-                          value={mechanism}
-                          label={mechanism}
-                        />
-                      ))}
-                    </Tabs>
-                  </Box>
+                  <TransparentTextField
+                    placeholder="Auth Database"
+                    value={authConfig.passwordParams?.authDb || ""}
+                    onChange={(e) =>
+                      setAuthConfig((prev) => ({
+                        ...prev,
+                        passwordParams: {
+                          ...prev.passwordParams,
+                          authDb: e.target.value,
+                        },
+                      }))
+                    }
+                    fullWidth
+                  />
                 }
               />
             </ListItemButton>

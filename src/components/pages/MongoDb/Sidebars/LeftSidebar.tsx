@@ -26,7 +26,7 @@ export const MongoLeftSidebar: FC = () => {
       {/* Sidebar Tabs */}
       <Box
         sx={{
-          width: 60,
+          width: 40,
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-start",
@@ -42,7 +42,7 @@ export const MongoLeftSidebar: FC = () => {
           TabIndicatorProps={{
             sx: {
               transform: "unset !important",
-              width: "4px",
+              width: "2px",
               borderRadius: 0,
               left: 0,
             },
@@ -75,7 +75,7 @@ export const MongoLeftSidebar: FC = () => {
       {/* Sidebar Content */}
       <Box
         sx={{
-          width: "calc(100% - 60px)",
+          width: "calc(100% - 40px)",
           overflow: "hidden",
           display: "flex",
           p: 0,

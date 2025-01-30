@@ -7,7 +7,6 @@ export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> &
   MuiTypography: {
     styleOverrides: {
       root: {
-        color: "text.primary",
           fontFamily: "'Fira Code', 'Courier New', monospace",
           variants: [
           {
@@ -41,24 +40,19 @@ export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> &
   MuiTabs: {
     styleOverrides: {
       root: ({ theme }) => ({
-        "&.MuiTabs-fixed": {
+        "& .MuiTabs-fixed": {
           px: 2,
 
           "& .MuiTabs-flexContainer": {
-            borderBottom: "1px solid",
-            borderColor: theme.palette.divider,
+            height: "100%",
           },
         },
         "& .MuiTabs-indicator": {
           backgroundColor: theme.palette.primary.main,
-          height: "60%",
-          transform: "translateY(-35%)",
-          borderRadius: 4,
         },
         "& .MuiTab-root": {
           textTransform: "none",
           minWidth: "unset",
-          padding: "6px 12px",
           fontFamily: "'Fira Code', 'Courier New', monospace",
           // marginRight: 2, // `mr: 2` shorthand replaced with `marginRight`
           color: theme.palette.text.secondary,
@@ -67,11 +61,6 @@ export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> &
             color: theme.palette.primary.contrastText,
           },
 
-          "& p": {
-            color: "inherit",
-            fontWeight: "bold",
-            transition: "none",
-          },
         },
       }),
     },

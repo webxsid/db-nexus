@@ -1,6 +1,7 @@
-import { CommandCentre } from "@/components/common";
+import { CC, CommandCentre } from "@/components/common";
 import { KeybindingManager } from "@/helpers/keybindings";
 import { useDialogManager } from "@/managers";
+import { EDialogIds } from "@/store";
 import { ArrowBack } from "@mui/icons-material";
 import {
   Box,
@@ -8,9 +9,7 @@ import {
   IconButton,
   InputAdornment,
   List,
-  ListItemButton,
   ListItemText,
-  useTheme,
 } from "@mui/material";
 import { ESupportedDatabases } from "@shared";
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
@@ -44,23 +43,58 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
     setProviders(filteredProviders);
   };
 
-  const theme = useTheme();
-
   const handleArrowDown = useCallback(
     function arrowDownHandler() {
-      setSelectedIndex((prev) => (prev + 1) % providers.length);
+      setSelectedIndex((prev) => {
+        if (prev === 0) {
+          const inputField = document.getElementById(
+            `${EDialogIds.MongoCommandCentre}-search`,
+          );
+          if (inputField) {
+            inputField.blur();
+          }
+        }
+        if (prev !== providers.length) {
+          return prev + 1;
+        }
+        return prev;
+      });
+      const selectedListItem = document.querySelector(
+        `#${EDialogIds.MongoCommandCentre}-list .SelectedListItem`,
+      );
+
+      if (selectedListItem) {
+        selectedListItem.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
     },
-    [providers.length],
+    [providers],
   );
 
-  const handleArrowUp = useCallback(
-    function arrowUpHandler() {
-      setSelectedIndex(
-        (prev) => (prev - 1 + providers.length) % providers.length,
-      );
-    },
-    [providers.length],
-  );
+  const handleArrowUp = useCallback(function arrowUpHandler() {
+    setSelectedIndex((prev) => {
+      if (prev === 1) {
+        // focus on the input field
+        const inputField = document.getElementById(
+          `${EDialogIds.MongoCommandCentre}-search`,
+        );
+        if (inputField) {
+          inputField.focus();
+        }
+      }
+      if (prev !== 0) {
+        return prev - 1;
+      }
+      return prev;
+    });
+
+    const selectedListItem = document.querySelector(
+      `#${EDialogIds.MongoCommandCentre}-list .SelectedListItem`,
+    );
+
+    if (selectedListItem) {
+      selectedListItem.scrollIntoView({ block: "end", behavior: "smooth" });
+    }
+  }, []);
 
   const handleSelect = useCallback(
     (index: number) => {
@@ -82,7 +116,7 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
   const handleEnter = useCallback(
     function enterHandler() {
       if (open && selectedIndex >= 0 && selectedIndex < providers.length) {
-        handleSelect(selectedIndex);
+        handleSelect(selectedIndex - 1);
       }
     },
     [open, selectedIndex, providers, handleSelect],
@@ -149,25 +183,14 @@ export const SelectConnectionProviderDialog: FC = (): ReactNode => {
     >
       <List sx={{ width: "100%", px: 2 }}>
         {providers.map((provider, index) => (
-          <ListItemButton
-            selected={selectedIndex === index}
-            key={`${provider.code}-${index}`}
-            sx={{
-              borderRadius: 2,
-              py: 1.5,
-              border: "1px solid",
-              borderColor: "transparent",
-              backgroundColor: "transparent",
-              color: "text.primary",
-              my: 0.5,
-              "&:hover": {
-                backgroundColor: `${theme.palette.primary.main}22`,
-              },
-            }}
+          <CC.ListButton
+            key={provider.code}
+            selected={selectedIndex === index + 1}
             onClick={() => handleSelect(index)}
+            className={selectedIndex === index + 1 ? "SelectedListItem" : ""}
           >
             <ListItemText primary={provider.name} />
-          </ListItemButton>
+          </CC.ListButton>
         ))}
       </List>
     </CommandCentre>

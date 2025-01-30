@@ -1,10 +1,32 @@
-import { FC, useEffect, useState } from "react";
-import { useAtomValue } from "jotai";
-import { mongoCollectionListAtom, mongoDatabaseListAtom } from "@/store";
 import {
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useAtom, useAtomValue } from "jotai";
+import {
+  IMongoCollectionTab,
+  IMongoDatabaseTab,
+  mongoActiveTabsAtom,
+  mongoCollectionListAtom,
+  mongoDatabaseListAtom,
+  mongoPinnedTabsAtom,
+  mongoSelectedTabAtom,
+  TMongoCollectionListAtom,
+  TMongoTab,
+} from "@/store";
+import {
+  alpha,
   Box,
+  Checkbox,
   Collapse,
   darken,
+  IconButton,
+  InputAdornment,
   lighten,
   List,
   ListItem,
@@ -15,19 +37,191 @@ import {
   useTheme,
 } from "@mui/material";
 import Render from "@/components/common/Render.tsx";
-import { ChevronRight, Circle } from "@mui/icons-material";
+import {
+  Add,
+  ChevronRight,
+  Folder,
+  FolderOpen,
+  MoreVert,
+  PushPin,
+  PushPinOutlined,
+} from "@mui/icons-material";
 import { HotkeyButton, TransparentTextField } from "@/components/common";
+import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
+import { MongoSidebarModulePanelTemplate } from "../Templates";
+import { v4 } from "uuid";
+import { usePopper } from "@/hooks";
 
 interface IFilteredCollectionItem {
   id: string;
   label: string;
-  sizeOnDisk?: number;
-  children: Array<{ id: string; label: string }>;
+  children: TMongoCollectionListAtom;
 }
+
+interface IMongoCollectionListButtonProps {
+  collection: TMongoCollectionListAtom[0];
+  openCollection: (collection: string, database: string) => void;
+  selected?: boolean;
+}
+
+const MongoCollectionListButton: FC<IMongoCollectionListButtonProps> = ({
+  collection,
+  openCollection,
+  selected,
+}) => {
+  const activeTabs = useAtomValue(mongoActiveTabsAtom);
+
+  const isOpen = useMemo<boolean>(() => {
+    return activeTabs.some(
+      (tab) =>
+        tab.type === "collection" &&
+        tab.collection === collection.name &&
+        tab.database === collection.database,
+    );
+  }, [activeTabs, collection]);
+
+  const [pinnedCollections, setPinnedCollections] =
+    useAtom(mongoPinnedTabsAtom);
+
+  const isPinned = useMemo<boolean>(() => {
+    return pinnedCollections.some(
+      (c) => c.name === collection.name && c.database === collection.database,
+    );
+  }, [pinnedCollections, collection]);
+
+  const { showPopper, hidePopper } = usePopper();
+
+  const onHover = (e: MouseEvent, message: string): void => {
+    showPopper(e.currentTarget, {
+      content: <Typography variant={"body2"}>{message}</Typography>,
+      placement: "bottom",
+    });
+  };
+
+  const pinCollection = useCallback(
+    (e: MouseEvent, targetCollection: TMongoCollectionListAtom[0]) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setPinnedCollections((prev) => {
+        if (isPinned) {
+          return prev.filter(
+            (c) =>
+              c.name !== collection.name && c.database !== collection.database,
+          );
+        }
+        return [...prev, targetCollection];
+      });
+      hidePopper();
+    },
+    [isPinned, collection, setPinnedCollections, hidePopper],
+  );
+
+  return (
+    <ListItemButton
+      key={collection.name}
+      id={`collection-${collection.database}-${collection.name}`}
+      dense
+      disableGutters
+      sx={{
+        position: "relative", // Ensure the pseudo-element is positioned correctly
+        pr: 0.5,
+        pl: 2,
+        py: 0,
+      }}
+      onClick={() => openCollection(collection.name, collection.database)}
+      selected={selected}
+    >
+      <ListItemIcon
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minWidth: "unset",
+          p: 1,
+        }}
+      >
+        <Render
+          if={isOpen}
+          then={<FolderOpen sx={{ fontSize: "1rem" }} />}
+          else={<Folder sx={{ fontSize: "1rem" }} />}
+        />
+      </ListItemIcon>
+      <ListItemText
+        primary={
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.primary",
+                fontSize: "0.8rem",
+                flexGrow: 1,
+              }}
+            >
+              {collection.name}
+            </Typography>
+            <IconButton
+              size={"small"}
+              sx={{
+                p: 0.5,
+                borderRadius: 2,
+                height: "100%",
+              }}
+              onClick={(e) => pinCollection(e, collection)}
+              onMouseEnter={(e) =>
+                onHover(e, isPinned ? "Unpin collection" : "Pin collection")
+              }
+              onMouseLeave={hidePopper}
+            >
+              <Checkbox
+                sx={{ p: 0 }}
+                checked={isPinned}
+                icon={
+                  <PushPinOutlined
+                    sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }}
+                  />
+                }
+                checkedIcon={
+                  <PushPin
+                    sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }}
+                  />
+                }
+              />
+            </IconButton>
+            <IconButton
+              size={"small"}
+              sx={{
+                p: 0.5,
+                borderRadius: 2,
+                height: "100%",
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseEnter={(e) => onHover(e, "More options")}
+              onMouseLeave={hidePopper}
+            >
+              <MoreVert sx={{ fontSize: "0.9rem" }} />
+            </IconButton>
+          </Box>
+        }
+      />
+    </ListItemButton>
+  );
+};
 
 export const MongoCollectionListPanel: FC = () => {
   const { databases } = useAtomValue(mongoDatabaseListAtom);
   const collections = useAtomValue(mongoCollectionListAtom);
+  const [activeTabs, setActiveTabs] = useAtom(mongoActiveTabsAtom);
+  const [selectedTabId, setSelectedTabId] = useAtom(mongoSelectedTabAtom);
+
+  const selectedTab = useMemo<TMongoTab | undefined>(() => {
+    return activeTabs.find((tab) => tab.id === selectedTabId);
+  }, [selectedTabId, activeTabs]);
 
   const [collectionSearch, setCollectionSearch] = useState<string>("");
   const [filteredCollections, setFilteredCollections] = useState<
@@ -35,8 +229,11 @@ export const MongoCollectionListPanel: FC = () => {
   >([]);
 
   const [expandedDbs, setExpandedDbs] = useState<string[]>([]);
+  const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
 
   const theme = useTheme();
+
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const handleExpandDb = (itemId: string): void => {
     if (expandedDbs.includes(itemId)) {
@@ -61,213 +258,339 @@ export const MongoCollectionListPanel: FC = () => {
         ? lighten(primaryColor, factor)
         : darken(primaryColor, factor);
 
-    return colorInRGB.replace("rgb", "rgba").replace(")", ", 0.1)");
+    return alpha(colorInRGB, 0.3);
   };
+
+  const clearSearch = useCallback(function onClearSearch() {
+    setCollectionSearch("");
+  }, []);
+
+  const focusSearch = useCallback(function onFocusSearch() {
+    searchRef.current?.focus();
+  }, []);
+
+  const openCollection = useCallback(
+    (collection: string, database: string) => {
+      const existingTab = activeTabs.find(
+        (tab) =>
+          tab.type === "collection" &&
+          tab.collection === collection &&
+          tab.database === database,
+      );
+
+      if (existingTab) {
+        setSelectedTabId(existingTab.id);
+        return;
+      }
+      const newTabData: IMongoCollectionTab = {
+        type: "collection",
+        id: v4(),
+        collection,
+        database,
+      };
+      setActiveTabs((prevTabs) => [...prevTabs, newTabData]);
+      setSelectedTabId(newTabData.id);
+    },
+    [setActiveTabs, setSelectedTabId, activeTabs],
+  );
+
+  const openDatabase = useCallback(
+    (database: string) => {
+      const existingTab = activeTabs.find(
+        (tab) => tab.type === "database" && tab.database === database,
+      );
+
+      if (existingTab) {
+        setSelectedTabId(existingTab.id);
+        return;
+      }
+      const newTabData: IMongoDatabaseTab = {
+        type: "database",
+        id: v4(),
+        database,
+      };
+      setActiveTabs((prevTabs) => [...prevTabs, newTabData]);
+      setSelectedTabId(newTabData.id);
+    },
+    [setActiveTabs, setSelectedTabId, activeTabs],
+  );
 
   useEffect(() => {
     const filtered =
       collectionSearch.length > 0
         ? collections.filter((c) => c.name.includes(collectionSearch))
         : collections;
-    const groups: IFilteredCollectionItem[] = Object.entries(databases).map(
-      ([dbName, dbStats]) => {
-        const dbCollections = filtered.filter((c) => c.database === dbName);
-        return {
-          id: dbName,
-          label: dbName,
-          sizeOnDisk: dbStats.sizeOnDisk,
-          children: dbCollections.map((c) => ({ id: c.name, label: c.name })),
-        };
-      },
-    );
 
-    console.log(groups);
+    const groups: IFilteredCollectionItem[] = Object.keys(databases)
+      .map((dbName) => {
+        const dbCollections = filtered.filter((c) => c.database === dbName);
+        return dbCollections.length > 0 || collectionSearch.length === 0
+          ? {
+              id: dbName,
+              label: dbName,
+              children: dbCollections,
+            }
+          : null;
+      })
+      .filter((group): group is IFilteredCollectionItem => group !== null); // Removes null entries
 
     setFilteredCollections(groups);
   }, [collectionSearch, collections, databases]);
+
+  useEffect(() => {
+    if (!selectedTab) return;
+
+    if (selectedTab.type !== "database" && selectedTab.type !== "collection")
+      return;
+    const query =
+      selectedTab.type === "database"
+        ? `#db-${selectedTab.id}`
+        : `#collection-${selectedTab.database}-${selectedTab.id}`;
+
+    if (!query) return;
+
+    const element = document.querySelector(query);
+    setExpandedDbs((prev) => {
+      if (prev.includes(selectedTab.database)) return prev;
+      return [...prev, selectedTab.database];
+    });
+
+    if (element) {
+      element.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  }, [selectedTab]);
+
+  useEffect(() => {
+    KeybindingManager.registerKeybinding(["Escape"], clearSearch);
+    KeybindingManager.registerKeybinding(["Meta+k"], focusSearch);
+    return () => {
+      KeybindingManager.unregisterKeybinding(["Escape"], clearSearch);
+      KeybindingManager.unregisterKeybinding(["Meta+k"], focusSearch);
+    };
+  }, [clearSearch, focusSearch]);
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        gap: 1,
-      }}
+    <MongoSidebarModulePanelTemplate
+      label={"Databases"}
+      moduleKey={"collection-list"}
+      side={"left"}
+      headerActions={[
+        {
+          icon: <Add />,
+          label: "Create Database",
+          onClick: () => {},
+        },
+      ]}
     >
+      <Box
+        sx={{
+          backgroundColor: "background.paper",
+          borderRadius: 2,
+        }}
+      >
+        <TransparentTextField
+          placeholder={"Search databases.."}
+          variant="outlined"
+          size={"small"}
+          value={collectionSearch}
+          onChange={(e) => setCollectionSearch(e.target.value)}
+          inputRef={searchRef}
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={() => setIsSearchFocused(false)}
+          sx={{
+            color: "text.primary",
+          }}
+          slotProps={{
+            input: {
+              endAdornment: !isSearchFocused ? (
+                <InputAdornment position={"end"}>
+                  <KeyCombo keyCombo={"Meta+k"} size={"small"} />
+                </InputAdornment>
+              ) : null,
+            },
+          }}
+        />
+      </Box>
+      <Box sx = {{overflowY:"auto", height:"100%"}}>
       <Render
         if={filteredCollections.length > 0}
         then={
-          <>
-            <TransparentTextField
-              placeholder={"Search collections.."}
-              variant="outlined"
-              value={collectionSearch}
-              onChange={(e) => setCollectionSearch(e.target.value)}
-              sx={{
-                color: "text.primary",
-                borderBottom: "1px solid",
-                borderColor: "divider",
-              }}
-            />
-            <List
-              dense
-              sx={{
-                px: 1,
-              }}
-            >
-              {filteredCollections.map((db) => (
-                <Box
-                  key={db.id}
-                  sx={{
-                    backgroundColor: expandedDbs.includes(db.id)
-                      ? `${getActiveColor(db.id)}`
+          <List
+            dense
+            sx={{
+              px: 1,
+            }}
+          >
+            {filteredCollections.map((db) => (
+              <Box
+                key={db.id}
+                id={`db-${db.id}`}
+                sx={{
+                  borderRadius: 2,
+                  mb: 0.5,
+                  transition: "background-color 0.3s",
+                  overflow: "hidden",
+                  backgroundColor:
+                    (selectedTab?.type === "database" ||
+                      selectedTab?.type === "collection") &&
+                    selectedTab.database === db.id
+                      ? getActiveColor(db.id)
                       : "transparent",
-                    borderRadius: 2,
-                    mb: 0.5,
-                    transition: "padding 0.3s",
-                    p: expandedDbs.includes(db.id) ? 0.5 : 0,
-                  }}
-                >
-                  <ListItemButton
-                    dense
-                    disableGutters
-                    selected={expandedDbs.includes(db.id)}
-                    onClick={(_e) => handleExpandDb(db.id)}
-                    sx={{
-                      borderRadius: 2,
-                      "&.Mui-selected": {
-                        backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: getActiveColor(db.id),
+                  },
+                }}
+              >
+                <ListItem
+                  dense
+                  disableGutters
+                  sx={{
+                    p: 0,
+                    backgroundColor:
+                      selectedTab?.type === "database" &&
+                      selectedTab.database === db.id
+                        ? getActiveColor(db.id)
+                        : "transparent",
+                    transition: "background-color 0.3s",
+                    "& .secondary-action": {
+                      opacity: 0,
+                      transition: "opacity 0.3s",
+                      "& svg": {
+                        fontSize: "0.9rem",
                       },
-                    }}
-                  >
-                    <ListItemIcon
+                    },
+                    "&:hover": {
+                      backgroundColor: expandedDbs.includes(db.id)
+                        ? `${getActiveColor(db.id)}`
+                        : lighten(getActiveColor(db.id), 0.1),
+
+                      "& .secondary-action": {
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                  secondaryAction={
+                    <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "center",
                         alignItems: "center",
+                        gap: 0.5,
+                        px: 0.7,
                       }}
+                      className={"secondary-action"}
                     >
-                      {db.children.length > 0 ? (
-                        <ChevronRight
-                          fontSize={"small"}
-                          sx={{
-                            transition: "transform 0.3s",
-                            transform: expandedDbs.includes(db.id)
-                              ? "rotate(90deg)"
-                              : "rotate(0deg)",
-                          }}
-                        />
-                      ) : (
-                        <Circle
-                          sx={{
-                            fontSize: "0.5rem",
-                          }}
-                        />
-                      )}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={db.label}
-                      primaryTypographyProps={{
-                        variant: "body2",
-                        noWrap: true,
-                        color: "text.primary",
-                        fontSize: "0.9rem",
+                      <IconButton size={"small"} sx={{ padding: 0 }}>
+                        <Add />
+                      </IconButton>
+                      <IconButton size={"small"} sx={{ padding: 0 }}>
+                        <MoreVert />
+                      </IconButton>
+                    </Box>
+                  }
+                >
+                  <ListItemIcon
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      minWidth: "unset",
+                      p: 1,
+                    }}
+                    role={"button"}
+                    onClick={(_e) => handleExpandDb(db.id)}
+                  >
+                    <ChevronRight
+                      fontSize={"small"}
+                      sx={{
+                        transition: "transform 0.3s",
+                        transform: expandedDbs.includes(db.id)
+                          ? "rotate(90deg)"
+                          : "rotate(0deg)",
                       }}
                     />
-                  </ListItemButton>
-                  <Collapse in={expandedDbs.includes(db.id)} unmountOnExit>
-                    <List dense disablePadding>
-                      <Render
-                        if={db.children.length > 0}
-                        then={
-                          <>
-                            {db.children.map((c) => (
-                              <ListItemButton
-                                key={c.id}
-                                dense
-                                disableGutters
-                                sx={{
-                                  borderRadius: 2,
-                                  pl: 1.5,
-                                }}
-                              >
-                                <ListItemIcon
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <Circle
-                                    sx={{
-                                      fontSize: "0.5rem",
-                                    }}
-                                  />
-                                </ListItemIcon>
-                                <ListItemText
-                                  primary={
-                                    <Typography
-                                      variant="body2"
-                                      sx={{
-                                        color: "text.primary",
-                                      }}
-                                    >
-                                      {c.label}
-                                    </Typography>
-                                  }
-                                />
-                              </ListItemButton>
-                            ))}
-                          </>
-                        }
-                        else={
-                          <ListItem
-                            dense
-                            disableGutters
-                            sx={{
-                              borderRadius: 2,
-                              pl: 1.5,
-                            }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: "text.secondary",
-                                    verticalAlign: "middle",
-                                    useSelect: "none",
-                                  }}
-                                  noWrap
-                                >
-                                  No collections found,
-                                  <Typography
-                                    role={"button"}
-                                    variant={"body2"}
-                                    color={"primary"}
-                                    sx={{
-                                      cursor: "pointer",
-                                      userSelect: "none",
-                                      "&:hover": {
-                                        textDecoration: "underline",
-                                      },
-                                    }}
-                                  >
-                                    create one
-                                  </Typography>
-                                </Typography>
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={db.label}
+                    onClick={() => openDatabase(db.id)}
+                    primaryTypographyProps={{
+                      variant: "body2",
+                      noWrap: true,
+                      color: "text.primary",
+                      fontSize: "0.9rem",
+                      role: "button",
+                      sx: {
+                        cursor: "pointer",
+                        userSelect: "none",
+                      },
+                    }}
+                  />
+                </ListItem>
+                <Collapse in={expandedDbs.includes(db.id)} unmountOnExit>
+                  <List dense disablePadding>
+                    <Render
+                      if={db.children.length > 0}
+                      then={
+                        <>
+                          {db.children.map((c) => (
+                            <MongoCollectionListButton
+                              key={`${c.database}-${c.name}`}
+                              collection={c}
+                              openCollection={openCollection}
+                              selected={
+                                selectedTab?.type === "collection" &&
+                                selectedTab.collection === c.name &&
+                                selectedTab.database === db.id
                               }
                             />
-                          </ListItem>
-                        }
-                      />
-                    </List>
-                  </Collapse>
-                </Box>
-              ))}
-            </List>
-          </>
+                          ))}
+                        </>
+                      }
+                      else={
+                        <ListItem
+                          dense
+                          disableGutters
+                          sx={{
+                            borderRadius: 2,
+                            pl: 1.5,
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: "text.secondary",
+                                  verticalAlign: "middle",
+                                  useSelect: "none",
+                                }}
+                                noWrap
+                              >
+                                No collections found,
+                                <Typography
+                                  role={"button"}
+                                  variant={"body2"}
+                                  color={"primary"}
+                                  sx={{
+                                    cursor: "pointer",
+                                    userSelect: "none",
+                                    "&:hover": {
+                                      textDecoration: "underline",
+                                    },
+                                  }}
+                                >
+                                  create one
+                                </Typography>
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                      }
+                    />
+                  </List>
+                </Collapse>
+              </Box>
+            ))}
+          </List>
         }
         else={
           <Box
@@ -276,29 +599,57 @@ export const MongoCollectionListPanel: FC = () => {
               height: "100%",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
+              justifyContent: "flex-start",
               alignItems: "center",
               gap: 1,
+              px: 1,
             }}
           >
-            <Typography variant="body2" color="textSecondary">
-              No database / collections found
-            </Typography>
+            <Render
+              if={collectionSearch.length > 0}
+              then={
+                <>
+                  <Typography variant="body2" color="textSecondary">
+                    No collections found, try searching for something else
+                  </Typography>
+                  <Typography
+                    variant={"caption"}
+                    color={"textSecondary"}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                    }}
+                  >
+                    Press <KeyCombo keyCombo={"Esc"} size={"small"} /> to clear
+                    search
+                  </Typography>
+                </>
+              }
+              else={
+                <>
+                  <Typography variant="body2" color="textSecondary">
+                    No collections found
+                  </Typography>
 
-            <HotkeyButton
-              onClick={() => {}}
-              keyBindings={["Meta+n"]}
-              skipBind={true}
-              hotKeySize="smaller"
-              variant={"outlined"}
-              size={"small"}
-              tooltip={"Create a new database"}
-            >
-              Create Database
-            </HotkeyButton>
+                  <HotkeyButton
+                    onClick={() => {}}
+                    keyBindings={["Meta+n"]}
+                    skipBind={true}
+                    hotKeySize="smaller"
+                    variant={"outlined"}
+                    size={"small"}
+                    tooltip={"Create a new database"}
+                  >
+                    Create Database
+                  </HotkeyButton>
+                </>
+              }
+            />
           </Box>
         }
       />
-    </Box>
+      </Box>
+    </MongoSidebarModulePanelTemplate>
   );
 };

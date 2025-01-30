@@ -44,6 +44,9 @@ export class MongoConnectionService {
     );
     if (!meta || !meta.uri) throw new Error("Connection not found");
 
+    meta.lastConnectionAt = new Date();
+    await this._connectionManager.updateConnection(ESupportedDatabases.Mongo, id, meta, true);
+
     const existingClient = this._clientManager.getClient(id);
     const existingMongooseConnection =
       this._clientManager.getMongooseConnection(id);

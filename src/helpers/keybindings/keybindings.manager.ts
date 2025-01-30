@@ -31,7 +31,8 @@ const forcedKeyCombos: string[] = [
   "Meta+Shift+6",
   "Meta+Shift+7",
   "Meta+Shift+8",
-  "Meta+Shift+9"
+  "Meta+Shift+9",
+  "Escape"
 ];
 
 class _KeybindingManager {
@@ -89,13 +90,20 @@ class _KeybindingManager {
       activeElement?.tagName === "TEXTAREA" ||
       activeElement?.isContentEditable;
 
+    // console.log("Event", event);
+
     const keyCombo = this.getKeyCombo(event);
+
+    // console.log("Key Combo", keyCombo);
 
     if (isTypingContext && !forcedKeyCombos.includes(keyCombo)) {
       return;
     }
 
     if (this.bindings[keyCombo]) {
+      event.preventDefault();
+      event.stopPropagation();
+      // console.log("Binding", this.bindings[keyCombo]);
       this.bindings[keyCombo].forEach((binding) => binding.callback(event));
     }
   }

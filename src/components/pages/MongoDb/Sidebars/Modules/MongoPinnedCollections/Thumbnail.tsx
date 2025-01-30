@@ -1,11 +1,12 @@
-import { Bookmark } from "@mui/icons-material";
+import { Bookmarks, BookmarksOutlined } from "@mui/icons-material";
 import { MongoSidebarModuleThumbnailTemplate } from "../Templates";
 import { FC } from "react";
 
-export const MongoPinnedCollectionThumbnail: FC = () => {
+export const MongoPinnedCollectionsThumbnail: FC = () => {
   return (
     <MongoSidebarModuleThumbnailTemplate
-      icon={<Bookmark sx={{ fontSize: "1.5rem" }} />}
+      icon={<BookmarksOutlined sx={{ fontSize: "1.5rem" }} />}
+      activeIcon={<Bookmarks sx={{ fontSize: "1.5rem" }} />}
       label="Pinned Collections"
       moduleKey="pinned-collections"
       side={"left"}

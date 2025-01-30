@@ -15,6 +15,7 @@ import {
 import { Box, Typography, useTheme } from "@mui/material";
 import { usePopper } from "@/hooks";
 import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
+import Render from "@/components/common/Render.tsx";
 
 export type TMongoSideBarKeyBinding =
   | "Meta+0"
@@ -29,6 +30,7 @@ export type TMongoSideBarKeyBinding =
 
 export interface IMongoSidebarModuleThumbnailTemplateProps {
   icon: ReactNode; // To accept any icon component (e.g., ViewList)
+  activeIcon?: ReactNode; // Optional icon to display when active
   label: string; // Label to display in the tooltip
   moduleKey: TMongoSidebarModule; // Unique module identifier (e.g., "collection-list")
   color?: string; // Optional color (can be from the connection object)
@@ -41,6 +43,7 @@ export const MongoSidebarModuleThumbnailTemplate: FC<
   IMongoSidebarModuleThumbnailTemplateProps
 > = ({
   icon,
+  activeIcon,
   label,
   moduleKey,
   color: _color,
@@ -124,7 +127,19 @@ export const MongoSidebarModuleThumbnailTemplate: FC<
         flexGrow: 1,
       }}
     >
-      {icon}
+      <Render if={
+        !activeIcon
+      } then={
+        icon
+      } else = {
+        <Render if={
+          isActive
+        } then={
+          activeIcon
+        } else = {
+          icon
+        } />
+      } />
     </Box>
   );
 };

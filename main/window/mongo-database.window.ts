@@ -1,7 +1,7 @@
 import { BrowserWindow, nativeImage } from "electron";
 import { MongoIPCListeners, ProcessIPCListeners } from "../ipc-listeners";
 import { FileManager, PathManager } from "../managers";
-import { kDefaultWindowHeight, kDefaultWindowWidth } from "../constants";
+import { kDefaultWindowHeight, kDefaultWindowWidth, kMinWindowHeight, kMinWindowWidth } from "../constants";
 
 export class MongoDbWindow {
   private _window: BrowserWindow | null = null;
@@ -69,11 +69,13 @@ try {
       this._window = new BrowserWindow({
         width: width ?? kDefaultWindowWidth,
         height: height ?? kDefaultWindowHeight,
+        minWidth: kMinWindowWidth,
+        minHeight: kMinWindowHeight,
         icon: nativeImage.createFromPath(this._fileManager.IconFile),
         titleBarStyle: "hidden",
         fullscreenable: false,
         ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
-        trafficLightPosition:{ x: 12, y: 28 },
+        trafficLightPosition:{ x: 12, y: 18 },
         webPreferences: {
           nodeIntegration: true,
           preload: this._pathManager.MongoWindowPreloadPath,

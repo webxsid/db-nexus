@@ -1,3 +1,4 @@
+import Render from "@/components/common/Render.tsx";
 import { KeybindingManager } from "@/helpers/keybindings";
 import { useDialogManager } from "@/managers";
 import { TDialogIds } from "@/store";
@@ -14,7 +15,10 @@ export interface ICommandCentreProps {
   keybindings?: string[];
   startAdornment?: ReactNode;
   endAdornment?: ReactNode;
+  disableText?: boolean;
+  footer?: ReactNode;
 }
+
 export const CommandCentre: FC<ICommandCentreProps> = ({
   text,
   textPlaceholder,
@@ -24,6 +28,8 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
   keybindings,
   startAdornment,
   endAdornment,
+  disableText,
+  footer,
 }) => {
   const { openDialog, closeDialog, isDialogOpen } = useDialogManager();
 
@@ -32,27 +38,30 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleToggle = useCallback(() => {
-    console.log("Handle Toggle");
     if (open) {
       closeDialog();
+      onTextChange("");
     } else {
       openDialog(dialogType);
     }
-  }, [open, openDialog, dialogType, closeDialog]);
+  }, [open, openDialog, dialogType, closeDialog, onTextChange]);
 
   useEffect(() => {
-    // Focus on the input field when the dialog is opened
-    if (open) {
-      // wait for the inputRef to be available
+    // Update open state when the dialog's visibility changes
+    const isOpen = isDialogOpen(dialogType);
+    if (isOpen !== open) {
+      setOpen(isOpen);
+    }
+
+    console.log("isOpen", isOpen);
+
+    // Focus on the input field when the dialog opens
+    if (isOpen) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     }
-  }, [open]);
-
-  useEffect(() => {
-    setOpen(isDialogOpen(dialogType));
-  }, [isDialogOpen, dialogType]);
+  }, [isDialogOpen, dialogType, open]);
 
   useEffect(() => {
     if (keybindings && keybindings.length > 0) {
@@ -63,6 +72,7 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
       };
     }
   }, [handleToggle, keybindings]);
+
   return (
     <Dialog
       open={open}
@@ -91,23 +101,39 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
       >
         <Box sx={{ width: "100%", backgroundColor: "background.default" }}>
           <TransparentTextField
-            InputProps={{
-              id: `${dialogType}-search`,
-              ...(startAdornment && { startAdornment }),
-              ...(endAdornment && { endAdornment }),
-            }}
             inputRef={inputRef}
             placeholder={textPlaceholder}
             variant="outlined"
+            disabled={!!disableText}
             fullWidth
             value={text}
             onChange={(e) => onTextChange(e.target.value)}
             multiline
             maxRows={2}
+            slotProps={{
+              input: {
+                id: `${dialogType}-search`,
+                ...(startAdornment && { startAdornment }),
+                ...(endAdornment && { endAdornment }),
+              },
+            }}
           />
         </Box>
         <Divider flexItem />
-        {children}
+        <Box
+          sx={{ width: "100%", overflowY: "auto", p: 1, maxHeight: "50vh" }}
+          id={`${dialogType}-list`}
+        >
+          {children}
+        </Box>
+        <Render
+          if={!!footer}
+          then={
+            <Box sx={{ width: "100%", backgroundColor: "background.default" }}>
+              {footer}
+            </Box>
+          }
+        />
       </Box>
     </Dialog>
   );

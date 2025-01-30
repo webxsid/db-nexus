@@ -1,4 +1,4 @@
-import { CommandCentre, HotkeyButton } from "@/components/common";
+import { CC, CommandCentre, HotkeyButton } from "@/components/common";
 import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
 import { CoreIpcEvents, MongoIpcEvents } from "@/ipc-events";
 import { useDialogManager } from "@/managers";
@@ -122,7 +122,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
         setSelectedTab(0);
         // blur the input field
         const inputField = document.getElementById(
-          `${EDialogIds.AddMongoConnection}-search`,
+          `${EDialogIds.SelectDbProvider}-search`,
         );
         if (inputField) {
           inputField.blur();
@@ -179,7 +179,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       setSelectedIndex((prev) => {
         if (prev === 0) {
           const inputField = document.getElementById(
-            `${EDialogIds.AddMongoConnection}-search`,
+            `${EDialogIds.SelectDbProvider}-search`,
           );
           if (inputField) {
             inputField.blur();
@@ -188,9 +188,15 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
         if (prev !== ccOptions.length) {
           return prev + 1;
         }
-
         return prev;
       });
+      const selectedListItem = document.querySelector(
+        `#${EDialogIds.SelectDbProvider}-list .SelectedListItem`,
+      );
+
+      if (selectedListItem) {
+        selectedListItem.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
     },
     [ccOptions],
   );
@@ -200,7 +206,7 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       if (prev === 1) {
         // focus on the input field
         const inputField = document.getElementById(
-          `${EDialogIds.AddMongoConnection}-search`,
+          `${EDialogIds.SelectDbProvider}-search`,
         );
         if (inputField) {
           inputField.focus();
@@ -209,9 +215,16 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       if (prev !== 0) {
         return prev - 1;
       }
-
       return prev;
     });
+
+    const selectedListItem = document.querySelector(
+      `#${EDialogIds.SelectDbProvider}-list .SelectedListItem`,
+    );
+
+    if (selectedListItem) {
+      selectedListItem.scrollIntoView({ block: "end", behavior: "smooth" });
+    }
   }, []);
 
   const handleSaveConnection = async (): Promise<void> => {
@@ -378,6 +391,85 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
           </Box>
         </InputAdornment>
       }
+
+      footer={
+      <>
+        {
+          showAdvancedConfig && !showCustomizeDb && !loading ? (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                p:1,
+                backgroundColor: "secondary.main",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ flexGrow: 1, display: "flex", gap: 1 }}
+              >
+                Use the <KeyCombo keyCombo="ArrowDown" size="smaller" /> &{" "}
+                <KeyCombo keyCombo="ArrowUp" size="smaller" /> keys to navigate
+                between fields
+              </Typography>
+              <HotkeyButton
+                onClick={toggleAdvancedConfig}
+                keyBindings={["Meta+Shift+a"]}
+                showhotkey={true}
+                tooltip="Close Advanced Config"
+                sx={{ textTransform: "none" }}
+              >
+                Close Advanced Config
+              </HotkeyButton>
+            </Box>
+          ): showCustomizeDb && !showAdvancedConfig && !loading ? (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                p:1,
+                backgroundColor: "secondary.main",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ flexGrow: 1, display: "flex", gap: 1 }}
+              >
+                Use the <KeyCombo keyCombo="ArrowDown" size="smaller" /> &{" "}
+                <KeyCombo keyCombo="ArrowUp" size="smaller" /> keys to navigate
+                between fields
+              </Typography>
+              <HotkeyButton
+                onClick={closeCustomizeDb}
+                keyBindings={["Meta+ArrowLeft"]}
+                showhotkey={true}
+                tooltip="Close Customization"
+                disabled={loading}
+                sx={{ textTransform: "none" }}
+              >
+                Back
+              </HotkeyButton>
+              <HotkeyButton
+                variant="outlined"
+                onClick={isEdit ? handleUpdateConnection : handleSaveConnection}
+                keyBindings={["Meta+Enter"]}
+                showhotkey={true}
+                tooltip="Save Connection"
+                disabled={loading}
+                sx={{
+                  textTransform: "none",
+                  backgroundColor: `${theme.palette.primary.main}44`,
+                }}
+              >
+                {isEdit ? "Update Connection" : "Save Connection"}
+              </HotkeyButton>
+            </Box>
+          ): null
+        }
+      </>
+      }
     >
       <Collapse
         in={!showAdvancedConfig && !showCustomizeDb && !loading}
@@ -388,40 +480,17 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
       >
         <List sx={{ width: "100%" }}>
           {ccOptions.map((option, index) => (
-            <ListItemButton
+            <CC.ListButton
               selected={selectedIndex === index + 1}
               key={index}
-              sx={{
-                borderRadius: 2,
-                py: 1.5,
-                border: "1px solid",
-                borderColor: "transparent",
-                backgroundColor: "transparent",
-                color: "text.primary",
-                my: 0.5,
-                "&:hover": {
-                  backgroundColor: `${theme.palette.primary.main}22`,
-                },
-              }}
+              className={selectedIndex === index + 1 ? "SelectedListItem" : ""}
               onClick={option.handler}
             >
-              <ListItemIcon>
-                <Box
-                  sx={{
-                    aspectRatio: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    backgroundColor: "primary.dark",
-                    borderRadius: 2,
-                    justifyContent: "center",
-                    p: 1,
-                  }}
-                >
+              <CC.ListIcon>
                   {option.icon}
-                </Box>
-              </ListItemIcon>
+              </CC.ListIcon>
               <ListItemText primary={option.title} />
-            </ListItemButton>
+            </CC.ListButton>
           ))}
         </List>
       </Collapse>
@@ -450,34 +519,6 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
             setAuthConfig={setAuthConfig}
           />
         </TabPanel>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            px: 2,
-            py: 1,
-            backgroundColor: "secondary.main",
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{ flexGrow: 1, display: "flex", gap: 1 }}
-          >
-            Use the <KeyCombo keyCombo="ArrowDown" size="smaller" /> &{" "}
-            <KeyCombo keyCombo="ArrowUp" size="smaller" /> keys to navigate
-            between fields
-          </Typography>
-          <HotkeyButton
-            onClick={toggleAdvancedConfig}
-            keyBindings={["Meta+Shift+a"]}
-            showhotkey={true}
-            tooltip="Close Advanced Config"
-            sx={{ textTransform: "none" }}
-          >
-            Close Advanced Config
-          </HotkeyButton>
-        </Box>
       </Collapse>
       <Collapse
         unmountOnExit
@@ -491,49 +532,6 @@ export const AddMongoDbConnectionDialog = (): ReactNode => {
           setColor={setConnectionColor}
           isOpen={showCustomizeDb && !showAdvancedConfig && !loading}
         />
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            px: 2,
-            py: 1,
-            backgroundColor: "secondary.main",
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{ flexGrow: 1, display: "flex", gap: 1 }}
-          >
-            Use the <KeyCombo keyCombo="ArrowDown" size="smaller" /> &{" "}
-            <KeyCombo keyCombo="ArrowUp" size="smaller" /> keys to navigate
-            between fields
-          </Typography>
-          <HotkeyButton
-            onClick={closeCustomizeDb}
-            keyBindings={["Meta+ArrowLeft"]}
-            showhotkey={true}
-            tooltip="Close Customization"
-            disabled={loading}
-            sx={{ textTransform: "none" }}
-          >
-            Back
-          </HotkeyButton>
-          <HotkeyButton
-            variant="outlined"
-            onClick={isEdit ? handleUpdateConnection : handleSaveConnection}
-            keyBindings={["Meta+Enter"]}
-            showhotkey={true}
-            tooltip="Save Connection"
-            disabled={loading}
-            sx={{
-              textTransform: "none",
-              backgroundColor: `${theme.palette.primary.main}44`,
-            }}
-          >
-            {isEdit ? "Update Connection" : "Save Connection"}
-          </HotkeyButton>
-        </Box>
       </Collapse>
       <Collapse in={loading} sx={{ width: "100%" }}>
         <Box

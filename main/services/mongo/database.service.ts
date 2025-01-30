@@ -1,7 +1,7 @@
+import { IMongoCollectionList, IMongoDatabaseList, safeExecute } from "@shared";
+import { ListDatabasesResult } from "mongodb";
 import { Singleton } from "../../decorators";
 import { MongoClientManager } from "../../managers";
-import { IMongoCollectionList, IMongoDatabaseList } from "@shared";
-import { ListDatabasesResult } from "mongodb";
 import { logger } from "../../utils";
 
 @Singleton
@@ -55,7 +55,7 @@ export class MongoDatabaseService {
   public async listCollections(
     connectionId: string,
     databaseName: string,
-  ): Promise<IMongoCollectionList['collections']> {
+  ): Promise<IMongoCollectionList["collections"]> {
     const client = this._clientManager.getClient(connectionId);
     if (!client) throw new Error("Client not found");
 
@@ -63,7 +63,15 @@ export class MongoDatabaseService {
       .db(databaseName)
       .listCollections()
       .toArray();
-    const collectionsWithStats = collections.map(async (collection) => await this.getCollectionStats(connectionId, databaseName, collection.name));
+    logger.info("Collections:", collections);
+    const collectionsWithStats = collections.map(
+      async (collection) =>
+        await this.getCollectionStats(
+          connectionId,
+          databaseName,
+          collection.name,
+        ),
+    );
     return Promise.all(collectionsWithStats);
   }
 
@@ -71,12 +79,16 @@ export class MongoDatabaseService {
     connectionId: string,
     databaseName: string,
     collectionName: string,
-  ): Promise<IMongoCollectionList['collections'][number]> {
+  ): Promise<IMongoCollectionList["collections"][number]> {
     const client = this._clientManager.getClient(connectionId);
     if (!client) throw new Error("Client not found");
 
-      await client.db(databaseName).createCollection(collectionName);
-      return await this.getCollectionStats(connectionId, databaseName, collectionName);
+    await client.db(databaseName).createCollection(collectionName);
+    return await this.getCollectionStats(
+      connectionId,
+      databaseName,
+      collectionName,
+    );
   }
 
   public async dropCollection(
@@ -113,19 +125,34 @@ export class MongoDatabaseService {
     };
   }
 
-  private async getCollectionStats(connectionId: string,dbName: string, collectionName: string): Promise<IMongoCollectionList['collections'][number]> {
+  private async getCollectionStats(
+    connectionId: string,
+    dbName: string,
+    collectionName: string,
+  ): Promise<IMongoCollectionList["collections"][number]> {
     const client = this._clientManager.getClient(connectionId);
     if (!client) throw new Error("Client not found");
 
     const db = client.db(dbName);
 
-    const stats = await db.command({ collStats: collectionName });
+    const [stats, err] = await safeExecute<Document>(
+      db.command({ collStats: collectionName }),
+    );
 
+    if (err) {
+      logger.error("Error while getting collection stats", err);
+      return {
+        name: collectionName,
+        size: -1,
+        numOfDocuments: -1,
+        numOfIndexes: -1,
+      };
+    }
     return {
       name: collectionName,
       size: stats.size,
       numOfDocuments: stats.count,
       numOfIndexes: stats.nindexes,
-    }
+    };
   }
 }

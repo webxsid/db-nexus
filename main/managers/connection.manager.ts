@@ -89,12 +89,14 @@ export class ConnectionManager {
     provider: ESupportedDatabases,
     id: string,
     connection: IDatabaseConnection<unknown>,
+    ignoreUpdatedAt = false,
   ): Promise<void> {
     switch (provider) {
       case ESupportedDatabases.Mongo:
         await this._updateMongoConnection(
           id,
           connection as Omit<IMongoConnection, "id">,
+          ignoreUpdatedAt,
         );
         break;
       default:
@@ -160,12 +162,13 @@ export class ConnectionManager {
   private async _updateMongoConnection(
     id: string,
     connection: Omit<IMongoConnection, "id">,
+    ignoreUpdatedAt = false,
   ): Promise<void> {
     this._validateMongoConnection(connection);
     const data = {
       ...connection,
       id,
-      updatedAt: new Date(),
+      ...(ignoreUpdatedAt ? {} : { updatedAt: new Date() }),
     };
     this._mongoConnections.set(id, data);
     await this._fileManager.updateConnectionToFile(

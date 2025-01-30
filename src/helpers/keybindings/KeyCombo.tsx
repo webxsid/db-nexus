@@ -135,6 +135,7 @@ export const KeyCombo: FC<IKeyComboProps> = ({ keyCombo, size }): ReactNode => {
                       fontSize,
                       color: "inherit",
                       fontFamily: "monospace",
+                      mx: 0.5,
                     }}
                   >
                     {key.toUpperCase()}

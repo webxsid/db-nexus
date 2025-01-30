@@ -1,8 +1,10 @@
 {
-  "appId": "com.webxsid.db-nexus",
+  "appId": "com.db-nexus.app",
   "productName": "DB Nexus",
+  "copyright": "Copyright © 2025 webxsid",
   "directories": {
-    "output": "release/${version}"
+    "output": "release/${version}",
+    "buildResources": "shared/assets/app-icons"
   },
   "files": [
     {
@@ -12,6 +14,37 @@
   ],
   "mac": {
     "appId": "com.webxsid.db-nexus",
-    "target": ["dmg"]
-  }
+    "target": ["dmg", "pkg"],
+    "icon": "shared/assets/app-icons/logo.icns",
+    "category": "public.app-category.developer-tools",
+    "entitlements": "configs/entitlements.mac.plist",
+    "entitlementsInherit": "configs/entitlements.mac.plist",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false
+  },
+  "win": {
+    "target": ["nsis", "portable"],
+    "icon": "shared/assets/app-icons/logo.ico",
+    "publisherName": "DB Nexus"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "DB Nexus"
+  },
+  "linux": {
+    "target": ["deb"],
+    "icon": "shared/assets/app-icons/logo.png",
+    "category": "Development"
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "webxsid",
+      "repo": "db-nexus",
+      "releaseType": "draft"
+    }
+  ]
 }

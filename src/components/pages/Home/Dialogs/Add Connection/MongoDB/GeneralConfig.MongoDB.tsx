@@ -16,6 +16,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { IMongoConnectionParams } from "@shared";
+import { SetStateAction } from "jotai";
 import React, {
   Dispatch,
   FC,
@@ -24,7 +25,6 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { SetStateAction } from "jotai";
 
 const schemeInfo = {
   mongodb:
@@ -276,6 +276,9 @@ export const GeneralConfig: FC<IProps> = ({
                   backgroundColor: "background.default",
                   borderRadius: 2,
                   px: 1,
+                  "& .MuiTab-root.Mui-selected": {
+                    color: "primary.main",
+                  },
                 }}
               >
                 <Tab label="mongodb" value="mongodb" />
@@ -366,6 +369,9 @@ export const GeneralConfig: FC<IProps> = ({
                         backgroundColor: "background.default",
                         borderRadius: 2,
                         px: 1,
+                        "& .MuiTab-root.Mui-selected": {
+                          color: "primary.main",
+                        },
                       }}
                     >
                       <Tab label="On" value={"true"} />

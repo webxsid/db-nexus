@@ -1,6 +1,6 @@
 import { activeDialogAtom, dialogHistoryAtom, TDialogIds } from "@/store";
 import { useAtom } from "jotai";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export interface IDialogManager {
   activeDialog: TDialogIds | null;
@@ -54,9 +54,12 @@ export const useDialogManager = (): IDialogManager => {
     clearActiveDialog();
   };
 
-  const isDialogOpen = (dialogId: TDialogIds): boolean => {
-    return activeDialog === dialogId;
-  };
+  const isDialogOpen = useCallback(
+    (dialogId: TDialogIds): boolean => {
+      return activeDialog === dialogId;
+    },
+    [activeDialog],
+  );
 
   const hasHistory = (): boolean => {
     return dialogHistory.length > 0;

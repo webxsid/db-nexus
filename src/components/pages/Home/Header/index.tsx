@@ -25,20 +25,20 @@ const Header: React.FC = () => {
         width: "100%",
         height: "100%",
         backgroundColor: "background.default",
-        // borderBottom: "1px solid",
+        borderBottom: "1px solid",
         borderColor: "divider",
         overflowY: "auto",
         display: "flex",
         justifyContent: "space-between",
         gap: 1,
         pr: 3,
-        py: 2,
+        py: 1.3,
         position: "relative",
       }}
     >
       <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
         {isMac ? <Box sx={{ height: "100%", width: 75 }} /> : null}
-        <Logo />
+        <Logo width={30} height={30} />
         <Typography
           variant="h6"
           component={"h1"}

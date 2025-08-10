@@ -16,7 +16,7 @@ export class MongoDataService {
   constructor(
     private readonly _clientManager: MongoClientManager = new MongoClientManager(),
     protected readonly _schemaManager: MongoSchemaManager = new MongoSchemaManager(),
-  ) {}
+  ) { }
 
   public async listDocuments(
     connectionId: string,
@@ -41,7 +41,7 @@ export class MongoDataService {
       if (mongooseConnection && schema) {
         const model = mongooseConnection.model(collectionName, schema);
         return (await model
-          .find(query as RootFilterQuery<Document>, queryOptions)
+          .find(query as RootFilterQuery<Document>, queryOptions as QueryOptions)
           .exec()) as unknown as Array<WithId<Document>>;
       }
     }

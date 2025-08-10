@@ -66,4 +66,5 @@ Each daily entry should capture:
 ### App screenshots
 
 - Mongo DB Workarea
+
 ![Mongo DB Workarea as on Aug 10,2025]("./screenshots/August 10, 2025 - v0.1.0.png")

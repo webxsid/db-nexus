@@ -1,58 +1,95 @@
 #!/bin/bash
+set -euo pipefail
 
-# ANSI color codes for colored output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Function to display an error message and exit
-show_error() {
-  echo -e "${RED}Error:${NC} $1"
+say() { echo -e "$1"; }
+ok() { say "${GREEN}$1${NC}"; }
+warn() { say "${YELLOW}$1${NC}"; }
+err() {
+  say "${RED}Error:${NC} $1"
   exit 1
 }
 
-# Function to display a success message
-show_success() {
-  echo -e "${GREEN}$1${NC}"
-}
-
-# Function to display a warning message
-show_warning() {
-  echo -e "${YELLOW}$1${NC}"
-}
-
-# Function to display a loading spinner
-spinner() {
-  local pid=$1
-  local delay=0.2
-  local spinstr='|/-\'
-  while ps -p $pid > /dev/null; do
-    local temp=${spinstr#?}
-    printf " [%c]  " "$spinstr"
-    local spinstr=$temp${spinstr%"$temp"}
-    sleep $delay
+# Spinner wrapper that preserves exit code
+run_with_spinner() {
+  local label="$1"
+  shift
+  warn "$label..."
+  ("$@") &
+  local pid=$!
+  local spin='|/-\'
+  local i=0
+  while kill -0 $pid 2>/dev/null; do
+    i=$(((i + 1) % 4))
+    printf " [%c]  " "${spin:$i:1}"
+    sleep 0.2
     printf "\b\b\b\b\b\b"
   done
-  printf "    \b\b\b\b"
+  wait $pid
 }
 
-echo -e "${CYAN}Running linting, build, and formatting checks...${NC}"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+staged_files="$(git diff --cached --name-only)"
 
-# Run linting using yarn lint
-show_warning "Running linting..."
-yarn lint & spinner $!
+contains_changes_in() {
+  echo "$staged_files" | grep -E "$1" >/dev/null
+}
 
-# Run build using yarn build
-show_warning "Running build..."
-yarn build & spinner $!
+only_docs_or_ci() {
+  # true if all staged files are docs/ci/misc
+  echo "$staged_files" |
+    grep -vE '(^README\.md$|\.md$|^docs/|^\.github/|^\.husky/|^\.vscode/|\.json$|\.yml$|\.yaml$)' \
+      >/dev/null && return 0 || return 1
+}
 
-# if the build fails, show an error message and exit
-if [ $? -ne 0 ]; then
-  show_error "Build failed. Please fix the errors and try again."
+commit_msg="$(git log -1 --pretty=%B 2>/dev/null || true)"
+has_flag() { echo "$commit_msg" | grep -qi "$1"; }
+
+echo -e "${CYAN}Running pre-commit checks...${NC}"
+
+# Always lint staged files (use lint-staged if you have it)
+run_with_spinner "Running lint" yarn lint || err "Lint failed."
+
+# Decide whether to build
+should_build=false
+
+# 1) Branch policy
+[[ "$branch" =~ ^release/ ]] && should_build=true
+[[ "$branch" =~ ^hotfix/ ]] && should_build=true
+
+# 2) Path-based triggers (only if not already true)
+$should_build || contains_changes_in '^(src/|apps/|packages/)' && should_build=true
+
+# 3) Critical file triggers
+$should_build || contains_changes_in '(^package\.json$|^yarn\.lock$|^tsconfig\.json$|^vite\.config|^next\.config\.js$)' && should_build=true
+
+# 4) Commit message flags
+has_flag '\[force build\]' && should_build=true
+has_flag '\[skip build\]' && should_build=false
+
+# 5) Optional heuristic: many file changes
+changed_count=$(echo "$staged_files" | sed '/^\s*$/d' | wc -l | xargs)
+if ! $should_build && [ "$changed_count" -ge 25 ]; then
+  warn "Large change set ($changed_count files) → building."
+  should_build=true
 fi
 
-# All checks passed, allow the commit
-show_success "Pre-commit checks passed!"
+# 6) Skip if only docs/ci (unless forced)
+if only_docs_or_ci && ! has_flag '\[force build\]'; then
+  warn "Only docs/CI/config changes detected → skipping build."
+  should_build=false
+fi
+
+if $should_build; then
+  run_with_spinner "Running build" yarn build || err "Build failed. Fix errors and retry."
+  ok "Pre-commit checks passed (build ran)."
+else
+  ok "Pre-commit checks passed (build skipped)."
+fi
+
 exit 0

@@ -16,9 +16,11 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  darken,
   Divider,
   IconButton,
   InputAdornment,
+  lighten,
   List,
   ListItemButton,
   ListItemText,
@@ -126,7 +128,7 @@ const RowContextMenu: FC<{ collection: TMongoCollectionListAtom[0], isPinned: bo
           primary={
             <>
               {
-                !isPinned ? <PushPin sx={{ fontSize: "0.9rem", transform:"rotate(45deg)" }} /> : <PushPinOutlined sx={{ fontSize: "0.9rem", transform:"rotate(45deg)" }} />
+                !isPinned ? <PushPin sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }} /> : <PushPinOutlined sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }} />
               }
               {isPinned ? "Unpin" : "Pin"}
             </>
@@ -173,6 +175,7 @@ const MongoCollectionListRow: FC<{ collection: TMongoCollectionListAtom[0] }> = 
 
   const { showContextMenu } = useContextMenu();
 
+  const openCollection = useSetAtom(openCollectionAtom);
   const onContextMenu = useCallback(
     (e: MouseEvent<HTMLElement>) => {
       e.preventDefault();
@@ -204,7 +207,7 @@ const MongoCollectionListRow: FC<{ collection: TMongoCollectionListAtom[0] }> = 
         },
         {
           content: (
-            <RowContextMenu  collection={collection} isPinned={isPinned} />
+            <RowContextMenu collection={collection} isPinned={isPinned} />
           ),
         },
       );
@@ -228,18 +231,18 @@ const MongoCollectionListRow: FC<{ collection: TMongoCollectionListAtom[0] }> = 
           opacity: 1,
         },
       }}
-      onClick={() => openDatabase(collection.database, "replace")}
+      onClick={() => openCollection(collection.name, collection.database, "replace")}
       onContextMenu={onContextMenu}
     >
       <TableCell>
-        <Typography variant="body2" noWrap sx = {{
+        <Typography variant="body2" noWrap sx={{
           display: "flex",
           alignItems: "center",
           gap: 1
         }}>
           {collection.name}
           {
-            isPinned ? <PushPin sx={{ fontSize: "0.9rem", transform:"rotate(45deg)" }} /> : null
+            isPinned ? <PushPin sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }} /> : null
           }
         </Typography>
       </TableCell>
@@ -363,9 +366,6 @@ export const MongoDatabaseTabPanel: FC<IMongoDatabaseTabPanelProps> = ({
         }}
       >
         <Breadcrumbs aria-label="breadcrumb">
-          <Typography variant="body2">
-            {connection?.name ?? "Connection"}
-          </Typography>
           <Typography
             variant="body2"
             role="button"
@@ -377,7 +377,7 @@ export const MongoDatabaseTabPanel: FC<IMongoDatabaseTabPanelProps> = ({
               },
             }}
           >
-            Databases
+            {connection?.name ?? "Connection"}
           </Typography>
           <Typography variant="body2">{databaseName}</Typography>
         </Breadcrumbs>
@@ -421,12 +421,10 @@ export const MongoDatabaseTabPanel: FC<IMongoDatabaseTabPanelProps> = ({
           <TableHead>
             <TableRow
               sx={{
-                backgroundColor: (theme) =>
-                  alpha(theme.palette.primary.main, 0.2),
                 color: "text.primary",
                 "& th": {
                   fontWeight: "bold",
-                  backgroundColor: "transparent",
+                  backgroundColor: (theme) => darken(theme.palette.primary.main, 0.5),
                 },
               }}
             >

@@ -53,7 +53,7 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
       setOpen(isOpen);
     }
 
-    console.log("isOpen", isOpen);
+    // console.log("isOpen", isOpen);
 
     // Focus on the input field when the dialog opens
     if (isOpen) {
@@ -73,20 +73,29 @@ export const CommandCentre: FC<ICommandCentreProps> = ({
     }
   }, [handleToggle, keybindings]);
 
+  //clear the input field when the dialog closes
+  useEffect(() => {
+    if (!open) {
+      onTextChange("");
+    }
+  }, [open, onTextChange]);
+
   return (
     <Dialog
       open={open}
       onClose={handleToggle}
       fullWidth
       maxWidth="md"
-      PaperProps={{
-        sx: {
-          backgroundColor: "secondary.dark",
-          backgroundImage: "unset",
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "divider",
-        },
+      slotProps={{
+        paper: {
+          sx: {
+            backgroundColor: "secondary.dark",
+            backgroundImage: "unset",
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }
+        }
       }}
     >
       <Box

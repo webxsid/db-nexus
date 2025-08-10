@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import { useTheme, Select, Box, Chip, SelectProps, alpha } from "@mui/material";
+import { Select, Box, Chip, SelectProps, alpha } from "@mui/material";
 
 interface IStyledSelectProps {
   value: string | string[];
@@ -9,7 +9,7 @@ interface IStyledSelectProps {
   label?: string;
   labelId?: string;
   input?: ReactElement;
-  size?: "small" | "medium";
+  size?: "smaller" | "small" | "medium";
   fullWidth?: boolean;
   sx?: SelectProps['sx'];
 }
@@ -34,7 +34,7 @@ const StyledSelect: React.FC<IStyledSelectProps> = ({
       {...(label && { label })}
       {...(input && { input })}
       multiple={multiple}
-      size={size}
+      size={size === "smaller" ? "small" : size}
       {...(multiple && {
         renderValue: (selected) => {
           return (
@@ -50,6 +50,14 @@ const StyledSelect: React.FC<IStyledSelectProps> = ({
         borderRadius: 2,
         "& legend": {
           color: "text.primary",
+        },
+        "& .MuiSelect-select": {
+          ...(size === "smaller" ? {
+            py: 0.5
+          } : {}),
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
         },
         ...(!!sx && sx),
       }}

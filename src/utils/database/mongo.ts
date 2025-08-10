@@ -227,7 +227,10 @@ const mongoURIGenerator = (config: IMongoConnectionParams): string => {
   return query?.length ? `${uri}?${query}` : uri;
 };
 
-const mongoConfigParser = (uri: string): IMongoConnectionParams | null => {
+const mongoConfigParser = (uri?: string): IMongoConnectionParams | null => {
+  if (!uri) {
+    return mongoConnectionInit;
+  }
   const parsed = qs.parse(uri);
   const scheme = uri.split("://")[0];
   const hosts = uri.split("://")[1].split("/")[0].split(",");

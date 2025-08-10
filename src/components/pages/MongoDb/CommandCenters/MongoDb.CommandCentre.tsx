@@ -1,18 +1,19 @@
 import { KeybindingManager } from "@/helpers/keybindings";
 import { useDialogManager } from "@/managers";
-import { Add, CreateNewFolder, Folder, Storage, Tab } from "@mui/icons-material";
+import { CreateNewFolder, Folder, Storage, Tab } from "@mui/icons-material";
 import { Box, Chip, List, ListItemText } from "@mui/material";
 import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { CC, CommandCentre, HotkeyButton } from "@/components/common";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   EDialogIds,
-  IMongoCollectionTab, IMongoConnectionTab,
+  IMongoConnectionTab,
   IMongoDatabaseTab,
   mongoActiveTabsAtom,
   mongoCollectionListAtom,
   mongoDatabaseListAtom,
   mongoSelectedTabAtom,
+  openCollectionAtom,
   selectedConnectionAtom,
   TMongoTab
 } from "@/store";
@@ -76,22 +77,20 @@ export const MongoDbCommandCentre: FC = () => {
   const collections = useAtomValue(mongoCollectionListAtom);
   const { databases } = useAtomValue(mongoDatabaseListAtom);
   const _connection = useAtomValue(selectedConnectionAtom);
+  const openCollectionFromState = useSetAtom(openCollectionAtom);
 
   const { openDialog, isDialogOpen, clearAllDialogs } = useDialogManager();
 
   const open = isDialogOpen("mongoCommandCentre");
 
   const openCollection = useCallback((collection: IMongoCCCollection) => {
-    const newTabData: IMongoCollectionTab = {
-      type: "collection",
-      id: v4(),
-      collection: collection.collection,
-      database: collection.database,
-    };
-    setActiveTabs((prevTabs) => [...prevTabs, newTabData]);
-    setSelectedTabId(newTabData.id);
+    openCollectionFromState(
+      collection.collection,
+      collection.database,
+      "default"
+    )
     clearAllDialogs();
-  }, [setActiveTabs, setSelectedTabId, clearAllDialogs]);
+  }, [openCollectionFromState, clearAllDialogs]);
 
   const openDatabase = useCallback((database: IMongoCCDatabase) => {
     const newTabData: IMongoDatabaseTab = {
@@ -221,7 +220,7 @@ export const MongoDbCommandCentre: FC = () => {
 
   const onClick = useCallback((index: number) => {
     const selected = currentOptions[index];
-    if(!selected) clearAllDialogs();
+    if (!selected) clearAllDialogs();
     if (selected.type === "collection") openCollection(selected as IMongoCCCollection);
     else if (selected.type === "database") openDatabase(selected as IMongoCCDatabase);
     else if (selected.type === "tab") openTab((selected as IMongoCCTab).tab);
@@ -230,7 +229,7 @@ export const MongoDbCommandCentre: FC = () => {
   }, [currentOptions, openCollection, openDatabase, openTab, clearAllDialogs, openConnection]);
 
   const handleEnter = useCallback(() => {
-    onClick(selectedItem-1);
+    onClick(selectedItem - 1);
   }, [onClick, selectedItem]);
 
   useEffect(() => {
@@ -283,19 +282,23 @@ export const MongoDbCommandCentre: FC = () => {
       onTextChange={setText}
       dialogType="mongoCommandCentre"
       keybindings={["Meta+t"]}
-      footer={ footerActions?.length > 0 ? (
-        <Box sx={{ display: "flex", gap: 1, alignItems:"center", justifyContent:"flex-end", px:1 }}>
+      footer={footerActions?.length > 0 ? (
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center", justifyContent: "flex-end", px: 1 }}>
           {footerActions.map((action, index) => (
             <HotkeyButton variant={"text"} onClick={handleEnter} key={index} keyBindings={[action.keyCombo]} skipBind showhotkey >{action.label}</HotkeyButton>
           ))}
         </Box>
       ) : null}
     >
-      <List dense sx = {{width:"100%"}} >
+      <List dense sx={{ width: "100%" }} >
         <Render if={currentOptions.length > 0} then={currentOptions.map((option, index) => (
-          <CC.ListButton key={index} selected={selectedItem === index + 1} onClick={() => onClick(index)} className={
-            selectedItem === index + 1 ? "SelectedListItem" : ""
-          }>
+          <CC.ListButton
+            key={index}
+            selected={selectedItem === index + 1}
+            onMouseEnter={() => setSelectedItem(index + 1)}
+            onClick={() => onClick(index)} className={
+              selectedItem === index + 1 ? "SelectedListItem" : ""
+            }>
             <CC.ListIcon>{option.icon}</CC.ListIcon>
             <OptionListItemText option={option} />
           </CC.ListButton>

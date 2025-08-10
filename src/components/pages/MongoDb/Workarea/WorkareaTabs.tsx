@@ -9,6 +9,7 @@ import {
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   mongoActiveTabsAtom,
+  mongoCloseTab,
   mongoSelectedTabAtom,
   selectedConnectionAtom,
   TMongoTab, toggleDirtyTabAtom
@@ -172,8 +173,8 @@ export const TabItem: FC<{
 export const WorkareaTabs: FC = () => {
   const [activeTabs, setActiveTabs] = useAtom(mongoActiveTabsAtom);
   const [selectedTabId, setSelectedTabId] = useAtom(mongoSelectedTabAtom);
-  const _toggleDirtyTab = useSetAtom(toggleDirtyTabAtom);
 
+  const closeTab = useSetAtom(mongoCloseTab);
 
   const { showPopper, hidePopper } = usePopper();
 
@@ -185,9 +186,9 @@ export const WorkareaTabs: FC = () => {
   }, [activeTabs, selectedTabId]);
 
   const handleSelectTab = (tabId: string): void => {
-    if(selectedTabId === tabId) return;
+    if (selectedTabId === tabId) return;
 
-    if(selectedTab && selectedTab.isDirty) {
+    if (selectedTab && selectedTab.isDirty) {
       toast.error("Please save or discard changes before switching tabs");
       // TODO: Show dialog to save or discard changes
       return;
@@ -199,27 +200,10 @@ export const WorkareaTabs: FC = () => {
   const handleCloseTab = useCallback(
     (tabId: string, e?: MouseEvent): void => {
       e?.stopPropagation();
-      const tabIndex = activeTabs.findIndex((tab) => tab.id === tabId);
-      if (tabIndex === -1) return; // Tab not found, exit early
-
-      const newTabs = [...activeTabs];
-      newTabs.splice(tabIndex, 1);
-
-      console.log("New tabs", newTabs);
-      setActiveTabs(newTabs);
-
-      // Fix: Select adjacent tab if the closed tab was active
-      if (selectedTabId === tabId) {
-        console.log("Selected tab is closed");
-        const newSelectedTab =
-          newTabs[tabIndex] || newTabs[tabIndex - 1] || null;
-        console.log("New selected tab", newSelectedTab);
-        setSelectedTabId(newSelectedTab?.id ?? "");
-      }
-
+      closeTab(tabId);
       hidePopper();
     },
-    [activeTabs, selectedTabId, setActiveTabs, setSelectedTabId, hidePopper],
+    [hidePopper, closeTab],
   );
 
   const closeTabWithKeybinding = useCallback(

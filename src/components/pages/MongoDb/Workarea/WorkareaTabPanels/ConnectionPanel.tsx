@@ -61,12 +61,12 @@ const RowContextMenu: FC<{ databaseName: string }> = ({ databaseName }) => {
   const { hideContextMenu } = useContextMenu();
   const { openDialog } = useDialogManager();
 
-  const handleOpenDatabase = (type: "replace" | "new"):void => {
+  const handleOpenDatabase = (type: "replace" | "new"): void => {
     openDatabase(databaseName, type);
     hideContextMenu();
   };
 
-  const onDropDatabase = ():void => {
+  const onDropDatabase = (): void => {
     setSelectedDatabase(databaseName);
     openDialog("dropMongoDatabase");
     hideContextMenu();
@@ -329,9 +329,6 @@ export const MongoConnectionTanPanel: FC = () => {
           <Typography variant="body2">
             {connection?.name ?? "Connection"}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Databases
-          </Typography>
         </Breadcrumbs>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
@@ -380,59 +377,59 @@ export const MongoConnectionTanPanel: FC = () => {
                 alpha(theme.palette.primary.main, 0.2),
             },
           }}>
-              <TableCell>
-                <TableSortLabel
-                  active={sortBy === "name"}
-                  direction={sortBy === "name" ? sortOrder : "asc"}
-                  onClick={() => requestSort("name")}
-                  sx={{
-                    gap: 1,
-                  }}
-                >
-                  <Abc />
-                  Name
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortBy === "collections"}
-                  direction={sortBy === "collections" ? sortOrder : "asc"}
-                  onClick={() => requestSort("collections")}
-                  sx={{
-                    gap: 1,
-                  }}
-                >
-                  <Numbers sx={{ fontSize: "0.9rem" }} />
-                  Collections
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortBy === "indexes"}
-                  direction={sortBy === "indexes" ? sortOrder : "asc"}
-                  onClick={() => requestSort("indexes")}
-                  sx={{
-                    gap: 1,
-                  }}
-                >
-                  <Numbers sx={{ fontSize: "0.9rem" }} />
-                  Indexes
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortBy === "sizeOnDisk"}
-                  direction={sortBy === "sizeOnDisk" ? sortOrder : "asc"}
-                  onClick={() => requestSort("sizeOnDisk")}
-                  sx={{
-                    gap: 1,
-                    alignItems: "center",
-                  }}
-                >
-                  <Storage sx={{ fontSize: "0.9rem" }} />
-                  Size
-                </TableSortLabel>
-              </TableCell>
+            <TableCell>
+              <TableSortLabel
+                active={sortBy === "name"}
+                direction={sortBy === "name" ? sortOrder : "asc"}
+                onClick={() => requestSort("name")}
+                sx={{
+                  gap: 1,
+                }}
+              >
+                <Abc />
+                Name
+              </TableSortLabel>
+            </TableCell>
+            <TableCell>
+              <TableSortLabel
+                active={sortBy === "collections"}
+                direction={sortBy === "collections" ? sortOrder : "asc"}
+                onClick={() => requestSort("collections")}
+                sx={{
+                  gap: 1,
+                }}
+              >
+                <Numbers sx={{ fontSize: "0.9rem" }} />
+                Collections
+              </TableSortLabel>
+            </TableCell>
+            <TableCell>
+              <TableSortLabel
+                active={sortBy === "indexes"}
+                direction={sortBy === "indexes" ? sortOrder : "asc"}
+                onClick={() => requestSort("indexes")}
+                sx={{
+                  gap: 1,
+                }}
+              >
+                <Numbers sx={{ fontSize: "0.9rem" }} />
+                Indexes
+              </TableSortLabel>
+            </TableCell>
+            <TableCell>
+              <TableSortLabel
+                active={sortBy === "sizeOnDisk"}
+                direction={sortBy === "sizeOnDisk" ? sortOrder : "asc"}
+                onClick={() => requestSort("sizeOnDisk")}
+                sx={{
+                  gap: 1,
+                  alignItems: "center",
+                }}
+              >
+                <Storage sx={{ fontSize: "0.9rem" }} />
+                Size
+              </TableSortLabel>
+            </TableCell>
           </TableHead>
           <TableBody>
             {sortedDatabases.map((db) => (

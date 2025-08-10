@@ -8,13 +8,14 @@ import { QueryOptions, Types } from "mongoose";
 export class MongoDataController {
   constructor(
     private readonly _service: MongoDataService = new MongoDataService()
-  ) {}
+  ) { }
 
   @Event("list")
   public async listDocuments(
     payload: IMongoIpcEventsPayload[EMongoIpcEvents.GetDocumentList]
   ): Promise<IMongoIpcEventsResponse[EMongoIpcEvents.GetDocumentList]> {
     try {
+      logger.info("Listing documents", payload);
       const res = await this._service.listDocuments(
         payload.connectionId,
         payload.dbName,
@@ -81,13 +82,13 @@ export class MongoDataController {
         payload.connectionId,
         payload.dbName,
         payload.collectionName,
-        {_id: new Types.ObjectId(payload.documentId)},
+        { _id: new Types.ObjectId(payload.documentId) },
         payload.document,
         payload.updateOptions as QueryOptions,
         payload.ignoreMongoose
       );
 
-      if(!doc) {
+      if (!doc) {
         throw new Error("Error while updating document");
       }
       return {
@@ -117,12 +118,12 @@ export class MongoDataController {
         payload.connectionId,
         payload.dbName,
         payload.collectionName,
-        {_id: new Types.ObjectId(payload.documentId)},
+        { _id: new Types.ObjectId(payload.documentId) },
         payload.deleteOptions as QueryOptions,
         payload.ignoreMongoose
       );
 
-      if(!ok) {
+      if (!ok) {
         throw new Error("Error while deleting document");
       }
       return {

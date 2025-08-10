@@ -58,13 +58,13 @@ export const MongoDbPage: FC = () => {
   const setOpsStats = useSetAtom(mongoConnectionOpsStatsAtom);
 
   const [widthDistribution, setWidthDistribution] = useState<[number, number]>([
-    240, 50,
+    240, 0,
   ]);
   const [kMaxWidth] = useState<[number, number]>([300, 250]);
-  const [kMinWidth] = useState<[number, number]>([60, 50]);
+  const [kMinWidth] = useState<[number, number]>([40, 40]);
   const [enableResize, setEnableResize] = useState<[boolean, boolean]>([
     true,
-    true,
+    false,
   ]);
   const [isDragging, setIsDragging] = useState<"left" | "right" | null>(null);
 
@@ -118,7 +118,7 @@ export const MongoDbPage: FC = () => {
       }
     }
     setCollectionList(collections);
-  },[connectionId, databaseList.databases, setCollectionList])
+  }, [connectionId, databaseList.databases, setCollectionList])
 
   useEffect(() => {
     loadDatabaseList();
@@ -320,6 +320,7 @@ export const MongoDbPage: FC = () => {
             height: "100%",
             flexGrow: 1,
             minWidth: "50vw",
+            width: 0,
             position: "relative",
           }}
         >
@@ -338,6 +339,7 @@ export const MongoDbPage: FC = () => {
               height: "100%",
               width: "100%",
               borderRadius: 2,
+              overflow: "hidden",
             }}
           >
             <MongoDbWorkarea />
@@ -357,8 +359,6 @@ export const MongoDbPage: FC = () => {
           sx={{
             height: "100%",
             width: `${widthDistribution[1]}px`,
-            py: 2,
-            px: 1,
             borderLeft: "1px solid",
             borderColor: "divider",
           }}

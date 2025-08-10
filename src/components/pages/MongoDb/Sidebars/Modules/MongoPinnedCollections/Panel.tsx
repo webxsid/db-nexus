@@ -1,5 +1,5 @@
 import { FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import {
   IMongoCollectionTab,
   mongoActiveTabsAtom,
@@ -16,7 +16,6 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-  useTheme
 } from "@mui/material";
 import { MongoSidebarModulePanelTemplate } from "../Templates";
 import { Folder, FolderOpen, MoreVert, PushPin } from "@mui/icons-material";
@@ -47,7 +46,7 @@ export const MongoPinnedCollectionsPanel: FC = () => {
 
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const {showPopper, hidePopper} = usePopper()
+  const { showPopper, hidePopper } = usePopper()
 
   const clearSearch = useCallback(function onClearSearch() {
     setCollectionSearch("");
@@ -103,7 +102,7 @@ export const MongoPinnedCollectionsPanel: FC = () => {
         content: <Typography variant="body2">{label}</Typography>,
       }
     )
-  },[showPopper])
+  }, [showPopper])
 
   useEffect(() => {
     if (!selectedTab) return;
@@ -169,9 +168,6 @@ export const MongoPinnedCollectionsPanel: FC = () => {
         then={
           <List
             dense
-            sx={{
-              px: 1,
-            }}
           >
             {filteredCollections.map((c) => (
               <ListItem
@@ -191,36 +187,7 @@ export const MongoPinnedCollectionsPanel: FC = () => {
                   },
                 }}
                 onClick={() => openCollection(c?.name, c?.database)}
-                secondaryAction={
-                <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
-                  <IconButton
-                    size={"small"}
-                    sx={{
-                      p: 1,
-                      borderRadius: 2,
-                      height: "100%",
-                    }}
-                    onClick={(e) => unPinCollection(e, c?.name, c?.database)}
-                    onMouseEnter={(e) => onHover(e, "Unpin collection")}
-                    onMouseLeave={hidePopper}
-                  >
-                    <PushPin sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }} />
-                  </IconButton>
-                  <IconButton
-                    size={"small"}
-                    sx={{
-                      p: 1,
-                      borderRadius: 2,
-                      height: "100%",
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseEnter={(e) => onHover(e, "More options")}
-                    onMouseLeave={hidePopper}
-                  >
-                    <MoreVert sx={{ fontSize: "0.9rem" }} />
-                  </IconButton>
-                </Box>
-                }
+
               >
                 <ListItemIcon
                   sx={{
@@ -240,17 +207,65 @@ export const MongoPinnedCollectionsPanel: FC = () => {
                   } />
                 </ListItemIcon>
                 <ListItemText
-                  primary={c?.name}
-                  secondary={c?.database}
-                  primaryTypographyProps={{
-                    color: "text.primary",
-                    fontSize: "0.8rem",
-                    flexGrow: 1,
-                  }}
-                  secondaryTypographyProps={{
-                    color: "text.secondary",
-                    fontSize: "0.7rem",
-                  }}
+                  primary={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Box sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        maxWidth: "calc(100% - 40px)",
+
+                      }}>
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{
+                            color: "text.primary",
+                            fontSize: "0.8rem",
+                            flexGrow: 1,
+                          }}
+                        >
+                          {c?.name}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          noWrap
+                          sx={{
+                            color: "text.secondary",
+                            fontSize: "0.7rem",
+                          }}
+                        >
+                          {c?.database}
+                        </Typography>
+                      </Box>
+                      <IconButton
+                        size={"small"}
+                        sx={{
+                          p: 0.5,
+                          borderRadius: 2,
+                          height: "100%",
+                        }}
+                        onClick={(e) => unPinCollection(e, c?.name, c?.database)}
+                        onMouseEnter={(e) => onHover(e, "Unpin collection")}
+                        onMouseLeave={hidePopper}
+                      >
+                        <PushPin sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }} />
+                      </IconButton>
+                      <IconButton
+                        size={"small"}
+                        sx={{
+                          p: 0.5,
+                          borderRadius: 2,
+                          height: "100%",
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseEnter={(e) => onHover(e, "More options")}
+                        onMouseLeave={hidePopper}
+                      >
+                        <MoreVert sx={{ fontSize: "0.9rem" }} />
+                      </IconButton>
+                    </Box>
+                  }
                 />
               </ListItem>
             ))}

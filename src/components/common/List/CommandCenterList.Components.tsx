@@ -3,11 +3,17 @@ import { ListItemButton, styled, alpha, ListItemIcon } from "@mui/material";
 const ListButton = styled(ListItemButton)(({ theme }) => ({
   borderRadius: 8,
   color: theme.palette.text.primary,
+  maxHeight: 50,
+  paddingInline: 10,
+  marginBottom: 6,
   "&.Mui-selected": {
     borderColor: theme.palette.primary.main,
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
     color: theme.palette.text.secondary,
   },
+  "& .MuiListItemText-root": {
+    margin: 0
+  }
 }));
 
 const ListIcon = styled(ListItemIcon)(() => ({

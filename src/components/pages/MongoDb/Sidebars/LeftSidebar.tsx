@@ -39,13 +39,15 @@ export const MongoLeftSidebar: FC = () => {
         <Tabs
           orientation="vertical"
           value={activeModule}
-          TabIndicatorProps={{
-            sx: {
-              transform: "unset !important",
-              width: "2px",
-              borderRadius: 0,
-              left: 0,
-            },
+          slotProps={{
+            indicator: {
+              sx: {
+                transform: "unset !important",
+                width: "2px",
+                borderRadius: 0,
+                left: 0,
+              }
+            }
           }}
           sx={{
             width: "100%",

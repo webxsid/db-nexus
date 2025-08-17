@@ -3860,6 +3860,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.8.0"
     "@typescript-eslint/parser": "npm:^7.8.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
+    bson: "npm:^6.10.4"
     electron: "npm:^28.2.2"
     electron-builder: "npm:^24.9.1"
     electron-chrome-extensions: "npm:^3.10.1"

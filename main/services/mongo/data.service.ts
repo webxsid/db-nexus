@@ -1,3 +1,4 @@
+import { EJSON } from "bson";
 import { Singleton } from "../../decorators";
 import { MongoClientManager, MongoSchemaManager } from "../../managers";
 import {
@@ -47,7 +48,14 @@ export class MongoDataService {
     }
 
     const collection = client.db(databaseName).collection(collectionName);
-    return collection.find(query, queryOptions).toArray();
+    const documents = await collection.find(query, queryOptions).toArray();
+    if (!documents) throw new Error("Error while listing documents");
+
+    const ejson = EJSON.stringify(documents, {
+      relaxed: false,
+    });
+
+    return JSON.parse(ejson) as Array<WithId<Document>>;
   }
 
   public async createDocument(

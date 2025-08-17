@@ -26,6 +26,13 @@ const theme = createTheme({
     },
   },
 
+  containerQueries: {
+    sm: "@container workarea (min-width: 400px)",
+    md: "@container workarea (min-width: 650px)",
+    lg: "@container workarea (min-width: 800px)",
+    xl: "@container workarea (min-width: 1200px)"
+  },
+
   components: ComponentsTheme
 });
 

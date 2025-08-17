@@ -28,6 +28,12 @@ const lightTheme = createTheme({
       secondary: "#757575", // Lighter gray for secondary text
     },
   },
+  containerQueries: {
+    sm: "@container workarea (min-width: 600px)",
+    md: "@container workarea (min-width: 960px)",
+    lg: "@container workarea (min-width: 1280px)",
+    xl: "@container workarea (min-width: 1920px)"
+  },
 
   components: ComponentsTheme
 });

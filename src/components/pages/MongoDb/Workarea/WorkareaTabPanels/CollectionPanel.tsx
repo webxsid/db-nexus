@@ -7,6 +7,7 @@ import { Breadcrumbs, Typography, Box, MenuItem, alpha, Grid2, IconButton } from
 import { useAtomValue, useSetAtom } from "jotai";
 import { FC, useRef, useState } from "react";
 import { DocumentRenderer } from "../../Renderers/Document.Renderer";
+import theme from "@/theme";
 
 export interface IMongoCollectionTabPanelProps {
   databaseName: string;
@@ -165,55 +166,45 @@ export const MongoCollectionTabPanel: FC<IMongoCollectionTabPanelProps> = ({
         </Box>
       </Box>
 
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          width: "100%",
-          height: "100%",
-          minHeight: 0,
-          flex: 1,
-          overflow: "hidden",
-        }}>
-        <Grid2
-          size={{
-            xs: 6,
-            sm: 6,
-            md: 5,
-            lg: 4,
-          }}
-          sx={{
+      <Box sx={{
+        width: "100%",
+        height: "100%",
+        display: "grid",
+        gap: 1,
+        minHeight: 0,
+        flex: 1,
+        overflow: "hidden",
+        gridTemplateRows: "repeat(12, 1fr)",
+        gridTemplateColumns: "repeat(12, 1fr)",
+      }}>
+        <Box
+          sx={(theme) => ({
             display: "flex",
             flexDirection: "column",
             gap: 1,
-            minWidth: 0,
+            width: "100%",
             height: "100%",
-            overflow: "hidden"
-          }}
+            borderRadius: 3,
+            border: 1,
+            borderColor: (theme) => alpha(theme.palette.primary.dark, 0.3),
+            overflowY: "auto",
+            [theme.containerQueries.md]: {
+              gridRowStart: 1,
+              gridRowEnd: "span 2",
+              gridColumnStart: 1,
+              gridColumnEnd: "span 12",
+            },
+            [theme.containerQueries.lg]: {
+              gridRowStart: 1,
+              gridRowEnd: "span 12",
+              gridColumnStart: 1,
+              gridColumnEnd: "span 4",
+            }
+          })}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              width: "100%",
-              height: "100%",
-              borderRadius: 3,
-              border: 1,
-              borderColor: (theme) => alpha(theme.palette.primary.dark, 0.3),
-              overflowY: "auto",
-            }}
-          >
-          </Box>
-        </Grid2>
-        <Grid2
-          size={{
-            xs: 6,
-            sm: 6,
-            md: 7,
-            lg: 8,
-          }}
-          sx={{
+        </Box>
+        <Box
+          sx={(theme) => ({
             display: 'flex',
             flexDirection: 'column',
             height: "100%",
@@ -221,7 +212,19 @@ export const MongoCollectionTabPanel: FC<IMongoCollectionTabPanelProps> = ({
             gap: 1,
             borderRadius: 3,
             overflowY: "hidden",
-          }}
+            [theme.containerQueries.md]: {
+              gridRowStart: 3,
+              gridRowEnd: "span 10",
+              gridColumnStart: 1,
+              gridColumnEnd: "span 12",
+            },
+            [theme.containerQueries.lg]: {
+              gridRowStart: 1,
+              gridRowEnd: "span 12",
+              gridColumnStart: 5,
+              gridColumnEnd: "span 8",
+            }
+          })}
         >
           <Render
             if={isLoading || !!error}
@@ -270,21 +273,9 @@ export const MongoCollectionTabPanel: FC<IMongoCollectionTabPanelProps> = ({
               </Box>
             }
           />
-        </Grid2>
-      </Grid2>
-      {/* <Box */}
-      {/*   component={"footer"} */}
-      {/*   sx={{ */}
-      {/*     display: "flex", */}
-      {/*     justifyContent: "flex-end", */}
-      {/*     alignItems: "center", */}
-      {/*     paddingTop: 1, */}
-      {/*     borderTop: 0.5, */}
-      {/*     borderColor: (theme) => alpha(theme.palette.primary.dark, 0.3), */}
-      {/*   }}> */}
-      {/**/}
-      {/**/}
-      {/* </Box> */}
+        </Box>
+
+      </Box>
     </Box >
   );
 }

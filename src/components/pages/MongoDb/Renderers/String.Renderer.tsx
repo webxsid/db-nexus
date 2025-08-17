@@ -1,5 +1,8 @@
 import { FC } from "react";
-import { Box, darken, Typography } from "@mui/material";
+import { Box, } from "@mui/material";
+import { FieldTypeRenderer } from "./FieldType.Renderer";
+import { FieldNameRenderer } from "./FieldName.Renderer";
+import { FieldValueRenderer } from "./FieldValue.Renderer";
 
 export interface IStringRendererProps {
   fieldName: string;
@@ -25,28 +28,16 @@ export const StringRenderer: FC<IStringRendererProps> = ({ fieldName, value, lev
         alignItems: "center",
         justifyContent: "space-between",
       }}>
-        <Box sx={{ width: "100%", marginBottom: 0.5, display: "flex", gap: 1, }}>
-          <Typography variant="body2" component="span" sx={{ fontWeight: "bold" }}>
-            {fieldName}:
-          </Typography>
-          <Typography
-            noWrap
-            variant="body2"
-            component="span"
-            sx={{
-              color: "text.secondary",
-              maxWidth: "350px"
-            }}
-          >
-            {value}
-          </Typography>
+        <Box sx={{ flex: 1, marginBottom: 0.5, display: "flex", gap: 1, }}>
+          <FieldNameRenderer fieldName={fieldName} />
+          <FieldValueRenderer
+            value={value}
+            formatValue={(value) => `<span class="string-color">"${value}"</span>`}
+          />
         </Box>
-        <Typography variant="caption" sx={{
-          whiteSpace: "nowrap",
-          color: (theme) => darken(theme.palette.text.secondary, 0.6)
-        }}>
-          String
-        </Typography>
+        <FieldTypeRenderer
+          type="string"
+        />
       </Box>
     </Box>
   );

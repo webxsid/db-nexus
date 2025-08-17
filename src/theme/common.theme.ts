@@ -3,12 +3,12 @@ import { Theme } from "@mui/material/styles/createThemeNoVars";
 import { CssVarsTheme } from "@mui/material/styles/createThemeWithVars";
 
 
-export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> & CssVarsTheme> ={
+export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> & CssVarsTheme> = {
   MuiTypography: {
     styleOverrides: {
       root: {
-          fontFamily: "'Fira Code', 'Courier New', monospace",
-          variants: [
+        fontFamily: "'Fira Code', 'Courier New', monospace",
+        variants: [
           {
             props: { variant: "body2" },
             style: {
@@ -76,7 +76,7 @@ export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> &
     styleOverrides: {
       root: {
         borderRadius: 3,
-          fontWeight: "bold",
+        fontWeight: "bold",
       },
     },
   },
@@ -87,9 +87,28 @@ export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> &
       },
     },
   },
-  MuiListItemButton:{
-    defaultProps:{
+  MuiListItemButton: {
+    defaultProps: {
       disableRipple: true,
+    }
+  },
+  MuiTooltip: {
+    defaultProps: {
+      arrow: false,
+      enterDelay: 500,
+      slotProps: {
+        tooltip: {
+          sx: (theme) => ({
+            fontFamily: "'Fira Code', 'Courier New', monospace",
+            ...theme.typography.body2,
+            backgroundColor: theme.palette.primary.dark,
+            color: theme.palette.primary.contrastText,
+            boxShadow: theme.shadows[1],
+            borderRadius: 2,
+            padding: "8px 12px",
+          }),
+        }
+      }
     }
   }
 };

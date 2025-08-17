@@ -45,6 +45,7 @@ export const FieldRenderer: FC<IFieldRendererProps> = ({ fieldName, fieldValue, 
         paddingBottom: level === 0 ? 1 : 0,
         position: "relative",
         maxWidth: "100%",
+        overflow: "auto"
       }}
     >
 

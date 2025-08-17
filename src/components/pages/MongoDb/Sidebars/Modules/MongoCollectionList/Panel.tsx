@@ -34,6 +34,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -91,14 +92,8 @@ const MongoCollectionListButton: FC<IMongoCollectionListButtonProps> = ({
     );
   }, [pinnedCollections, collection]);
 
-  const { showPopper, hidePopper } = usePopper();
 
-  const onHover = (e: MouseEvent, message: string): void => {
-    showPopper(e.currentTarget, {
-      content: <Typography variant={"body2"}>{message}</Typography>,
-      placement: "top",
-    });
-  };
+
 
   const pinCollection = useCallback(
     (e: MouseEvent, targetCollection: TMongoCollectionListAtom[0]) => {
@@ -113,9 +108,8 @@ const MongoCollectionListButton: FC<IMongoCollectionListButtonProps> = ({
         }
         return [...prev, targetCollection];
       });
-      hidePopper();
     },
-    [isPinned, collection, setPinnedCollections, hidePopper],
+    [isPinned, collection, setPinnedCollections],
   );
 
   return (
@@ -157,51 +151,54 @@ const MongoCollectionListButton: FC<IMongoCollectionListButtonProps> = ({
               gap: 0.5,
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.primary",
-                fontSize: "0.8rem",
-                flexGrow: 1,
-                maxWidth: "calc(100% - 40px)",
-              }}
-              noWrap
-              onMouseEnter={(e) =>
-                onHover(e, `${collection.name}`)
-              }
-              onMouseLeave={hidePopper}
-              role={"button"}
+            <Tooltip
+              title={collection.name}
             >
-              {collection.name}
-            </Typography>
-            <IconButton
-              size={"small"}
-              sx={{
-                p: 0.5,
-                borderRadius: 2,
-                height: "100%",
-              }}
-              onClick={(e) => pinCollection(e, collection)}
-              onMouseEnter={(e) =>
-                onHover(e, isPinned ? "Unpin collection" : "Pin collection")
-              }
-              onMouseLeave={hidePopper}
-            >
-              <Checkbox
-                sx={{ p: 0 }}
-                checked={isPinned}
-                icon={
-                  <PushPinOutlined
-                    sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }}
-                  />
-                }
-                checkedIcon={
-                  <PushPin
-                    sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }}
-                  />
-                }
-              />
-            </IconButton>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.primary",
+                  fontSize: "0.8rem",
+                  flexGrow: 1,
+                  maxWidth: "calc(100% - 40px)",
+                }}
+                noWrap
+                role={"button"}
+              >
+                {collection.name}
+              </Typography>
+            </Tooltip>
+            <Tooltip
+              title={
+                isPinned
+                  ? "Unpin collection"
+                  : "Pin collection"
+              }>
+              <IconButton
+                size={"small"}
+                sx={{
+                  p: 0.5,
+                  borderRadius: 2,
+                  height: "100%",
+                }}
+                onClick={(e) => pinCollection(e, collection)}
+              >
+                <Checkbox
+                  sx={{ p: 0 }}
+                  checked={isPinned}
+                  icon={
+                    <PushPinOutlined
+                      sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }}
+                    />
+                  }
+                  checkedIcon={
+                    <PushPin
+                      sx={{ fontSize: "0.9rem", transform: "rotate(45deg)" }}
+                    />
+                  }
+                />
+              </IconButton>
+            </Tooltip>
             <IconButton
               size={"small"}
               sx={{
@@ -210,8 +207,6 @@ const MongoCollectionListButton: FC<IMongoCollectionListButtonProps> = ({
                 height: "100%",
               }}
               onClick={(e) => e.stopPropagation()}
-              onMouseEnter={(e) => onHover(e, "More options")}
-              onMouseLeave={hidePopper}
             >
               <MoreVert sx={{ fontSize: "0.9rem" }} />
             </IconButton>
@@ -414,7 +409,7 @@ export const MongoCollectionListPanel: FC = () => {
           }}
         />
       </Box>
-      <Box sx={{ overflowY: "auto", flex: 1, pb: "100%" }}>
+      <Box sx={{ overflowY: "auto", flex: 1, pb: "100%", borderRadius: 2, overflowAnchor: "none", overflowX: "hidden" }}>
         <Render
           if={filteredCollections.length > 0}
           then={
@@ -429,15 +424,6 @@ export const MongoCollectionListPanel: FC = () => {
                     borderRadius: 2,
                     mb: 0.5,
                     transition: "background-color 0.3s",
-                    backgroundColor:
-                      (selectedTab?.type === "database" ||
-                        selectedTab?.type === "collection") &&
-                        selectedTab.database === db.id
-                        ? getActiveColor(db.id)
-                        : "transparent",
-                    "&:hover": {
-                      backgroundColor: getActiveColor(db.id),
-                    },
                   }}
                 >
                   <Box
@@ -524,22 +510,34 @@ export const MongoCollectionListPanel: FC = () => {
                       <ListItemText
                         primary={db.label}
                         onClick={() => openDatabase(db.id)}
-                        primaryTypographyProps={{
-                          variant: "body2",
-                          noWrap: true,
-                          color: "text.primary",
-                          fontSize: "0.9rem",
-                          role: "button",
-                          sx: {
-                            cursor: "pointer",
-                            userSelect: "none",
-                          },
+                        slotProps={{
+                          primary: {
+                            variant: "body2",
+                            noWrap: true,
+                            color: "text.primary",
+                            fontSize: "0.9rem",
+                            role: "button",
+                            sx: {
+                              cursor: "pointer",
+                              userSelect: "none",
+                            },
+
+                          }
                         }}
                       />
                     </ListItem>
                   </Box>
                   <Collapse in={expandedDbs.includes(db.id)} unmountOnExit sx={{ overflowAnchor: "none" }}>
-                    <List dense disablePadding>
+                    <List dense disablePadding sx={{
+                      border: "1px solid",
+                      borderColor: selectedTab?.type === "database" || selectedTab?.type === "collection" &&
+                        selectedTab.database === db.id
+                        ? getActiveColor(db.id)
+                        : "background.paper",
+                      borderRadius: 2,
+                      pt: "12px",
+                      transform: "translateY(-15px)",
+                    }}>
                       <Render
                         if={db.children.length > 0}
                         then={

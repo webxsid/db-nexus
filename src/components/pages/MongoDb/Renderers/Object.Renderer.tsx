@@ -2,6 +2,9 @@ import { FC, useState } from "react";
 import { Box, darken, Typography } from "@mui/material";
 import { FieldRenderer } from "./Field.Renderer";
 import { ChevronRight, ExpandMore } from "@mui/icons-material";
+import { FieldNameRenderer } from "./FieldName.Renderer";
+import { FieldValueRenderer } from "./FieldValue.Renderer";
+import { FieldTypeRenderer } from "./FieldType.Renderer";
 
 export interface IObjectRendererProps {
   fieldName: string;
@@ -70,6 +73,7 @@ export const ObjectRenderer: FC<IObjectRendererProps> = ({ fieldName, obj, level
             userSelect: "none",
             gap: 1,
             position: "relative",
+            pl: expanded ? 1 : 0,
           }}
           onClick={toggleExpand}
         >
@@ -77,28 +81,22 @@ export const ObjectRenderer: FC<IObjectRendererProps> = ({ fieldName, obj, level
             transform: "translateY(-50%)",
             color: "text.secondary",
             position: "absolute",
-            left: -15,
+            left: -12,
             top: "50%",
             width: "0.9rem",
             height: "0.9rem",
           }} />
 
-          <Typography variant="body2" component="span" sx={{ fontWeight: "bold" }}>
-            {fieldName}:
-          </Typography>
-
-          <Typography variant="body2" component="span" sx={{
-            color: "text.secondary"
-          }}>
-            {`Object [${Object.keys(obj).length}]`}
-          </Typography>
+          <FieldNameRenderer
+            fieldName={fieldName}
+          />
+          <FieldValueRenderer
+            value={`${Object.keys(obj).length} items`}
+          />
         </Box>
-        <Typography variant="caption" sx={{
-          whiteSpace: "nowrap",
-          color: (theme) => darken(theme.palette.text.secondary, 0.6)
-        }}>
-          Object
-        </Typography>
+        <FieldTypeRenderer
+          type="object"
+        />
       </Box>
       {expanded && (
         <Box sx={{

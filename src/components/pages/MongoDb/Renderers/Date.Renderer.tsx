@@ -4,7 +4,9 @@ import { useAtomValue } from "jotai";
 import { timezoneConversaionEnabledAtom, userDateFormatAtom, userTimezoneAtom } from "@/store";
 import moment from "moment-timezone";
 import { SettingsApplications } from "@mui/icons-material";
-import theme from "@/theme";
+import { FieldNameRenderer } from "./FieldName.Renderer";
+import { FieldValueRenderer } from "./FieldValue.Renderer";
+import { FieldTypeRenderer } from "./FieldType.Renderer";
 
 export interface IDateRendererProps {
   fieldName: string;
@@ -91,25 +93,26 @@ export const DateRenderer: FC<IDateRendererProps> = ({ fieldName, value, level }
     >
       <Box sx={{ width: "100%", mb: 0.5, display: "flex", gap: 1, alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body2" component="span" sx={{ fontWeight: "bold" }}>
-            {fieldName}:
-          </Typography>
+          <FieldNameRenderer
+            fieldName={fieldName}
+          />
 
           {isValid ? (
             <Tooltip title={tooltipText} arrow placement="top">
-              <Typography
-                variant="body2"
-                component="span"
-                sx={{ color: "text.secondary", cursor: "help", minWidth: "150px" }}
-              >
-                {displayText}
-
-              </Typography>
+              <FieldValueRenderer
+                value={displayText}
+                formatValue={(value) => (
+                  `<span class="date-color">${value}</span>`
+                )}
+              />
             </Tooltip>
           ) : (
-            <Typography variant="body2" component="span" sx={{ color: "text.secondary" }}>
-              {displayText}
-            </Typography>
+            <FieldValueRenderer
+              value={displayText}
+              formatValue={(value) => (
+                `<span class="date-color">${value}</span>`
+              )}
+            />
           )}
           <SettingsApplications
             role="button"
@@ -124,12 +127,9 @@ export const DateRenderer: FC<IDateRendererProps> = ({ fieldName, value, level }
               }
             }} />
         </Box>
-        <Typography variant="caption" sx={{
-          whiteSpace: "nowrap",
-          color: (theme) => darken(theme.palette.text.secondary, 0.6)
-        }}>
-          Date
-        </Typography>
+        <FieldTypeRenderer
+          type="date"
+        />
       </Box>
 
       {/* Context actions: style + timezone switchers */}

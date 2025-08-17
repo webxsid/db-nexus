@@ -2,6 +2,9 @@ import { FC, useState } from "react";
 import { Box, darken, Typography } from "@mui/material";
 import { FieldRenderer } from "./Field.Renderer";
 import { ChevronRight, Expand, ExpandMore, More } from "@mui/icons-material";
+import { FieldNameRenderer } from "./FieldName.Renderer";
+import { FieldValueRenderer } from "./FieldValue.Renderer";
+import { FieldTypeRenderer } from "./FieldType.Renderer";
 
 export interface IArrayRendererProps {
   fieldName: string;
@@ -42,6 +45,7 @@ export const ArrayRenderer: FC<IArrayRendererProps> = ({ fieldName, array, level
             cursor: "pointer",
             userSelect: "none",
             position: "relative",
+            pl: expanded ? 1 : 0,
           }}
           onClick={toggleExpand}
         >
@@ -49,27 +53,24 @@ export const ArrayRenderer: FC<IArrayRendererProps> = ({ fieldName, array, level
             transform: "translateY(-50%)",
             color: "text.secondary",
             position: "absolute",
-            left: -15,
+            left: -12,
             top: "50%",
             width: "0.9rem",
             height: "0.9rem",
           }} />
-          <Typography variant="body2" component="span" sx={{ fontWeight: "bold" }}>
-            {fieldName}:
-          </Typography>
-
-          <Typography variant="body2" component="span" sx={{
-            color: "text.secondary",
-          }}>
-            {`Array [${array.length}]`}
-          </Typography>
+          <FieldNameRenderer
+            fieldName={fieldName}
+          />
+          <FieldValueRenderer
+            value={`${array.length} items`}
+            formatValue={(value) => (
+              `<span class="array-color">${value}</span>`
+            )}
+          />
         </Box>
-        <Typography variant="caption" sx={{
-          whiteSpace: "nowrap",
-          color: (theme) => darken(theme.palette.text.secondary, 0.6)
-        }}>
-          Array
-        </Typography>
+        <FieldTypeRenderer
+          type="array"
+        />
       </Box>
       {expanded && (
         <Box sx={{

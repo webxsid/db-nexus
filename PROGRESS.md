@@ -68,3 +68,24 @@ Each daily entry should capture:
 - Mongo DB Workarea
 
 ![Mongo DB Workarea as on Aug 10,2025](./screenshots/aug_10_2025_workarea.png)
+
+## August 16 - August 17, 2025 - v0.1.0
+
+### UI / UX Design Update
+- Add a container type to the work-area wrapper
+- Switched the Query Box & Document List from a flex to a grid layout
+  - The components now dynamically readjust based on the container width
+  - Added this breakpoints as std breakpoints in the MUI theme
+- Brainstorming the Edit mode & document contextual action
+
+### Document Rendering Enhancements
+- Learned about the `EJSON` format for mongo documents
+  - Need to re-map the rendering engine to infer the data types from the `EJSON`
+  - Render the values with the new types
+  - Add a `EJSON` viewer mode in the document card
+    - Should the toggle be global? (if yes -> easier on command center action, if no -> easier for direct keyboard shortcuts)
+
+### UI / UX Considerations
+- Should the edit mode mimic the `Mongo DB Compass` view or something like `Git Diff` screen?
+  - If we go with the `Git Diff` view, how do we make it work with the limited space?
+

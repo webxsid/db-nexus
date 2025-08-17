@@ -340,6 +340,9 @@ export const MongoDbPage: FC = () => {
               width: "100%",
               borderRadius: 2,
               overflow: "hidden",
+              minWidth: 0,
+              containerType: "inline-size",
+              containerName: "workarea",
             }}
           >
             <MongoDbWorkarea />

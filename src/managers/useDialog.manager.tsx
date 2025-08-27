@@ -9,7 +9,7 @@ export interface IDialogManager {
   clearDialogHistory: () => void;
   clearActiveDialog: () => void;
   clearAllDialogs: () => void;
-  isDialogOpen: (dialogId: TDialogIds) => boolean;
+  isDialogOpen: (dialogId?: TDialogIds) => boolean;
   hasHistory: () => boolean;
 }
 
@@ -55,7 +55,8 @@ export const useDialogManager = (): IDialogManager => {
   };
 
   const isDialogOpen = useCallback(
-    (dialogId: TDialogIds): boolean => {
+    (dialogId?: TDialogIds): boolean => {
+      if (!dialogId) return activeDialog !== null;
       return activeDialog === dialogId;
     },
     [activeDialog],

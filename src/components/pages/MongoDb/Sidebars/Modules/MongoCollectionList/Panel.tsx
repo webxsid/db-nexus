@@ -52,7 +52,6 @@ import { HotkeyButton, TransparentTextField } from "@/components/common";
 import { KeybindingManager, KeyCombo } from "@/helpers/keybindings";
 import { MongoSidebarModulePanelTemplate } from "../Templates";
 import { v4 } from "uuid";
-import { usePopper } from "@/hooks";
 import { useDialogManager } from "@/managers";
 
 interface IFilteredCollectionItem {
@@ -119,10 +118,12 @@ const MongoCollectionListButton: FC<IMongoCollectionListButtonProps> = ({
       dense
       disableGutters
       sx={{
-        position: "relative", // Ensure the pseudo-element is positioned correctly
+        position: "sticky",
+        top: 0,
         pr: 0.5,
         pl: 2,
         py: 0,
+        borderRadius: 2,
       }}
       onClick={() => openCollection(collection.name, collection.database)}
       selected={selected}
@@ -529,14 +530,10 @@ export const MongoCollectionListPanel: FC = () => {
                   </Box>
                   <Collapse in={expandedDbs.includes(db.id)} unmountOnExit sx={{ overflowAnchor: "none" }}>
                     <List dense disablePadding sx={{
-                      border: "1px solid",
-                      borderColor: selectedTab?.type === "database" || selectedTab?.type === "collection" &&
-                        selectedTab.database === db.id
-                        ? getActiveColor(db.id)
-                        : "background.paper",
                       borderRadius: 2,
                       pt: "12px",
                       transform: "translateY(-15px)",
+                      position: "relative",
                     }}>
                       <Render
                         if={db.children.length > 0}

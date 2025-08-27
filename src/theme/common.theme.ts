@@ -1,6 +1,7 @@
 import { Components } from "@mui/material/styles/components";
 import { Theme } from "@mui/material/styles/createThemeNoVars";
 import { CssVarsTheme } from "@mui/material/styles/createThemeWithVars";
+import { alpha } from "@mui/system";
 
 
 export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> & CssVarsTheme> = {
@@ -101,9 +102,12 @@ export const ComponentsTheme: Components<Omit<Theme, 'components' | 'palette'> &
           sx: (theme) => ({
             fontFamily: "'Fira Code', 'Courier New', monospace",
             ...theme.typography.body2,
-            backgroundColor: theme.palette.primary.dark,
-            color: theme.palette.primary.contrastText,
+            backgroundColor: alpha(theme.palette.primary.main, 0.4),
+            border: "1px solid",
+            borderColor: theme.palette.primary.main,
+            color: theme.palette.text.primary,
             boxShadow: theme.shadows[1],
+            backdropFilter: 'blur(10px)',
             borderRadius: 2,
             padding: "8px 12px",
           }),

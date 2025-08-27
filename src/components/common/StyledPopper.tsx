@@ -1,5 +1,6 @@
 import { PopperContext } from "@/context";
 import {
+  alpha,
   Box,
   ClickAwayListener,
   Grow,
@@ -38,10 +39,8 @@ export const StyledPopper: FC = () => {
               <Box
                 sx={{
                   border: 1,
-                  borderColor: "divider",
-                  px: 2,
-                  py: 1,
-                  bgcolor: `${theme.palette.primary.main}20`,
+                  borderColor: (t) => t.palette.primary.main,
+                  bgcolor: (t) => alpha(t.palette.primary.main, 0.3),
                   backdropFilter: "blur(10px)",
                   borderRadius: 2,
                   color: "text.primary",

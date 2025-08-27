@@ -1,13 +1,22 @@
 import Render from "@/components/common/Render";
 import StyledSelect from "@/components/common/StyledSelect";
 import { useDialogManager } from "@/managers";
-import { mongoSelectedCollectionTabStateAtom, openConnectionAtom, openDatabaseAtom, selectedConnectionAtom, TPageSize } from "@/store";
+import {
+  mongoCollectionTabStateLoadDocuments,
+  mongoSelectedCollectionTabStateAtom,
+  openConnectionAtom,
+  openDatabaseAtom,
+  selectedConnectionAtom,
+  toggleDirtyMongoCollectionTabState,
+  TPageSize,
+  updateMongoCollectionTabStatePage,
+  updateMongoCollectionTabStatePageSize
+} from "@/store";
 import { ChevronLeft, ChevronRight, Refresh } from "@mui/icons-material";
-import { Breadcrumbs, Typography, Box, MenuItem, alpha, Grid2, IconButton } from "@mui/material";
+import { Breadcrumbs, Typography, Box, MenuItem, alpha, Tooltip, IconButton } from "@mui/material";
 import { useAtomValue, useSetAtom } from "jotai";
-import { FC, useRef, useState } from "react";
-import { DocumentRenderer } from "../../Renderers/Document.Renderer";
-import theme from "@/theme";
+import { FC, useCallback } from "react";
+import { DocumentRenderer } from "../../Renderers";
 
 export interface IMongoCollectionTabPanelProps {
   databaseName: string;
@@ -18,25 +27,45 @@ export const MongoCollectionTabPanel: FC<IMongoCollectionTabPanelProps> = ({
   databaseName,
   collectionName,
 }) => {
-  const [openPageSizeMenu, setOpenPageSizeMenu] = useState(false);
-  const pageSizeAnchorElRef = useRef();
+
   const connection = useAtomValue(selectedConnectionAtom);
 
   const openConnection = useSetAtom(openConnectionAtom);
   const openDatabase = useSetAtom(openDatabaseAtom);
 
-  const { openDialog } = useDialogManager();
+  const loadMongoDocuments = useSetAtom(mongoCollectionTabStateLoadDocuments);
+  const updatePageSize = useSetAtom(updateMongoCollectionTabStatePageSize);
+  const updatePage = useSetAtom(updateMongoCollectionTabStatePage);
+  const toggleDirty = useSetAtom(toggleDirtyMongoCollectionTabState);
 
-  const state = useAtomValue(mongoSelectedCollectionTabStateAtom);
-  if (!state) {
-    console.log("Current state:", state);
-    return null;
-  }
+  const { isDialogOpen } = useDialogManager();
 
-  const { page, pageSize, documents, isLoading, isDirty, query, options, error } = state;
+  const { page, pageSize, documents, isLoading, isDirty, query, options, error, selectedDocumentIndex } = useAtomValue(mongoSelectedCollectionTabStateAtom);
 
   const pageStart = (page - 1) * pageSize + 1;
   const pageEnd = Math.min(page * pageSize, documents.length);
+
+  const handleReloadDocuments = useCallback(function handleReloadDocuments() {
+    loadMongoDocuments(connection!.id);
+  }, [loadMongoDocuments, connection]);
+
+  const handlePageNext = useCallback(function handlePageNext() {
+    if (page * pageSize < documents.length) {
+      updatePage(page + 1);
+    }
+  }, [page, pageSize, documents.length, updatePage]);
+
+  const handlePagePrevious = useCallback(function handlePagePrevious() {
+    if (page > 1) {
+      updatePage(page - 1);
+    }
+  }, [page, updatePage]);
+
+  const handlePageSizeChange = useCallback(function handlePageSizeChange(newSize: TPageSize) {
+    updatePageSize(newSize);
+  }, [updatePageSize]);
+
+
 
   return (
     <Box
@@ -93,60 +122,68 @@ export const MongoCollectionTabPanel: FC<IMongoCollectionTabPanelProps> = ({
         </Breadcrumbs>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton
-              size="small"
-              onClick={() => { }}
-              sx={{
-                "& svg": {
-                  color: (theme) => theme.palette.primary.main,
-                  fontSize: "1.2rem",
-                },
-                "&:hover": {
-                  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              <Refresh />
-            </IconButton>
+            <Tooltip title="Reload Documents" placement="top">
+              <IconButton
+                size="small"
+                onClick={handleReloadDocuments}
+                disabled={isLoading || isDialogOpen()}
+                sx={{
+                  "& svg": {
+                    color: (theme) => theme.palette.primary.main,
+                    fontSize: "1.2rem",
+                  },
+                  "&:hover": {
+                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  },
+                }}
+              >
+                <Refresh />
+              </IconButton>
+            </Tooltip>
             <Typography variant="body2" color="text.secondary">
               {pageStart} - {pageEnd} of {documents.length}
             </Typography>
 
-            <IconButton
-              size="small"
-              onClick={() => { }}
-              sx={{
-                "& svg": {
-                  color: (theme) => theme.palette.primary.main,
-                  fontSize: "1.2rem",
-                },
-                "&:hover": {
-                  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              <ChevronLeft />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => { }}
-              sx={{
-                "& svg": {
-                  color: (theme) => theme.palette.primary.main,
-                  fontSize: "1.2rem",
-                },
-                "&:hover": {
-                  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              <ChevronRight />
-            </IconButton>
-
+            <Tooltip title="Previous Page" placement="top">
+              <IconButton
+                size="small"
+                onClick={handlePagePrevious}
+                disabled={page <= 1 || isLoading || isDialogOpen()}
+                sx={{
+                  "& svg": {
+                    color: (theme) => theme.palette.primary.main,
+                    fontSize: "1.2rem",
+                  },
+                  "&:hover": {
+                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  },
+                }}
+              >
+                <ChevronLeft />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Next Page" placement="top">
+              <IconButton
+                size="small"
+                onClick={handlePageNext}
+                disabled={page * pageSize >= documents.length || isLoading || isDialogOpen()}
+                sx={{
+                  "& svg": {
+                    color: (theme) => theme.palette.primary.main,
+                    fontSize: "1.2rem",
+                  },
+                  "&:hover": {
+                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  },
+                }}
+              >
+                <ChevronRight />
+              </IconButton>
+            </Tooltip>
             <StyledSelect
               value={`${pageSize}`}
               onChange={(e) => {
-                console.log("Page size changed:", e.target.value);
+                handlePageSizeChange(parseInt(e.target.value as string) as TPageSize);
               }}
               size="smaller"
               sx={{ minWidth: 80 }}
@@ -268,7 +305,12 @@ export const MongoCollectionTabPanel: FC<IMongoCollectionTabPanelProps> = ({
                 {documents.slice((page - 1) * pageSize, page * pageSize)
                   .filter((doc) => doc !== null && doc !== undefined)
                   .map((doc, index) => (
-                    <DocumentRenderer key={index} document={doc} />
+                    <DocumentRenderer
+                      key={`doc-${(page - 1) * pageSize + index}`}
+                      document={doc}
+                      docIndex={(page - 1) * pageSize + index}
+                      selected={selectedDocumentIndex === (page - 1) * pageSize + index}
+                    />
                   ))}
               </Box>
             }

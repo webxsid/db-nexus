@@ -174,7 +174,8 @@ export const MongoDbPageHeader: React.FC = () => {
             sx={{
               display: "flex",
               flexDirection: "row",
-              py: 1,
+              py: 0.5,
+              px: 1,
               justifyContent: "space-between",
               alignItems: "center",
               width: "120px",
@@ -195,6 +196,7 @@ export const MongoDbPageHeader: React.FC = () => {
             </Typography>
           </Box>
         ),
+        placement: "bottom"
       });
     },
     [connectionStatus, showPopper],

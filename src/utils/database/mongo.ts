@@ -8,6 +8,7 @@ import {
 import qs from "query-string";
 import { toast } from "react-toastify";
 import { array, boolean, number, object, string } from "yup";
+import { EJSON } from "bson";
 
 const mongoConnectionInit: IMongoConnectionParams = {
   general: {
@@ -327,9 +328,19 @@ const mongoConfigParser = (uri?: string): IMongoConnectionParams | null => {
   }
 };
 
+const parseEjsonToJson = (ejson: object): object => {
+  try {
+    return EJSON.parse(EJSON.stringify(ejson));
+  } catch (error) {
+    console.error("Failed to parse EJSON:", error);
+    throw new Error("Invalid EJSON format");
+  }
+}
+
 export {
   mongoConfigParser,
   mongoConnectionInit,
   mongoParamsValidator,
   mongoURIGenerator,
+  parseEjsonToJson
 };

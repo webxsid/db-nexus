@@ -89,3 +89,35 @@ Each daily entry should capture:
 - Should the edit mode mimic the `Mongo DB Compass` view or something like `Git Diff` screen?
   - If we go with the `Git Diff` view, how do we make it work with the limited space?
 
+
+## August 27, 2025 - v0.1.0
+
+### Document Rendering Framework
+- Refactored the document viewer to use **EJSON typing** instead of string/regex inference.  
+- Built a **normalizer** that recognizes all MongoDB EJSON types (`$oid`, `$date`, `$numberLong`, `$decimal128`, `$binary`, `$regex`, `$uuid`, `$timestamp`, `$minKey`, `$maxKey`, `$undefined`, `$symbol`, etc.).  
+- Implemented a **renderer registry** pattern:
+  - Each `kind` (string, objectId, date, array, object, binary, etc.) has a dedicated renderer.
+  - Central `ValueNode` dispatches to the correct component.
+- Added **per-node type badges** on the top-right corner of each field row, showing the current type (`STRING`, `OBJECTID`, `DATE`, etc.).
+
+### Leaf Renderers
+- Created brand-new components for each MongoDB type:
+  - `DateNode` with raw/pretty/timezone toggle UI.
+  - `ObjectIdNode` with copy and jump actions.
+  - `BinaryNode` with size + subtype display.
+  - `RegexNode`, `TimestampNode`, `MiscNode` for `$minKey/$maxKey/$undefined/$symbol`.
+  - `NumberLikeNode` for `$numberInt`, `$numberLong`, `$numberDouble`, `$decimal128`.
+- Ensured **precision safety**: numeric EJSON types remain strings, no coercion to JS floats.
+
+### Document Card
+- Update the document card to house the document-action box.
+- Added a **Copy Document** button in the document-action box.
+- Structured the card for consistent spacing, monospace alignment, and nested indentation.
+
+### Interactive Config
+- Introduced a **settings popover** for date rendering (raw vs formatted, timezone selection).  
+  - Fixed the issue of interactive tooltips by migrating to a **Popover** component.
+
+### Misc Updates
+- Add new Setter Atoms to update the `page`, `pageSize`, `documentReload`.
+- Map those new Setter Atoms to the relevant buttons on the collection tab view.

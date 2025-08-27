@@ -13,6 +13,7 @@ import {
   TMongoCollectionTabState,
   TMongoDatabaseListAtom,
   TMongoTab,
+  TPageSize,
 } from "../types";
 import { WithId } from "mongodb";
 import { Document } from "mongoose";
@@ -127,6 +128,7 @@ export const openCollectionAtom = atom(
             isLoading: false,
             error: null,
             isDirty: false,
+            selectedDocumentIndex: 0,
             selectedDocument: null,
           } as IMongoCollectionTabState,
         };
@@ -294,11 +296,11 @@ mongoCollectionQueryHistoryAtom.debugLabel = "Mongo Collection Query History";
 export const mongoCollectionTabStateAtom = atom<TMongoCollectionTabState>({});
 mongoCollectionTabStateAtom.debugLabel = "Mongo Collection Tab State";
 
-export const mongoSelectedCollectionTabStateAtom = atom<IMongoCollectionTabState | null>(
+export const mongoSelectedCollectionTabStateAtom = atom<IMongoCollectionTabState>(
   (get) => {
     const selectedTabId = get(mongoSelectedTabAtom);
     const tabState = get(mongoCollectionTabStateAtom);
-    return tabState[selectedTabId] || null;
+    return tabState[selectedTabId];
   },
 );
 
@@ -428,6 +430,7 @@ export const mongoUpdateCollectionTabStateQuery = atom(
           error: null,
           isDirty: false,
           selectedDocument: updatedDocuments.docs.length > 0 ? updatedDocuments.docs[0] : null,
+          selectedDocumentIndex: updatedDocuments.docs.length > 0 ? 0 : null,
           page: 1, // Reset to first page after query update
         },
       });
@@ -488,9 +491,111 @@ export const mongoCollectionTabStateLoadDocuments = atom(
         error: null,
         isDirty: false,
         selectedDocument: newDocuments.docs.length > 0 ? newDocuments.docs[0] : null,
+        selectedDocumentIndex: newDocuments.docs.length > 0 ? 0 : null,
         page: 1
       },
     });
 
   },
+)
+
+export const updateMongoCollectionTabStatePageSize = atom(
+  null,
+  (get, set, pageSize: TPageSize) => {
+    const selectedTabId = get(mongoSelectedTabAtom);
+    const tabState = get(mongoCollectionTabStateAtom);
+    const currentTabState = tabState[selectedTabId];
+
+    if (!currentTabState) {
+      console.error("No current tab state found for selected tab");
+      return;
+    }
+    set(mongoCollectionTabStateAtom, {
+      ...tabState,
+      [selectedTabId]: {
+        ...currentTabState,
+        pageSize: pageSize,
+        page: 1, // Reset to first page when page size changes
+      },
+    });
+  }
+)
+
+export const updateMongoCollectionTabStatePage = atom(
+  null,
+  (get, set, page: number) => {
+    const selectedTabId = get(mongoSelectedTabAtom);
+    const tabState = get(mongoCollectionTabStateAtom);
+    const currentTabState = tabState[selectedTabId];
+
+    if (!currentTabState) {
+      console.error("No current tab state found for selected tab");
+      return;
+    }
+    if (page < 1) {
+      console.error("Page number must be greater than 0");
+      return;
+    }
+    set(mongoCollectionTabStateAtom, {
+      ...tabState,
+      [selectedTabId]: {
+        ...currentTabState,
+        page,
+      },
+    });
+  }
+)
+
+/**
+ * Toggle the isDirty state of the current collection tab.
+ * If isDirty is provided, set it to that value, otherwise toggle it.
+* @param isDirty Optional boolean to set the isDirty state explicitly.
+ */
+export const toggleDirtyMongoCollectionTabState = atom(
+  null,
+  (get, set, isDirty?: boolean) => {
+    const selectedTabId = get(mongoSelectedTabAtom);
+    const tabState = get(mongoCollectionTabStateAtom);
+    const currentTabState = tabState[selectedTabId];
+
+    if (!currentTabState) {
+      console.error("No current tab state found for selected tab");
+      return;
+    }
+    set(mongoCollectionTabStateAtom, {
+      ...tabState,
+      [selectedTabId]: {
+        ...currentTabState,
+        isDirty: typeof isDirty === "boolean" ? isDirty : !currentTabState.isDirty,
+      },
+    });
+  }
+);
+
+export const setMongoCollectionTabStateSelectedDocument = atom(
+  null,
+  (get, set, index: number) => {
+    const selectedTabId = get(mongoSelectedTabAtom);
+    const tabState = get(mongoCollectionTabStateAtom);
+    const currentTabState = tabState[selectedTabId];
+
+    if (!currentTabState) {
+      console.error("No current tab state found for selected tab");
+      return;
+    }
+
+    if (index < 0 || index >= currentTabState.documents.length) {
+      console.error("Index out of bounds for documents array");
+      return;
+    }
+
+    set(mongoCollectionTabStateAtom, {
+      ...tabState,
+      [selectedTabId]: {
+        ...currentTabState,
+        selectedDocument: currentTabState.documents[index],
+        selectedDocumentIndex: index,
+      },
+    });
+  }
 )

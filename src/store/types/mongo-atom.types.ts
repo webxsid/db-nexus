@@ -53,6 +53,7 @@ export interface IMongoCollectionTabState {
   collection: string;
   documents: object[];
   selectedDocument: object | null;
+  selectedDocumentIndex: number | null;
   isLoading: boolean;
   error: string | null;
   page: number;
